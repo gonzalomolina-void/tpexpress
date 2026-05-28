@@ -27,8 +27,8 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 **Para** verificar que el servidor está corriendo adecuadamente y sentar las bases del backend.
 
 * **Criterios de Aceptación:**
-  * El proyecto debe inicializarse y poder instalar dependencias con `npm install`.
-  * Debe poder iniciarse en desarrollo con `npm run dev` y en producción con `npm start`.
+  * El proyecto debe inicializarse y poder instalar dependencias con `pnpm install`.
+  * Debe poder iniciarse en desarrollo con `pnpm dev` y en producción con `pnpm start`.
   * El endpoint `GET /api/health` debe estar disponible y retornar código `200 OK` con el JSON:
     ```json
     {
@@ -55,9 +55,9 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
   * Debe crearse el archivo `schema.prisma` y configurarse para PostgreSQL.
   * Se debe definir el modelo de la entidad principal elegida (la misma de la aplicación React) que incluya al menos: `id`, `createdAt`, `updatedAt` y campos propios.
   * Debe existir un archivo `docker-compose.yml` configurado con servicios para Node LTS y PostgreSQL para el entorno de desarrollo local.
-  * Debe ser posible ejecutar las migraciones mediante `npx prisma migrate dev`.
+  * Debe ser posible ejecutar las migraciones mediante `pnpm prisma migrate dev`.
   * La carpeta `prisma/migrations` debe estar incluida en el control de versiones (Git).
-  * Se debe poder generar el cliente con `npx prisma generate`.
+  * Se debe poder generar el cliente con `pnpm prisma generate`.
 
 * **Tareas Técnicas:**
   * Instalar `@prisma/client` y `prisma` como dependencia de desarrollo.
@@ -76,7 +76,7 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 **Para** poblar la base de datos con suficientes registros iniciales coherentes que faciliten las pruebas del scroll infinito y la paginación.
 
 * **Criterios de Aceptación:**
-  * Se debe poder ejecutar el comando `npx prisma db seed`.
+  * Se debe poder ejecutar el comando `pnpm prisma db seed`.
   * El script debe crear entre 20 y 30 registros coherentes con la temática de la aplicación en la base de datos.
   * El comando de semillado debe estar documentado en el `README.md`.
 

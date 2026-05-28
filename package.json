@@ -1,0 +1,31 @@
+{
+  "name": "tpexpress",
+  "version": "1.0.0",
+  "description": "Este repositorio contiene el desarrollo del backend (API REST) para dar soporte a la aplicación web desarrollada en React, reemplazando la persistencia en `localStorage` por una base de datos PostgreSQL persistida de forma real.",
+  "main": "src/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gonzalomolina-void@github.com/gonzalomolina-void/tpexpress.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/gonzalomolina-void/tpexpress/issues"
+  },
+  "homepage": "https://github.com/gonzalomolina-void/tpexpress#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

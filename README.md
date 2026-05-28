@@ -40,7 +40,7 @@ Su función principal es modelar la entidad principal de la aplicación, proveer
 
 Asegúrate de tener instalados los siguientes componentes antes de comenzar:
 * **Node.js** (Versión LTS recomendada)
-* **npm** (Gestor de paquetes de Node)
+* **pnpm** (Gestor de paquetes rápido de Node)
 * **Docker y Docker Compose** (Para levantar la base de datos PostgreSQL local de forma rápida)
 
 ---
@@ -65,7 +65,7 @@ docker-compose up -d
 ### 3. Instalar Dependencias
 Instala los paquetes necesarios del proyecto localmente:
 ```bash
-npm install
+pnpm install
 ```
 
 ### 4. Ejecutar Migraciones de Prisma
@@ -83,7 +83,7 @@ npx prisma db seed
 ### 6. Ejecutar el Servidor en Desarrollo
 Inicia el servidor Express localmente con recarga automática (`nodemon`):
 ```bash
-npm run dev
+pnpm dev
 ```
 La API estará corriendo por defecto en `http://localhost:3000`.
 
@@ -91,11 +91,11 @@ La API estará corriendo por defecto en `http://localhost:3000`.
 
 ## Scripts Disponibles
 
-* `npm run dev`: Inicia el servidor Express local en modo desarrollo usando nodemon.
-* `npm start`: Inicia el servidor Express local en modo producción.
-* `npx prisma migrate dev`: Crea y aplica migraciones en desarrollo.
-* `npx prisma generate`: Genera el cliente de Prisma.
-* `npx prisma db seed`: Ejecuta el script de semilla para poblar la base de datos.
+* `pnpm dev`: Inicia el servidor Express local en modo desarrollo usando nodemon.
+* `pnpm start`: Inicia el servidor Express local en modo producción.
+* `pnpm prisma migrate dev`: Crea y aplica migraciones en desarrollo.
+* `pnpm prisma generate`: Genera el cliente de Prisma.
+* `pnpm prisma db seed`: Ejecuta el script de semilla para poblar la base de datos.
 
 ---
 

@@ -77,7 +77,7 @@ npx prisma migrate dev --name init
 ### 5. Semillar la Base de Datos (Seed)
 Puebla la base de datos con los registros de prueba requeridos (20 a 30 elementos para verificar scroll y paginados):
 ```bash
-npx prisma db seed
+pnpm prisma db seed
 ```
 
 ### 6. Ejecutar el Servidor en Desarrollo

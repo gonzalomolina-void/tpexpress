@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Entidad Principal de la Carta
+model Card {
+  id        Int       @id @default(autoincrement())
+  cost      Int
+  atk       Int
+  def       Int
+  image     String    // Mapea a media.image
+  
+  // Relaciones Paramétricas
+  typeId    Int
+  type      CardType  @relation(fields: [typeId], references: [id])
+  
+  rarityId  Int
+  rarity    Rarity    @relation(fields: [rarityId], references: [id])
+  
+  // Traducciones
+  translations CardTranslation[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("cards")
+}
+
+// Tabla de Traducción de Cartas
+model CardTranslation {
+  id          Int      @id @default(autoincrement())
+  cardId      Int
+  card        Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  
+  language    String   // "es" o "en"
+  name        String
+  description String
+
+  @@unique([cardId, language])
+  @@map("card_translations")
+}
+
+// Tipo de Carta Paramétrico (creature, spell, artifact)
+model CardType {
+  id           Int                   @id @default(autoincrement())
+  code         String                @unique // "creature", "spell", "artifact"
+  cards        Card[]
+  translations CardTypeTranslation[]
+
+  @@map("card_types")
+}
+
+model CardTypeTranslation {
+  id       Int      @id @default(autoincrement())
+  typeId   Int
+  type     CardType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  
+  language String   // "es" o "en"
+  name     String   // "Criatura", "Creature", etc.
+
+  @@unique([typeId, language])
+  @@map("card_type_translations")
+}
+
+// Rareza Paramétrica (poor, common, uncommon, rare, epic, legendary)
+model Rarity {
+  id           Int                 @id @default(autoincrement())
+  code         String              @unique // "poor", "common", "uncommon", etc.
+  cards        Card[]
+  translations RarityTranslation[]
+
+  @@map("rarities")
+}
+
+model RarityTranslation {
+  id       Int      @id @default(autoincrement())
+  rarityId Int
+  rarity   Rarity   @relation(fields: [rarityId], references: [id], onDelete: Cascade)
+  
+  language String   // "es" o "en"
+  name     String   // "Pobre", "Poor", "Legendario", "Legendary", etc.
+
+  @@unique([rarityId, language])
+  @@map("rarity_translations")
+}

@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tpexpress-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-tpexpress}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tpexpress"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: node:22-alpine
+    container_name: tpexpress-app
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@db:5432/${DB_NAME:-tpexpress}?schema=public
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "corepack enable && pnpm install && pnpm run dev"
+
+volumes:
+  pgdata:
+    driver: local

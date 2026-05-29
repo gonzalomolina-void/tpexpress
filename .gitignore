@@ -4,4 +4,3 @@ dist/
 
 /src/generated/prisma
 .pnpm-store/
-New-Release.ps1

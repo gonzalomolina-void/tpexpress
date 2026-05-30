@@ -89,13 +89,22 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 
 ### US 4: Endpoints de Lectura de la API (GET)
 **Como** consumidor de la API  
-**Quiero** obtener todos los registros o uno específico a partir de su ID desde la base de datos  
-**Para** poder visualizarlos en la interfaz del cliente.
+**Quiero** obtener todas las cartas (con soporte opcional de paginación e internacionalización) o una específica a partir de su ID desde la base de datos  
+**Para** poder visualizarlas en la interfaz del cliente adaptándose al paginado del frontend, reduciendo el procesamiento en el cliente y mostrando la información en el idioma correcto.
 
 * **Criterios de Aceptación:**
-  * `GET /api/entidad` debe retornar todos los registros de la entidad con status `200 OK`.
-  * `GET /api/entidad/:id` debe retornar el registro correspondiente al ID indicado con status `200 OK`.
-  * Si el recurso consultado por ID no existe, se debe responder con status `404 Not Found` y el JSON:
+  * `GET /api/cards` y `GET /api/cards/:id` deben soportar internacionalización (idiomas `'es'` y `'en'`) mediante la **estrategia híbrida**:
+    * Se debe buscar el idioma en el query parameter `lang` (ej. `?lang=en`).
+    * Si no se provee, se debe buscar en la cabecera HTTP `Accept-Language` (ej. `Accept-Language: en`).
+    * Si no se detecta ninguno, se debe usar el idioma por defecto `'es'` (español).
+    * La respuesta JSON debe retornar los campos traducidos de forma **aplanada** en el objeto raíz (los campos `name` y `description` de la carta, así como el campo `name` del tipo de carta y de la rareza, deben mapearse directamente según el idioma solicitado, ocultando la estructura interna relacional de traducción).
+  * `GET /api/cards` debe retornar los registros de la entidad `Card` con status `200 OK` en formato de array JSON plano.
+  * `GET /api/cards` debe soportar paginación opcional utilizando los query parameters `page` (número de página, comenzando en 1) y `limit` (cantidad de elementos por página) emulando el comportamiento de **mockapi.io**:
+    * La respuesta del body debe ser un **array JSON plano** (sin envolver en objetos adicionales) conteniendo solo los elementos de la página seleccionada.
+    * La respuesta debe incluir el header HTTP **`X-Total-Count`** con el total de registros en la base de datos (para que el frontend calcule el total de páginas).
+    * Si no se especifican `page` o `limit`, se debe retornar el listado completo.
+  * `GET /api/cards/:id` debe retornar la carta correspondiente al ID indicado con status `200 OK`.
+  * Si la carta consultada por ID no existe, se debe responder con status `404 Not Found` y el JSON:
     ```json
     {
       "error": "Recurso no encontrado"
@@ -105,20 +114,26 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 
 * **Tareas Técnicas:**
   * Crear las rutas y controladores para las peticiones de lectura (`getAll` y `getById`).
-  * Implementar los servicios que se comunican con Prisma para consultar la base de datos.
+  * En los controladores de lectura, determinar el idioma objetivo buscando en `req.query.lang` o `req.headers['accept-language']`, aplicando `'es'` como fallback por defecto si no son válidos o no están presentes.
+  * En el controlador `getAll`, capturar `page` y `limit` desde `req.query`, parseándolos a enteros.
+  * Implementar el servicio que consulta a la base de datos usando Prisma:
+    * Incluir las relaciones de traducciones para `Card`, `CardType` y `Rarity`.
+    * Si hay parámetros de paginación, aplicar `skip: (page - 1) * limit` y `take: limit`.
+  * Realizar un conteo total (`count()`) en la base de datos cuando se solicita paginación para poder setear el header `X-Total-Count` en la respuesta.
+  * Crear una función utilitaria para mapear y aplanar la respuesta relacional de Prisma al formato de respuesta JSON aplanado esperado por el frontend.
   * Configurar un middleware de manejo de errores global (`src/middlewares/errorHandler.js`) para capturar fallos inesperados y retornar status `500`.
 
 ---
 
 ### US 5: Endpoints de Escritura de la API con Validación Manual (POST, PUT, DELETE)
 **Como** consumidor de la API  
-**Quiero** poder crear, modificar y eliminar registros en la base de datos validando los datos de entrada  
+**Quiero** poder crear, modificar y eliminar cartas en la base de datos validando los datos de entrada  
 **Para** garantizar la integridad del sistema sin depender de librerías externas de validación.
 
 * **Criterios de Aceptación:**
-  * `POST /api/entidad` debe crear un registro y responder con status `201 Created`.
-  * `PUT /api/entidad/:id` debe actualizar un registro existente y responder con status `200 OK`.
-  * `DELETE /api/entidad/:id` debe eliminar el registro y responder con status `200 OK` o `204 No Content`.
+  * `POST /api/cards` debe crear una carta y responder con status `201 Created`.
+  * `PUT /api/cards/:id` debe actualizar una carta existente y responder con status `200 OK`.
+  * `DELETE /api/cards/:id` debe eliminar la carta y responder con status `200 OK` o `204 No Content`.
   * Se deben validar los datos del body de forma **manual** (usando JavaScript puro, sin librerías tipo Zod/Joi). Se debe validar:
     * Campos obligatorios presentes.
     * Strings no vacíos.
@@ -136,7 +151,7 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
     ```
 
 * **Tareas Técnicas:**
-  * Implementar las funciones de validación manual en `src/validations/entity.validation.js`.
+  * Implementar las funciones de validación manual en `src/validations/card.validation.js`.
   * Crear controladores para `create`, `update` y `delete`.
   * Agregar la validación antes de llamar al servicio de creación/edición.
   * Conectar con Prisma para ejecutar operaciones de persistencia e implementar lógica de manejo del error `404` si el ID a modificar o eliminar no existe en la base de datos.
@@ -229,6 +244,46 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
   * Instalar `swagger-ui-express` y `swagger-jsdoc` (o preparar un archivo `swagger.json` estático).
   * Configurar e inicializar Swagger en `src/app.js`.
   * Escribir la especificación OpenAPI de los endpoints (ya sea con anotaciones JSDoc en las rutas o en un archivo centralizado).
+
+---
+
+### US 11: Sistema de Autenticación de Usuarios (Registro/Login con JWT)
+**Como** administrador de la aplicación  
+**Quiero** que los usuarios puedan registrarse e iniciar sesión de manera segura  
+**Para** proteger las rutas que modifican datos y personalizar la experiencia del usuario.
+
+* **Criterios de Aceptación:**
+  * `POST /api/auth/register` debe crear un usuario con `email` y `password` (hasheado con `bcryptjs`) y retornar status `201 Created`.
+  * Si el email ya está registrado, debe retornar status `400 Bad Request` y un mensaje de error claro.
+  * `POST /api/auth/login` debe validar el email y la contraseña. Si son correctos, retornar status `200 OK` con un token JWT firmado.
+  * Si las credenciales son inválidas, retornar status `401 Unauthorized`.
+  * Debe implementarse un middleware de autenticación (`requireAuth`) para validar el token JWT enviado en la cabecera `Authorization: Bearer <token>` y añadir el usuario autenticado a `req.user`.
+
+* **Tareas Técnicas:**
+  * Crear el modelo `User` en `prisma/schema.prisma` y ejecutar la migración.
+  * Instalar las librerías `bcryptjs` y `jsonwebtoken`.
+  * Implementar las funciones de validación para registro y login.
+  * Crear el controlador y las rutas de autenticación.
+  * Crear el middleware `src/middlewares/auth.js` para la protección de rutas.
+
+---
+
+### US 12: Endpoints para Gestión de Favoritos Relacionados con el Usuario
+**Como** usuario autenticado  
+**Quiero** guardar y eliminar mis cartas favoritas en la base de datos  
+**Para** no perder mi colección personal al cambiar de navegador o dispositivo.
+
+* **Criterios de Aceptación:**
+  * `GET /api/favorites` debe retornar la lista de cartas favoritas del usuario autenticado con status `200 OK`. Debe soportar internacionalización (estrategia híbrida y aplanada en el objeto raíz).
+  * `POST /api/favorites` debe agregar la carta indicada por `cardId` en el body a la lista de favoritos del usuario autenticado, retornando status `201 Created`.
+  * Si el `cardId` no existe, retornar status `404 Not Found`.
+  * `DELETE /api/favorites/:cardId` debe remover la carta indicada de los favoritos del usuario autenticado con status `200 OK` o `204 No Content`.
+  * Todas las rutas de favoritos deben estar protegidas por el middleware de autenticación (`requireAuth`).
+
+* **Tareas Técnicas:**
+  * Crear el modelo `Favorite` en `prisma/schema.prisma` vinculando `userId` y `cardId` con clave compuesta única, y ejecutar la migración.
+  * Implementar el controlador y las rutas para la gestión de favoritos.
+  * Conectar las consultas con Prisma e integrar la función utilitaria de aplanado de i18n en `GET /api/favorites`.
 
 ---
 

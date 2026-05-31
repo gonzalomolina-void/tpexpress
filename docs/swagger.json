@@ -1,0 +1,172 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TPExpress API",
+    "version": "1.0.0",
+    "description": "API REST para gestionar cartas coleccionables, desarrollada para la materia PWA (Universidad Nacional del Comahue). Reemplaza la persistencia en localStorage por una base de datos PostgreSQL persistida en tiempo real con Prisma ORM."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor de Desarrollo Local"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Verificar la salud de la API",
+        "description": "Retorna el estado de disponibilidad del servidor.",
+        "responses": {
+          "200": {
+            "description": "API funcionando correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" },
+                    "message": { "type": "string", "example": "API funcionando correctamente" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cards": {
+      "get": {
+        "summary": "Obtener catálogo de cartas",
+        "description": "Retorna el listado de cartas. Soporta internacionalización (mediante la cabecera Accept-Language) y paginación opcional. Si no se envía paginación, retorna todo el catálogo limitado a un tope de seguridad de 500 registros.",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número de página a retornar (1-indexed). Se requiere junto con limit.",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Cantidad de elementos por página. Se requiere junto con page.",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1 }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Idioma preferido para los textos de las cartas ('es' o 'en'). Por defecto es 'es'.",
+            "required": false,
+            "schema": { "type": "string", "enum": ["es", "en"], "default": "es" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de cartas obtenido correctamente",
+            "headers": {
+              "X-Total-Count": {
+                "schema": { "type": "integer" },
+                "description": "Total general de cartas disponibles en la base de datos (solo se incluye cuando la petición es paginada)."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Card" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cards/{id}": {
+      "get": {
+        "summary": "Obtener detalle de una carta por ID",
+        "description": "Retorna la información completa de una carta específica mapeada al idioma solicitado.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Identificador entero único de la carta.",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Idioma preferido para los textos de la carta ('es' o 'en').",
+            "required": false,
+            "schema": { "type": "string", "enum": ["es", "en"], "default": "es" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle de la carta obtenido correctamente",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Card" }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido (no es un entero)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string", "example": "Datos inválidos" },
+                    "details": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": { "type": "string", "example": "id" },
+                          "message": { "type": "string", "example": "El ID de la carta debe ser un número entero válido" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Carta no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string", "example": "Recurso no encontrado" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Card": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "cost": { "type": "integer", "example": 5 },
+          "atk": { "type": "integer", "example": 8 },
+          "def": { "type": "integer", "example": 10 },
+          "image": { "type": "string", "example": "SirKaelen.webp" },
+          "type": { "type": "string", "example": "Criatura" },
+          "rarity": { "type": "string", "example": "Legendario" },
+          "name": { "type": "string", "example": "Sir Kaelen" },
+          "description": { "type": "string", "example": "El último guardián del Sol Blanco. Su espada no conoce el miedo." }
+        }
+      }
+    }
+  }
+}

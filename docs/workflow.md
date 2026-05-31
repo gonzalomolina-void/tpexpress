@@ -25,7 +25,22 @@ Cada vez que comiences a programar, seguí este orden exacto de pasos para evita
 
 ---
 
-## 🛠️ 2. Flujo de Trabajo según el Tipo de Cambios
+## 🛑 2. Finalización de una Sesión de Trabajo (Session Off)
+
+Para evitar puertos bloqueados en la máquina local o corrupción en la base de datos de Docker al reiniciar o suspender la compu, realizá el cierre siguiendo estos pasos:
+
+1. **Bajar los Contenedores de Forma Limpia**: En tu terminal de VS Code, corré:
+   ```bash
+   docker compose down
+   ```
+   *Esto detiene y destruye los contenedores de forma segura sin borrar la persistencia del volumen de Postgres, liberando de inmediato los puertos 3000 y 5432.*
+2. **Cerrar VS Code**: Una vez apagados los servicios, cerrá tu editor.
+3. **Apagar Docker Desktop (Recomendado)**: Dale click derecho al icono de la barra de tareas y seleccioná *Quit Docker Desktop*.
+   > 💡 **Tip de Performance**: En Windows, Docker corre sobre la máquina virtual de WSL2. WSL2 tiende a consumir mucha memoria RAM y no la libera automáticamente al host. Cerrar Docker Desktop cuando termines de laburar te va a devolver gigabytes de memoria RAM de inmediato para el uso cotidiano de tu PC.
+
+---
+
+## 🛠️ 3. Flujo de Trabajo según el Tipo de Cambios
 
 Para que el entorno no se rompa, recordá qué tenés que hacer según lo que estés modificando:
 
@@ -61,7 +76,28 @@ Para que el entorno no se rompa, recordá qué tenés que hacer según lo que es
 
 ---
 
-## 🤝 3. Trabajar Colaborativamente con Antigravity
+## 🐞 4. Depuración del Servidor (Debugging en Docker)
+
+Configuramos el puerto `9229` en Docker y creamos un script de inspección en Node para que puedas colocar breakpoints directamente sobre tu código en VS Code:
+
+1. **Activar el Modo Debug**: En [docker-compose.yml](file:///C:/Work/Uncoma/PWA/tpexpress/docker-compose.yml), modificá el comando del contenedor de la app para que corra el script `dev:debug` en lugar de `dev`:
+   ```yaml
+       command: >
+         sh -c "corepack enable && pnpm install --ignore-scripts && pnpm prisma generate && pnpm run dev:debug"
+   ```
+2. **Reiniciar el Contenedor**:
+   ```bash
+   docker compose up -d
+   ```
+3. **Conectar el Depurador desde VS Code**:
+   - Poné breakpoints en tus archivos de código (por ejemplo, en tus controladores).
+   - Apretá la tecla `F5` de tu teclado (o andá a la pestaña de "Run and Debug" a la izquierda).
+   - Elegí la configuración **"Attach to Node (Docker)"** preconfigurada en [.vscode/launch.json](file:///C:/Work/Uncoma/PWA/tpexpress/.vscode/launch.json).
+   - ¡Listo! El editor se conectará en caliente al proceso Node dentro del contenedor. Podrás pausar ejecuciones, ver el Call Stack e inspeccionar variables.
+
+---
+
+## 🤝 5. Trabajar Colaborativamente con Antigravity
 
 Cuando quieras que yo te ayude a resolver un issue, hacé lo siguiente:
 

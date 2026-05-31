@@ -25,6 +25,7 @@ services:
       - /app/node_modules
     ports:
       - "3000:3000"
+      - "9229:9229"
     environment:
       PORT: 3000
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@db:5432/${DB_NAME:-tpexpress}?schema=public

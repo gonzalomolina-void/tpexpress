@@ -32,7 +32,7 @@ services:
       db:
         condition: service_healthy
     command: >
-      sh -c "corepack enable && pnpm install && pnpm run dev"
+      sh -c "corepack enable && pnpm install --ignore-scripts && pnpm prisma generate && pnpm run dev"
 
 volumes:
   pgdata:

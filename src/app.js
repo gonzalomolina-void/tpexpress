@@ -2,7 +2,9 @@ import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { createRequire } from 'module';
 import cardRoutes from './routes/card.routes.js';
+import authRoutes from './routes/auth.routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+
 
 const require = createRequire(import.meta.url);
 const swaggerDocument = require('../docs/swagger.json');
@@ -25,6 +27,8 @@ app.get('/api/health', (req, res) => {
 
 // Registrar rutas
 app.use('/api', cardRoutes);
+app.use('/api', authRoutes);
+
 
 // Middleware global de errores
 app.use(errorHandler);

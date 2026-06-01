@@ -16,6 +16,8 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 * [US 8: Integración Avanzada del Frontend / Postman (Modificaciones del CRUD)](#us-8-integración-avanzada-del-frontend--postman-modificaciones-del-crud)
 * [US 9: Despliegue en Producción (Backend, Base de Datos y Frontend)](#us-9-despliegue-en-producción-backend-base-de-datos-y-frontend)
 * [US 10 (Bonus): Documentación Interactiva con Swagger](#us-10-bonus-documentación-interactiva-con-swagger)
+* [US 11: Sistema de Autenticación de Usuarios (Registro/Login con JWT)](#us-11-sistema-de-autenticación-de-usuarios-registrologin-con-jwt)
+* [US 12: Endpoints para Gestión de Favoritos Relacionados con el Usuario](#us-12-endpoints-para-gestión-de-favoritos-relacionados-con-el-usuario)
 
 ---
 

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import prisma from '../src/prisma/prismaClient.js';
 import fs from 'fs/promises';
+import bcrypt from 'bcryptjs';
 
 async function main() {
   console.log('🧹 Limpiando la base de datos...');
@@ -12,6 +13,7 @@ async function main() {
   await prisma.cardType.deleteMany({});
   await prisma.rarityTranslation.deleteMany({});
   await prisma.rarity.deleteMany({});
+  await prisma.user.deleteMany({});
 
   console.log('✅ Base de datos limpia.');
 
@@ -169,6 +171,27 @@ async function main() {
   }
 
   console.log(`✅ Se insertaron exitosamente las ${characters.length} cartas en el mismo orden del JSON.`);
+
+  console.log('🌱 Creando usuarios de prueba...');
+  const testPassword = process.env.TEST_USER_PASSWORD || 'password123';
+  const hashedPassword = await bcrypt.hash(testPassword, 10);
+
+  const testUsers = [
+    {
+      email: 'testuser@example.com',
+      password: hashedPassword,
+    },
+    {
+      email: 'integration@test.com',
+      password: hashedPassword,
+    }
+  ];
+
+  for (const user of testUsers) {
+    await prisma.user.create({ data: user });
+  }
+  console.log('✅ Usuarios de prueba creados.');
+
   console.log('🌱 Proceso de semillado completado con éxito.');
 }
 

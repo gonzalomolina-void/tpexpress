@@ -145,6 +145,26 @@ La API estará corriendo por defecto en `http://localhost:3000`.
 
 ---
 
+## Pruebas de la API (Bruno)
+
+Para testear los endpoints de la API de forma local y colaborativa, implementamos una colección de **[Bruno](https://usebruno.com/)**, una alternativa open-source, offline-first y git-friendly a Postman.
+
+### 1. Instalación de Bruno
+Podés descargar e instalar Bruno en tu sistema operativo desde su sitio oficial:
+* [Descargar Bruno](https://www.usebruno.com/downloads) (disponible para Windows, macOS y Linux).
+
+### 2. Cómo usar la colección local
+1. Inicia la aplicación **Bruno**.
+2. Selecciona **"Open Collection"** (Abrir colección) en la pantalla de inicio.
+3. Busca y selecciona la carpeta [bruno/](/bruno/) que está en la raíz de este proyecto.
+4. En el selector de entornos ubicado arriba a la derecha (donde dice *No Environment*), selecciona **Development**. Esto cargará la variable de entorno `baseUrl` configurada como `http://localhost:3000`.
+
+### 3. Flujo de Autenticación Automático
+La colección tiene configurado un script post-response en la petición de **Login** (`POST /api/auth/login`). Al iniciar sesión exitosamente, el token JWT se guarda de manera automática en la variable de entorno de tiempo de ejecución `token`.
+Los endpoints que requieren autenticación (como **Get Me**) ya están configurados para usar esta variable `{{token}}` automáticamente en la cabecera de tipo Bearer Token.
+
+---
+
 ## Scripts Disponibles
 
 * `pnpm dev`: Inicia el servidor Express local en modo desarrollo usando nodemon.

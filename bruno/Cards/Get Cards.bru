@@ -1,0 +1,20 @@
+meta {
+  name: Get Cards
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/cards
+  body: none
+  auth: none
+}
+
+query {
+  ~page: 1
+  ~limit: 10
+}
+
+headers {
+  ~Accept-Language: es
+}

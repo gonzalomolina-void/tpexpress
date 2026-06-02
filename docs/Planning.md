@@ -18,6 +18,7 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 * [US 10 (Bonus): Documentación Interactiva con Swagger](#us-10-bonus-documentación-interactiva-con-swagger)
 * [US 11: Sistema de Autenticación de Usuarios (Registro/Login con JWT)](#us-11-sistema-de-autenticación-de-usuarios-registrologin-con-jwt)
 * [US 12: Endpoints para Gestión de Favoritos Relacionados con el Usuario](#us-12-endpoints-para-gestión-de-favoritos-relacionados-con-el-usuario)
+* [US 13: Configuración e Implementación de Pruebas Unitarias](#us-13-configuración-e-implementación-de-pruebas-unitarias)
 
 ---
 
@@ -286,6 +287,26 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
   * Crear el modelo `Favorite` en `prisma/schema.prisma` vinculando `userId` y `cardId` con clave compuesta única, y ejecutar la migración.
   * Implementar el controlador y las rutas para la gestión de favoritos.
   * Conectar las consultas con Prisma e integrar la función utilitaria de aplanado de i18n en `GET /api/favorites`.
+
+---
+
+### US 13: Configuración e Implementación de Pruebas Unitarias
+**Como** desarrollador  
+**Quiero** configurar un entorno de pruebas unitarias y escribir tests para controladores y servicios  
+**Para** asegurar la calidad del código, evitar regresiones y validar el comportamiento lógico de la API de forma automatizada.
+
+* **Criterios de Aceptación:**
+  * Configurar un framework de pruebas moderno (se sugiere Vitest por compatibilidad nativa con ES Modules).
+  * Crear un script `pnpm test` que ejecute las pruebas en modo 'watch' y CI.
+  * Implementar mocks de Prisma (`PrismaClient`) para que las pruebas unitarias sean independientes de la base de datos física.
+  * Escribir pruebas unitarias para `auth.controller.js` (validando registro con contraseñas seguras, logueo con credenciales correctas/incorrectas).
+  * Escribir pruebas unitarias para `favorite.controller.js` y `favorite.service.js` (verificando la lógica de agregación, eliminación e idempotencia).
+
+* **Tareas Técnicas:**
+  * Instalar `vitest` como devDependency en el proyecto.
+  * Configurar los mocks del cliente Prisma en `src/prisma/__mocks__/prismaClient.js` o configurar mocks dinámicos en los archivos de test.
+  * Escribir la suite de pruebas unitarias para los servicios y controladores de autenticación y favoritos.
+  * Integrar las pruebas en los scripts de ejecución de `package.json`.
 
 ---
 

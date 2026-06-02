@@ -10,11 +10,12 @@ get {
   auth: none
 }
 
-query {
+params:query {
   ~page: 1
   ~limit: 10
+  ~lang: es
 }
 
 headers {
-  ~Accept-Language: es
+  ~Accept-Language: en
 }

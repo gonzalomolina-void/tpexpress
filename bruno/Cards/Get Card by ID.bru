@@ -5,11 +5,19 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/cards/1
+  url: {{baseUrl}}/api/cards/:id
   body: none
   auth: none
 }
 
+params:query {
+  ~lang: es
+}
+
+params:path {
+  id: 1
+}
+
 headers {
-  ~Accept-Language: es
+  ~Accept-Language: en
 }

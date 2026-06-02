@@ -360,6 +360,133 @@
           }
         }
       }
+    },
+    "/api/favorites": {
+      "get": {
+        "summary": "Obtener catálogo de cartas favoritas",
+        "description": "Retorna el listado de cartas favoritas del usuario autenticado mapeadas al idioma solicitado.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Idioma preferido para los textos de las cartas ('es' o 'en'). Por defecto es 'es'.",
+            "required": false,
+            "schema": { "type": "string", "enum": ["es", "en"], "default": "es" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de favoritos obtenido correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Card" }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado (token faltante, inválido o expirado)"
+          }
+        }
+      },
+      "post": {
+        "summary": "Agregar una carta a favoritos",
+        "description": "Asocia la carta especificada en el body por cardId al listado de favoritos del usuario autenticado de forma idempotente.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["cardId"],
+                "properties": {
+                  "cardId": {
+                    "type": "integer",
+                    "example": 3
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Carta agregada a favoritos correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Carta agregada a favoritos correctamente" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos (ID inválido)"
+          },
+          "401": {
+            "description": "No autorizado"
+          },
+          "404": {
+            "description": "Carta no encontrada"
+          }
+        }
+      }
+    },
+    "/api/favorites/{cardId}": {
+      "delete": {
+        "summary": "Eliminar una carta de favoritos",
+        "description": "Remueve la relación de favorito entre el usuario autenticado y la carta indicada por cardId de forma idempotente.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cardId",
+            "in": "path",
+            "description": "Identificador entero único de la carta.",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Carta eliminada de favoritos correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Carta eliminada de favoritos correctamente" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos (ID inválido)"
+          },
+          "401": {
+            "description": "No autorizado"
+          }
+        }
+      }
     }
   },
   "components": {

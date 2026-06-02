@@ -24,6 +24,9 @@ model Card {
   // Traducciones
   translations CardTranslation[]
 
+  // Favoritos
+  favorites Favorite[]
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -96,6 +99,21 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Favoritos
+  favorites Favorite[]
+
   @@map("users")
+}
+
+// Entidad Relacional para Favoritos
+model Favorite {
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cardId    Int
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, cardId])
+  @@map("favorites")
 }
 

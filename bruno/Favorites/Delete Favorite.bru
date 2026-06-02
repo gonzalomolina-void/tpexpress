@@ -1,0 +1,19 @@
+meta {
+  name: Delete Favorite
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{baseUrl}}/api/favorites/:cardId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  cardId: 1
+}
+
+auth:bearer {
+  token: {{token}}
+}

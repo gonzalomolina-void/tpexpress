@@ -3,6 +3,7 @@ import swaggerUi from 'swagger-ui-express';
 import { createRequire } from 'module';
 import cardRoutes from './routes/card.routes.js';
 import authRoutes from './routes/auth.routes.js';
+import favoriteRoutes from './routes/favorite.routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
 
@@ -28,6 +29,7 @@ app.get('/api/health', (req, res) => {
 // Registrar rutas
 app.use('/api', cardRoutes);
 app.use('/api', authRoutes);
+app.use('/api', favoriteRoutes);
 
 
 // Middleware global de errores

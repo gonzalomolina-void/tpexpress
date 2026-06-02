@@ -7,8 +7,8 @@ Este repositorio contiene el desarrollo del backend (API REST) para dar soporte 
 * **Nombre del Proyecto:** `Hexa TCG API`
 * **Coordinador / PM:** `Juan Cruz Espinoza`
 * **Integrantes del Grupo:**
-  * `Juan Cruz Espinoza` - FAI-4767 ([LautyM22](https://github.com/LautyM22))
-  * `Lautaro Mellado` - FAI-2659 ([JuanEspinoza8](https://github.com/JuanEspinoza8))
+  * `Juan Cruz Espinoza` - FAI-4767 ([JuanEspinoza8](https://github.com/JuanEspinoza8))
+  * `Lautaro Mellado` - FAI-2659 ([LautyM22](https://github.com/LautyM22))
   * `Gonzalo Molina` - 42524 ([gonzalomolina-void](https://github.com/gonzalomolina-void))
 * **Link al Repositorio Frontend:** [pwatpo2react2](https://github.com/gonzalomolina-void/pwatpo2react2)
 * **Link al Tablero Kanban:** `[Pendiente]`

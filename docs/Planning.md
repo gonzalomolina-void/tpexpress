@@ -12,10 +12,7 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 * [US 4: Endpoints de Lectura de la API (GET)](#us-4-endpoints-de-lectura-de-la-api-get)
 * [US 5: Endpoints de Escritura de la API con Validación Manual (POST, PUT, DELETE)](#us-5-endpoints-de-escritura-de-la-api-con-validación-manual-post-put-delete)
 * [US 6: Variables de Entorno y CORS](#us-6-variables-de-entorno-y-cors)
-* [US 7: Integración Básica del Frontend (Lectura y Estados de UI)](#us-7-integración-básica-del-frontend-lectura-y-estados-de-ui)
-* [US 8: Integración Avanzada del Frontend / Postman (Modificaciones del CRUD)](#us-8-integración-avanzada-del-frontend--postman-modificaciones-del-crud)
 * [US 9: Despliegue en Producción (Backend, Base de Datos y Frontend)](#us-9-despliegue-en-producción-backend-base-de-datos-y-frontend)
-* [US 10 (Bonus): Documentación Interactiva con Swagger](#us-10-bonus-documentación-interactiva-con-swagger)
 * [US 11: Sistema de Autenticación de Usuarios (Registro/Login con JWT)](#us-11-sistema-de-autenticación-de-usuarios-registrologin-con-jwt)
 * [US 12: Endpoints para Gestión de Favoritos Relacionados con el Usuario](#us-12-endpoints-para-gestión-de-favoritos-relacionados-con-el-usuario)
 * [US 13: Configuración e Implementación de Pruebas Unitarias](#us-13-configuración-e-implementación-de-pruebas-unitarias)
@@ -114,6 +111,8 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
     }
     ```
   * Toda la información debe obtenerse de la base de datos a través de Prisma (no en arrays en memoria ni archivos JSON).
+  * Debe existir un endpoint (ej. `/api/docs`) que cargue la interfaz de Swagger UI para documentar y probar interactivamente los endpoints de lectura (`GET /api/cards` y `GET /api/cards/:id`).
+  * Los endpoints de lectura deben poder probarse y validarse exitosamente mediante una colección de Bruno.
 
 * **Tareas Técnicas:**
   * Crear las rutas y controladores para las peticiones de lectura (`getAll` y `getById`).
@@ -125,6 +124,10 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
   * Realizar un conteo total (`count()`) en la base de datos cuando se solicita paginación para poder setear el header `X-Total-Count` en la respuesta.
   * Crear una función utilitaria para mapear y aplanar la respuesta relacional de Prisma al formato de respuesta JSON aplanado esperado por el frontend.
   * Configurar un middleware de manejo de errores global (`src/middlewares/errorHandler.js`) para capturar fallos inesperados y retornar status `500`.
+  * Instalar `swagger-ui-express` y `swagger-jsdoc` (o preparar un archivo `swagger.json` estático).
+  * Configurar e inicializar Swagger en `src/app.js`.
+  * Escribir la especificación OpenAPI de los endpoints de lectura.
+  * Crear una colección de Bruno para probar los endpoints de lectura (`GET /api/cards` con internacionalización y paginación, y `GET /api/cards/:id`).
 
 ---
 
@@ -137,6 +140,7 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
   * `POST /api/cards` debe crear una carta y responder con status `201 Created`.
   * `PUT /api/cards/:id` debe actualizar una carta existente y responder con status `200 OK`.
   * `DELETE /api/cards/:id` debe eliminar la carta y responder con status `200 OK` o `204 No Content`.
+  * Se deben poder crear y actualizar los datos en múltiples idiomas (soportando tanto español `'es'` como inglés `'en'`).
   * Se deben validar los datos del body de forma **manual** (usando JavaScript puro, sin librerías tipo Zod/Joi). Se debe validar:
     * Campos obligatorios presentes.
     * Strings no vacíos.
@@ -152,12 +156,16 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
       ]
     }
     ```
+  * Los endpoints de escritura (`POST`, `PUT`, `DELETE`) deben estar documentados en la interfaz interactiva de Swagger UI (ej. `/api/docs`), detallando los esquemas de datos requeridos en el body y los posibles códigos de respuesta (`200`, `201`, `400`, `404`, `500`).
+  * Los endpoints de escritura deben poder probarse y validarse exitosamente mediante una colección de Bruno.
 
 * **Tareas Técnicas:**
   * Implementar las funciones de validación manual en `src/validations/card.validation.js`.
   * Crear controladores para `create`, `update` y `delete`.
   * Agregar la validación antes de llamar al servicio de creación/edición.
   * Conectar con Prisma para ejecutar operaciones de persistencia e implementar lógica de manejo del error `404` si el ID a modificar o eliminar no existe en la base de datos.
+  * Escribir la especificación OpenAPI de los endpoints de escritura.
+  * Crear una colección de Bruno para probar los endpoints de escritura (`POST`, `PUT` y `DELETE`) contemplando flujos de datos correctos e inválidos (errores `400` y `404`).
 
 ---
 
@@ -177,43 +185,7 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
   * Instalar el paquete `cors`.
   * Registrar el middleware de CORS en Express, vinculándolo dinámicamente con la variable de entorno `FRONTEND_URL`.
 
----
 
-### US 7: Integración Básica del Frontend (Lectura y Estados de UI)
-**Como** usuario de la aplicación React  
-**Quiero** visualizar la información provista por la API y conocer el estado de la comunicación con el servidor (carga o error)  
-**Para** tener una experiencia de usuario fluida y transparente sin datos mockeados en `localStorage`.
-
-* **Criterios de Aceptación:**
-  * Se debe eliminar el uso de `localStorage` para la persistencia del estado en el frontend.
-  * Al ingresar, el frontend debe consultar a la API para traer los elementos y mostrarlos.
-  * Mientras se obtienen los datos, debe mostrarse un estado de carga claro (spinner, skeleton o texto).
-  * Si la conexión con la API falla o devuelve un error, se debe mostrar un mensaje de error descriptivo en pantalla.
-  * Si la base de datos está vacía, se debe mostrar un mensaje que indique que no hay elementos cargados.
-
-* **Tareas Técnicas:**
-  * Reemplazar las lecturas directas a `localStorage` por llamadas HTTP (usando `fetch` o `axios`).
-  * Agregar estados de React (`isLoading`, `error`) para controlar el renderizado condicional del spinner y mensajes de error.
-  * Adaptar el flujo de búsquedas y filtrados para que, si corresponde, consulte al backend.
-
----
-
-### US 8: Integración Avanzada del Frontend / Postman (Modificaciones del CRUD)
-**Como** usuario o administrador  
-**Quiero** poder realizar modificaciones (crear, editar, borrar) desde la UI del Frontend (o mediante Postman/Swagger si la UI no lo soporta)  
-**Para** gestionar los datos persistidos en tiempo real.
-
-* **Criterios de Aceptación:**
-  * Al realizar una acción de creación, edición o eliminación de forma exitosa, la interfaz gráfica debe actualizarse para reflejar los cambios (sin recargar toda la página).
-  * Si la operación de escritura falla, la interfaz debe mostrar un mensaje advirtiendo al usuario de manera clara.
-  * Las acciones no soportadas por la UI de React deberán poder realizarse y probarse exitosamente usando herramientas como Postman o Swagger.
-
-* **Tareas Técnicas:**
-  * Conectar los formularios de creación y edición del frontend a los endpoints correspondientes de la API backend.
-  * Implementar el manejo del botón "Eliminar" conectándolo con la API.
-  * Manejar los casos de error del backend (como el error `400` de validación) y renderizarlos en los formularios.
-
----
 
 ### US 9: Despliegue en Producción (Backend, Base de Datos y Frontend)
 **Como** usuario final  
@@ -231,22 +203,6 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
   * Configurar las variables de entorno de producción en Vercel (incluyendo la `DATABASE_URL` provista por Neon y el `FRONTEND_URL`).
   * Configurar `vercel.json` o la configuración de hosting necesaria para el backend de Express.
   * Desplegar el frontend configurando su variable de entorno de API para apuntar al servidor de producción.
-
----
-
-### US 10 (Bonus): Documentación Interactiva con Swagger
-**Como** desarrollador integrador  
-**Quiero** contar con documentación interactiva de la API  
-**Para** conocer y probar rápidamente los endpoints, sus cuerpos de datos requeridos y los códigos de respuesta esperados.
-
-* **Criterios de Aceptación:**
-  * Debe existir un endpoint (ej. `/api/docs`) que cargue la interfaz de Swagger UI.
-  * La documentación debe listar todos los endpoints del CRUD con descripciones, parámetros esperados, cuerpos JSON de ejemplo y posibles códigos de respuesta (`200`, `201`, `400`, `404`, `500`).
-
-* **Tareas Técnicas:**
-  * Instalar `swagger-ui-express` y `swagger-jsdoc` (o preparar un archivo `swagger.json` estático).
-  * Configurar e inicializar Swagger en `src/app.js`.
-  * Escribir la especificación OpenAPI de los endpoints (ya sea con anotaciones JSDoc en las rutas o en un archivo centralizado).
 
 ---
 
@@ -313,7 +269,7 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 ## Tablero Kanban de Referencia
 
 A modo orientativo, se sugiere organizar el tablero Kanban con los siguientes estados:
-1. **Backlog (Pila de Producto):** Todas las Historias de Usuario (US 1 a US 10).
+1. **Backlog (Pila de Producto):** Todas las Historias de Usuario (US 1 a US 6, US 9, y US 11 a US 13).
 2. **To Do (Para Hacer):** Tareas específicas de la US activa desglosadas por el equipo.
 3. **In Progress (En Proceso):** Tarea asignada a un desarrollador en ejecución activa.
 4. **Testing / Peer Review:** Implementación finalizada que se está validando localmente o revisando mediante Pull Request.

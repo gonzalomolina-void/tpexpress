@@ -130,13 +130,21 @@ Aplica el esquema de base de datos ejecutando las migraciones pendientes:
 npx prisma migrate dev --name init
 ```
 
-### 5. Semillar la Base de Datos (Seed)
+### 5. Generar el Cliente de Prisma
+Antes de semillar o arrancar la aplicación, debés generar localmente el cliente compilado de Prisma:
+```bash
+pnpm prisma generate
+```
+> [!TIP]
+> **Si usás Windows con PowerShell** y te da un error de seguridad de políticas (`PSSecurityException`), podés solucionarlo corriendo `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` en tu terminal, o usando directamente el comando `pnpm.cmd prisma generate` y `pnpm.cmd prisma db seed`.
+
+### 6. Semillar la Base de Datos (Seed)
 Puebla la base de datos con los registros de prueba requeridos (20 a 30 elementos para verificar scroll y paginados):
 ```bash
 pnpm prisma db seed
 ```
 
-### 6. Ejecutar el Servidor en Desarrollo
+### 7. Ejecutar el Servidor en Desarrollo
 Inicia el servidor Express localmente con recarga automática (`nodemon`):
 ```bash
 pnpm dev

@@ -1,0 +1,12 @@
+change_name: us6-cors
+current_phase: archive
+status: completed
+phases:
+  explore: completed
+  proposal: completed
+  spec: completed
+  design: completed
+  tasks: completed
+  apply: completed
+  verify: completed
+  archive: completed

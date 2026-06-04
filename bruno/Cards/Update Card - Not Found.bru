@@ -1,0 +1,30 @@
+meta {
+  name: Update Card - Not Found
+  type: http
+  seq: 7
+}
+
+put {
+  url: {{baseUrl}}/api/cards/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 9999
+}
+
+body:json {
+  {
+    "cost": 4,
+    "atk": 5,
+    "def": 6,
+    "image": "dragon_test.webp",
+    "typeId": 1,
+    "rarityId": 1,
+    "nameEs": "Dragón Inexistente",
+    "descriptionEs": "No debería actualizarse nada.",
+    "nameEn": "Non-existent Dragon",
+    "descriptionEn": "Should not update anything."
+  }
+}

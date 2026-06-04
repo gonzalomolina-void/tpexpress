@@ -1,0 +1,23 @@
+meta {
+  name: Create Card - Invalid
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/cards
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "cost": -2,
+    "atk": "invalido",
+    "image": "",
+    "typeId": 9999,
+    "rarityId": 1,
+    "nameEs": "",
+    "nameEn": "Test"
+  }
+}

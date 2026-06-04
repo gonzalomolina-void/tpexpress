@@ -80,6 +80,35 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Crear una nueva carta",
+        "description": "Crea una carta en la base de datos con sus traducciones en español e inglés. Requiere validación manual de campos.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CardInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Carta creada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Card"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos (cuerpo vacío, tipos incorrectos, o referencias inexistentes)"
+          }
+        }
       }
     },
     "/api/cards/{id}": {
@@ -146,6 +175,79 @@
                 }
               }
             }
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar una carta existente",
+        "description": "Actualiza los campos de una carta y sus traducciones asociadas en la base de datos por su ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Identificador entero único de la carta.",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CardInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Carta actualizada correctamente",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Card" }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos (tipos incorrectos, o referencias inexistentes)"
+          },
+          "404": {
+            "description": "Carta no encontrada"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar una carta",
+        "description": "Elimina de forma permanente una carta y sus traducciones asociadas de la base de datos.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Identificador entero único de la carta.",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Carta eliminada correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string", "example": "Carta eliminada correctamente" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido"
+          },
+          "404": {
+            "description": "Carta no encontrada"
           }
         }
       }
@@ -498,6 +600,22 @@
       }
     },
     "schemas": {
+      "CardInput": {
+        "type": "object",
+        "required": ["cost", "atk", "def", "image", "typeId", "rarityId", "nameEs", "descriptionEs", "nameEn", "descriptionEn"],
+        "properties": {
+          "cost": { "type": "integer", "example": 5 },
+          "atk": { "type": "integer", "example": 8 },
+          "def": { "type": "integer", "example": 10 },
+          "image": { "type": "string", "example": "SirKaelen.webp" },
+          "typeId": { "type": "integer", "example": 1 },
+          "rarityId": { "type": "integer", "example": 1 },
+          "nameEs": { "type": "string", "example": "Sir Kaelen" },
+          "descriptionEs": { "type": "string", "example": "El último guardián del Sol Blanco. Su espada no conoce el miedo." },
+          "nameEn": { "type": "string", "example": "Sir Kaelen" },
+          "descriptionEn": { "type": "string", "example": "The last guardian of the White Sun. His sword knows no fear." }
+        }
+      },
       "Card": {
         "type": "object",
         "properties": {

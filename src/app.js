@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { createRequire } from 'module';
 import cardRoutes from './routes/card.routes.js';
@@ -13,6 +14,11 @@ const swaggerDocument = require('../docs/swagger.json');
 const app = express();
 
 // Middlewares
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  optionsSuccessStatus: 200,
+  exposedHeaders: ['X-Total-Count']
+}));
 app.use(express.json());
 
 // Servir documentación de Swagger interactiva

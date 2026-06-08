@@ -62,3 +62,16 @@ pnpm remove @prisma/adapter-pg pg
 pnpm install
 npx prisma generate
 ```
+
+---
+
+## ☁️ Consideraciones para Despliegue en Vercel (Serverless)
+
+Al desplegar la API en Vercel (que empaqueta la aplicación en Serverless Functions de Node.js):
+
+1. **Compatibilidad**: El runtime estándar de Node.js en Vercel soporta de forma nativa los binarios de Rust de Prisma (Query Engine Nativo), por lo que la refactorización propuesta es 100% compatible y recomendada (evita cold starts más lentos y la sobrecarga del pool en JS).
+2. **Límite de Conexiones**: En entornos serverless, cada instancia levantada por Vercel puede abrir su propio pool. Para evitar agotar rápidamente las conexiones permitidas por PostgreSQL en Neon, se debe limitar la cantidad de conexiones por instancia agregando `connection_limit=1` en la variable de entorno `DATABASE_URL` de producción:
+
+   ```
+   DATABASE_URL="postgresql://usuario:password@neon-host/tpexpress?schema=public&connection_limit=1"
+   ```

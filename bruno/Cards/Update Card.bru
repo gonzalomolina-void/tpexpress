@@ -1,0 +1,30 @@
+meta {
+  name: Update Card
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/cards/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 1
+}
+
+body:json {
+  {
+    "cost": 5,
+    "atk": 9,
+    "def": 11,
+    "image": "SirKaelen_Updated.webp",
+    "typeId": 1,
+    "rarityId": 1,
+    "nameEs": "Sir Kaelen Actualizado",
+    "descriptionEs": "Su espada ahora brilla con más intensidad.",
+    "nameEn": "Sir Kaelen Updated",
+    "descriptionEn": "His sword now shines with greater intensity."
+  }
+}

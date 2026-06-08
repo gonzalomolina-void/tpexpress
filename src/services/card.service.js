@@ -69,3 +69,132 @@ export async function getCardById(id) {
     include: INCLUDE_RELATIONS
   });
 }
+
+/**
+ * Verifica si un tipo de carta existe por su ID.
+ * @param {number} id - El ID del tipo de carta.
+ * @returns {Promise<boolean>} True si existe, false en caso contrario.
+ */
+export async function checkTypeExists(id) {
+  const type = await prisma.cardType.findUnique({ where: { id } });
+  return type !== null;
+}
+
+/**
+ * Verifica si una rareza existe por su ID.
+ * @param {number} id - El ID de la rareza.
+ * @returns {Promise<boolean>} True si existe, false en caso contrario.
+ */
+export async function checkRarityExists(id) {
+  const rarity = await prisma.rarity.findUnique({ where: { id } });
+  return rarity !== null;
+}
+
+/**
+ * Crea una nueva carta y sus traducciones correspondientes en la base de datos.
+ * 
+ * @param {Object} data - Datos de la carta y sus traducciones.
+ * @returns {Promise<Object>} La carta creada con sus relaciones.
+ */
+export async function createCard({ cost, atk, def, image, typeId, rarityId, nameEs, descriptionEs, nameEn, descriptionEn }) {
+  return prisma.card.create({
+    data: {
+      cost,
+      atk,
+      def,
+      image,
+      typeId,
+      rarityId,
+      translations: {
+        createMany: {
+          data: [
+            { language: 'es', name: nameEs, description: descriptionEs },
+            { language: 'en', name: nameEn, description: descriptionEn }
+          ]
+        }
+      }
+    },
+    include: INCLUDE_RELATIONS
+  });
+}
+
+/**
+ * Actualiza una carta existente y sus traducciones asociadas en una transacción.
+ * 
+ * @param {number} id - El ID de la carta a actualizar.
+ * @param {Object} data - Nuevos datos de la carta.
+ * @returns {Promise<Object|null>} La carta actualizada o null si no se encuentra.
+ */
+export async function updateCard(id, { cost, atk, def, image, typeId, rarityId, nameEs, descriptionEs, nameEn, descriptionEn }) {
+  return prisma.$transaction(async (tx) => {
+    // Verificar si la carta existe
+    const existing = await tx.card.findUnique({ where: { id } });
+    if (!existing) return null;
+
+    // Actualizar datos base de la carta
+    await tx.card.update({
+      where: { id },
+      data: {
+        cost,
+        atk,
+        def,
+        image,
+        typeId,
+        rarityId
+      }
+    });
+
+    // Actualizar traducciones usando upsert
+    const translations = [
+      { language: 'es', name: nameEs, description: descriptionEs },
+      { language: 'en', name: nameEn, description: descriptionEn }
+    ];
+
+    for (const t of translations) {
+      await tx.cardTranslation.upsert({
+        where: {
+          cardId_language: {
+            cardId: id,
+            language: t.language
+          }
+        },
+        update: {
+          name: t.name,
+          description: t.description
+        },
+        create: {
+          cardId: id,
+          language: t.language,
+          name: t.name,
+          description: t.description
+        }
+      });
+    }
+
+    // Retornar la carta actualizada con todas sus relaciones
+    return tx.card.findUnique({
+      where: { id },
+      include: INCLUDE_RELATIONS
+    });
+  });
+}
+
+/**
+ * Elimina una carta de la base de datos por su ID (la eliminación es en cascada).
+ * 
+ * @param {number} id - El ID de la carta a eliminar.
+ * @returns {Promise<Object|null>} El registro eliminado o null si no existe.
+ */
+export async function deleteCard(id) {
+  try {
+    return await prisma.card.delete({
+      where: { id }
+    });
+  } catch (error) {
+    if (error.code === 'P2025') {
+      return null;
+    }
+    throw error;
+  }
+}
+

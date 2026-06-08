@@ -1,0 +1,15 @@
+meta {
+  name: Delete Card
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/cards/:id
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 2
+}

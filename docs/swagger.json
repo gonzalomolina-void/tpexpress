@@ -602,7 +602,7 @@
     "schemas": {
       "CardInput": {
         "type": "object",
-        "required": ["cost", "atk", "def", "image", "typeId", "rarityId", "nameEs", "descriptionEs", "nameEn", "descriptionEn"],
+        "required": ["cost", "atk", "def", "image", "typeId", "rarityId", "translations"],
         "properties": {
           "cost": { "type": "integer", "example": 5 },
           "atk": { "type": "integer", "example": 8 },
@@ -610,10 +610,19 @@
           "image": { "type": "string", "example": "SirKaelen.webp" },
           "typeId": { "type": "integer", "example": 1 },
           "rarityId": { "type": "integer", "example": 1 },
-          "nameEs": { "type": "string", "example": "Sir Kaelen" },
-          "descriptionEs": { "type": "string", "example": "El último guardián del Sol Blanco. Su espada no conoce el miedo." },
-          "nameEn": { "type": "string", "example": "Sir Kaelen" },
-          "descriptionEn": { "type": "string", "example": "The last guardian of the White Sun. His sword knows no fear." }
+          "translations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["language", "name", "description"],
+              "properties": {
+                "language": { "type": "string", "enum": ["es", "en"], "example": "es" },
+                "name": { "type": "string", "example": "Sir Kaelen" },
+                "description": { "type": "string", "example": "El último guardián del Sol Blanco" }
+              }
+            }
+          }
         }
       },
       "Card": {

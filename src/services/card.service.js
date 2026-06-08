@@ -96,7 +96,7 @@ export async function checkRarityExists(id) {
  * @param {Object} data - Datos de la carta y sus traducciones.
  * @returns {Promise<Object>} La carta creada con sus relaciones.
  */
-export async function createCard({ cost, atk, def, image, typeId, rarityId, nameEs, descriptionEs, nameEn, descriptionEn }) {
+export async function createCard({ cost, atk, def, image, typeId, rarityId, translations }) {
   return prisma.card.create({
     data: {
       cost,
@@ -107,10 +107,11 @@ export async function createCard({ cost, atk, def, image, typeId, rarityId, name
       rarityId,
       translations: {
         createMany: {
-          data: [
-            { language: 'es', name: nameEs, description: descriptionEs },
-            { language: 'en', name: nameEn, description: descriptionEn }
-          ]
+          data: translations.map(t => ({
+            language: t.language,
+            name: t.name,
+            description: t.description
+          }))
         }
       }
     },
@@ -125,7 +126,7 @@ export async function createCard({ cost, atk, def, image, typeId, rarityId, name
  * @param {Object} data - Nuevos datos de la carta.
  * @returns {Promise<Object|null>} La carta actualizada o null si no se encuentra.
  */
-export async function updateCard(id, { cost, atk, def, image, typeId, rarityId, nameEs, descriptionEs, nameEn, descriptionEn }) {
+export async function updateCard(id, { cost, atk, def, image, typeId, rarityId, translations }) {
   return prisma.$transaction(async (tx) => {
     // Verificar si la carta existe
     const existing = await tx.card.findUnique({ where: { id } });
@@ -145,30 +146,27 @@ export async function updateCard(id, { cost, atk, def, image, typeId, rarityId, 
     });
 
     // Actualizar traducciones usando upsert
-    const translations = [
-      { language: 'es', name: nameEs, description: descriptionEs },
-      { language: 'en', name: nameEn, description: descriptionEn }
-    ];
-
-    for (const t of translations) {
-      await tx.cardTranslation.upsert({
-        where: {
-          cardId_language: {
+    if (translations && Array.isArray(translations)) {
+      for (const t of translations) {
+        await tx.cardTranslation.upsert({
+          where: {
+            cardId_language: {
+              cardId: id,
+              language: t.language
+            }
+          },
+          update: {
+            name: t.name,
+            description: t.description
+          },
+          create: {
             cardId: id,
-            language: t.language
+            language: t.language,
+            name: t.name,
+            description: t.description
           }
-        },
-        update: {
-          name: t.name,
-          description: t.description
-        },
-        create: {
-          cardId: id,
-          language: t.language,
-          name: t.name,
-          description: t.description
-        }
-      });
+        });
+      }
     }
 
     // Retornar la carta actualizada con todas sus relaciones

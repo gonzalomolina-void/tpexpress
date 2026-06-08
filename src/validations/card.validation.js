@@ -1,5 +1,69 @@
 /**
- * Valida los datos del body de una carta de forma manual.
+ * Funciones auxiliares para validación de datos.
+ */
+function isNonEmptyString(value) {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isPositiveInteger(value) {
+  return Number.isInteger(value) && value >= 0;
+}
+
+function isId(value) {
+  return Number.isInteger(value) && value > 0;
+}
+
+function isEmptyObject(obj) {
+  return obj && typeof obj === 'object' && !Array.isArray(obj) && Object.keys(obj).length === 0;
+}
+
+/**
+ * Valida el array de traducciones enviado en el body.
+ * 
+ * @param {Array} translations - Array de traducciones.
+ * @returns {Array<{field: string, message: string}>} Errores de validación de traducciones.
+ */
+function validateTranslations(translations) {
+  const errors = [];
+
+  if (!Array.isArray(translations)) {
+    errors.push({ field: 'translations', message: 'Debe ser un array' });
+    return errors;
+  }
+
+  if (translations.length === 0) {
+    errors.push({ field: 'translations', message: 'Debe tener al menos una traducción' });
+    return errors;
+  }
+
+  translations.forEach((translation, index) => {
+    if (!translation.language || !['es', 'en'].includes(translation.language)) {
+      errors.push({ 
+        field: `translations[${index}].language`, 
+        message: 'Debe ser "es" o "en"' 
+      });
+    }
+
+    if (!isNonEmptyString(translation.name)) {
+      errors.push({ 
+        field: `translations[${index}].name`, 
+        message: 'Debe ser un string no vacío' 
+      });
+    }
+
+    if (!isNonEmptyString(translation.description)) {
+      errors.push({ 
+        field: `translations[${index}].description`, 
+        message: 'Debe ser un string no vacío' 
+      });
+    }
+  });
+
+  return errors;
+}
+
+/**
+ * Valida los datos del body de una carta de forma manual, soportando traducciones anidadas.
  * Retorna un array con los detalles de los errores encontrados.
  * 
  * @param {Object} body - El cuerpo de la petición.
@@ -8,80 +72,43 @@
 export function validateCard(body) {
   const errors = [];
 
-  // 1. Validar que no sea un objeto vacío
-  if (!body || Object.keys(body).length === 0) {
-    errors.push({
-      field: 'body',
-      message: 'El cuerpo de la petición no puede estar vacío'
-    });
+  // 1. Validar que no sea un objeto vacío o nulo
+  if (isEmptyObject(body)) {
+    errors.push({ field: 'body', message: 'El body no puede estar vacío' });
     return errors;
   }
 
-  const requiredFields = [
-    { name: 'cost', type: 'number', label: 'El costo' },
-    { name: 'atk', type: 'number', label: 'El ataque (atk)' },
-    { name: 'def', type: 'number', label: 'La defensa (def)' },
-    { name: 'image', type: 'string', label: 'La imagen' },
-    { name: 'typeId', type: 'number', label: 'El ID del tipo de carta' },
-    { name: 'rarityId', type: 'number', label: 'El ID de la rareza' },
-    { name: 'nameEs', type: 'string', label: 'El nombre en español' },
-    { name: 'descriptionEs', type: 'string', label: 'La descripción en español' },
-    { name: 'nameEn', type: 'string', label: 'El nombre en inglés' },
-    { name: 'descriptionEn', type: 'string', label: 'La descripción en inglés' }
-  ];
+  // 2. Validar campos obligatorios y tipos
+  if (body.cost === undefined || !isPositiveInteger(body.cost)) {
+    errors.push({ field: 'cost', message: 'Debe ser un número entero >= 0' });
+  }
 
-  // 2. Validar campos requeridos y tipos de datos
-  for (const field of requiredFields) {
-    const value = body[field.name];
+  if (body.atk === undefined || !isPositiveInteger(body.atk)) {
+    errors.push({ field: 'atk', message: 'Debe ser un número entero >= 0' });
+  }
 
-    // Verificar si está presente (permitiendo el valor 0 para números)
-    if (value === undefined || value === null) {
-      errors.push({
-        field: field.name,
-        message: `${field.label} es obligatorio`
-      });
-      continue;
-    }
+  if (body.def === undefined || !isPositiveInteger(body.def)) {
+    errors.push({ field: 'def', message: 'Debe ser un número entero >= 0' });
+  }
 
-    // Validar tipo string
-    if (field.type === 'string') {
-      if (typeof value !== 'string') {
-        errors.push({
-          field: field.name,
-          message: `${field.label} debe ser una cadena de texto`
-        });
-      } else if (value.trim() === '') {
-        errors.push({
-          field: field.name,
-          message: `${field.label} no puede estar vacío`
-        });
-      }
-    }
+  if (!isNonEmptyString(body.image)) {
+    errors.push({ field: 'image', message: 'Debe ser un string no vacío' });
+  }
 
-    // Validar tipo number
-    if (field.type === 'number') {
-      if (typeof value !== 'number' || isNaN(value)) {
-        errors.push({
-          field: field.name,
-          message: `${field.label} debe ser un número válido`
-        });
-      } else {
-        // Verificar que sea un número entero
-        if (!Number.isInteger(value)) {
-          errors.push({
-            field: field.name,
-            message: `${field.label} debe ser un número entero`
-          });
-        }
-        // Verificar que sea no negativo
-        if (value < 0) {
-          errors.push({
-            field: field.name,
-            message: `${field.label} no puede ser menor a 0`
-          });
-        }
-      }
-    }
+  if (!body.typeId || !isId(body.typeId)) {
+    errors.push({ field: 'typeId', message: 'Debe ser un ID válido (número > 0)' });
+  }
+
+  if (!body.rarityId || !isId(body.rarityId)) {
+    errors.push({ field: 'rarityId', message: 'Debe ser un ID válido (número > 0)' });
+  }
+
+  // 3. Validar traducción estructurada
+  if (body.translations) {
+    const translationErrors = validateTranslations(body.translations);
+    errors.push(...translationErrors);
+  } else {
+    errors.push({ field: 'translations', message: 'Es requerido' });
   }
 
   return errors;

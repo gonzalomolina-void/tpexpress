@@ -1,0 +1,46 @@
+{
+  "es": {
+    "title": "Sobre Nosotros",
+    "description": "Información sobre el equipo de desarrollo y la filosofía que guía nuestro trabajo.",
+    "developers": [
+      {
+        "name": "Juan Cruz Espinoza",
+        "role": "PM"
+      },
+      {
+        "name": "Lautaro Mellado",
+        "role": "Desarrollador"
+      },
+      {
+        "name": "Gonzalo Molina",
+        "role": "Desarrollador"
+      }
+    ],
+    "stoicQuote": {
+      "author": "Epicteto",
+      "quote": "No busques que los eventos sucedan como deseas, sino desea que sucedan como suceden, y fluirás bien. Aquel que no espera nada de nadie nunca será defraudado."
+    }
+  },
+  "en": {
+    "title": "About Us",
+    "description": "Information about the development team and the philosophy guiding our work.",
+    "developers": [
+      {
+        "name": "Juan Cruz Espinoza",
+        "role": "PM"
+      },
+      {
+        "name": "Lautaro Mellado",
+        "role": "Developer"
+      },
+      {
+        "name": "Gonzalo Molina",
+        "role": "Developer"
+      }
+    ],
+    "stoicQuote": {
+      "author": "Epictetus",
+      "quote": "Seek not that the things which happen should happen as you wish; but wish the things which happen to be as they are, and you will have a tranquil flow of life. He who expects nothing from anyone will never be disappointed."
+    }
+  }
+}

@@ -69,7 +69,7 @@ $nodeProcess = Start-Process node -ArgumentList "src/index.js" -NoNewWindow -Pas
 Write-Host "[WAIT] Waiting for server to initialize..." -ForegroundColor Yellow
 Start-Sleep -Seconds 3
 
-function Invoke-Api($method, $uri, $body = $null) {
+function Invoke-Api($method, $uri, $body = $null, $headers = $null) {
     $params = @{
         Uri = $uri
         Method = $method
@@ -81,6 +81,9 @@ function Invoke-Api($method, $uri, $body = $null) {
     }
     if ($body) {
         $params["Body"] = $body
+    }
+    if ($headers) {
+        $params["Headers"] = $headers
     }
     try {
         $res = Invoke-WebRequest @params
@@ -143,6 +146,22 @@ try {
         Write-Host "  Header X-Total-Count present: $totalCount" -ForegroundColor Green
     } else {
         Write-Host "  Header X-Total-Count MISSING!" -ForegroundColor Red
+    }
+    if ($res.StatusCode -eq 200) {
+        $cards = $res.Content | ConvertFrom-Json
+        if ($cards.Count -gt 0) {
+            $firstCard = $cards[0]
+            if ($firstCard.type -in @("Creature", "Spell", "Artifact")) {
+                Write-Host "  [PASS] Language mapping (EN) for type: $($firstCard.type)" -ForegroundColor Green
+            } else {
+                Write-Host "  [FAIL] Language mapping (EN) for type: Got $($firstCard.type)" -ForegroundColor Red
+            }
+            if ($firstCard.rarity -in @("Poor", "Common", "Uncommon", "Rare", "Epic", "Legendary")) {
+                Write-Host "  [PASS] Language mapping (EN) for rarity: $($firstCard.rarity)" -ForegroundColor Green
+            } else {
+                Write-Host "  [FAIL] Language mapping (EN) for rarity: Got $($firstCard.rarity)" -ForegroundColor Red
+            }
+        }
     }
 
     # TC-03: POST /api/cards
@@ -249,6 +268,63 @@ try {
     Write-Host "TC-12: DELETE /api/cards/999999"
     $res = Invoke-Api -Method Delete -Uri "$baseUrl/api/cards/999999"
     Assert-Status $res 404 "TC-12: DELETE /api/cards/999999"
+
+    # TC-13: CORS validation with Origin header
+    Write-Host "TC-13: CORS validation with Origin header"
+    $headersCors = @{
+        "Origin" = "http://localhost:5173"
+    }
+    $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards" -headers $headersCors
+    Assert-Status $res 200 "TC-13: CORS validation"
+    $allowOrigin = $res.Headers["Access-Control-Allow-Origin"]
+    if (-not $allowOrigin) { $allowOrigin = $res.Headers["access-control-allow-origin"] }
+    $exposeHeaders = $res.Headers["Access-Control-Expose-Headers"]
+    if (-not $exposeHeaders) { $exposeHeaders = $res.Headers["access-control-expose-headers"] }
+    if ($allowOrigin -eq "http://localhost:5173") {
+        Write-Host "  [PASS] Access-Control-Allow-Origin is correct: $allowOrigin" -ForegroundColor Green
+    } else {
+        Write-Host "  [FAIL] Access-Control-Allow-Origin: Expected http://localhost:5173, got '$allowOrigin'" -ForegroundColor Red
+    }
+    if ($exposeHeaders -and $exposeHeaders.Contains("X-Total-Count")) {
+        Write-Host "  [PASS] Access-Control-Expose-Headers contains X-Total-Count" -ForegroundColor Green
+    } else {
+        Write-Host "  [FAIL] Access-Control-Expose-Headers: Expected to contain X-Total-Count, got '$exposeHeaders'" -ForegroundColor Red
+    }
+
+    # TC-14: CORS OPTIONS preflight request
+    Write-Host "TC-14: CORS OPTIONS preflight request"
+    $headersPreflight = @{
+        "Origin" = "http://localhost:5173"
+        "Access-Control-Request-Method" = "GET"
+    }
+    $res = Invoke-Api -Method Options -Uri "$baseUrl/api/cards" -headers $headersPreflight
+    Assert-Status $res 200 "TC-14: CORS OPTIONS preflight"
+    $allowOriginPreflight = $res.Headers["Access-Control-Allow-Origin"]
+    if (-not $allowOriginPreflight) { $allowOriginPreflight = $res.Headers["access-control-allow-origin"] }
+    if ($allowOriginPreflight -eq "http://localhost:5173") {
+        Write-Host "  [PASS] Preflight Access-Control-Allow-Origin is correct: $allowOriginPreflight" -ForegroundColor Green
+    } else {
+        Write-Host "  [FAIL] Preflight Access-Control-Allow-Origin: Expected http://localhost:5173, got '$allowOriginPreflight'" -ForegroundColor Red
+    }
+
+    # TC-15: i18n validation via Accept-Language header
+    Write-Host "TC-15: i18n validation via Accept-Language header"
+    $headersAcceptLang = @{
+        "Accept-Language" = "en-US,en;q=0.9"
+    }
+    $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards?page=1&limit=5" -headers $headersAcceptLang
+    Assert-Status $res 200 "TC-15: Accept-Language translation"
+    if ($res.StatusCode -eq 200) {
+        $cards = $res.Content | ConvertFrom-Json
+        if ($cards.Count -gt 0) {
+            $firstCard = $cards[0]
+            if ($firstCard.type -in @("Creature", "Spell", "Artifact")) {
+                Write-Host "  [PASS] Accept-Language translated type to English: $($firstCard.type)" -ForegroundColor Green
+            } else {
+                Write-Host "  [FAIL] Accept-Language translation: Got $($firstCard.type)" -ForegroundColor Red
+            }
+        }
+    }
 
     Write-Host "=== QA API TEST SUITE COMPLETE ===" -ForegroundColor Cyan
 } finally {

@@ -88,6 +88,34 @@
             "schema": { "type": "integer", "minimum": 1 }
           },
           {
+            "name": "search",
+            "in": "query",
+            "description": "Término de búsqueda parcial sobre el nombre de la carta (case-insensitive).",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "Filtro exacto por código del tipo de carta.",
+            "required": false,
+            "schema": { "type": "string", "enum": ["creature", "spell", "artifact"] }
+          },
+          {
+            "name": "rarity",
+            "in": "query",
+            "description": "Filtro exacto por código de la rareza de la carta.",
+            "required": false,
+            "schema": { "type": "string", "enum": ["poor", "common", "uncommon", "rare", "epic", "legendary"] }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Idioma preferido para los textos de las cartas ('es' o 'en'). Alternativa a Accept-Language.",
+            "required": false,
+            "schema": { "type": "string", "enum": ["es", "en"] }
+          },
+          {
             "name": "Accept-Language",
             "in": "header",
             "description": "Idioma preferido para los textos de las cartas ('es' o 'en'). Por defecto es 'es'.",

@@ -1,8 +1,13 @@
+import { getLanguage } from '../utils/i18n.js';
+import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
+
 export function errorHandler(err, req, res, next) {
   console.error('[Error Handler] Ocurrió un error no manejado:', err);
+  const lang = getLanguage(req);
+  const errorMsg = translate(ERROR_KEYS.INTERNAL_SERVER_ERROR, lang);
 
   res.status(500).json({
-    error: 'Error interno del servidor',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Ha ocurrido un error inesperado.'
+    error: errorMsg.error,
+    message: process.env.NODE_ENV === 'development' ? err.message : errorMsg.message
   });
 }

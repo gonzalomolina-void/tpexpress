@@ -62,12 +62,30 @@ if ($exitCode -eq 1) {
 
 Write-Host "[OK] Database is up and seeded!" -ForegroundColor Green
 
-Write-Host "[START] Starting Express server in the background..." -ForegroundColor Cyan
-$nodeProcess = Start-Process node -ArgumentList "src/index.js" -WorkingDirectory $PSScriptRoot -NoNewWindow -PassThru
+# --- CHECK IF EXPRESS SERVER IS ALREADY RUNNING ---
+$serverAlreadyRunning = $false
+try {
+    # Check if we get a response from health endpoint
+    $response = Invoke-WebRequest -Uri "$baseUrl/api/health" -Method Get -TimeoutSec 2 -UseBasicParsing -ErrorAction Stop
+    if ($response.StatusCode -eq 200) {
+        $serverAlreadyRunning = $true
+    }
+} catch {
+    # Ignore connection failure, server is not running
+}
 
-# Wait for server to boot
-Write-Host "[WAIT] Waiting for server to initialize..." -ForegroundColor Yellow
-Start-Sleep -Seconds 3
+$nodeProcess = $null
+if ($serverAlreadyRunning) {
+    Write-Host "[OK] Express server is already running on $baseUrl. Reusing existing instance (Docker or Host)!" -ForegroundColor Green
+} else {
+    Write-Host "[START] Express server is not running. Starting local Express server in the background..." -ForegroundColor Cyan
+    $nodeProcess = Start-Process node -ArgumentList "src/index.js" -WorkingDirectory $PSScriptRoot -NoNewWindow -PassThru
+
+    # Wait for server to boot
+    Write-Host "[WAIT] Waiting for server to initialize..." -ForegroundColor Yellow
+    Start-Sleep -Seconds 3
+}
+
 
 function Invoke-Api($method, $uri, $body = $null, $headers = $null) {
     $params = @{
@@ -132,6 +150,26 @@ function Assert-Status($response, $expectedStatus, $testName) {
 try {
     Write-Host "=== STARTING QA API TEST SUITE ===" -ForegroundColor Cyan
 
+    # Login as Admin to get Admin Token for write operations
+    Write-Host "[SETUP] Logging in as Admin to get auth token..." -ForegroundColor Yellow
+    $loginBody = @{
+        email = "admin@example.com"
+        password = "password123"
+    } | ConvertTo-Json
+    $loginRes = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/login" -Body $loginBody
+    $adminToken = $null
+    if ($loginRes.StatusCode -eq 200) {
+        $loginData = $loginRes.Content | ConvertFrom-Json
+        $adminToken = $loginData.token
+        Write-Host "[SETUP] Admin Token obtained successfully!" -ForegroundColor Green
+    } else {
+        Write-Host "[ERROR] Failed to log in as Admin. Status: $($loginRes.StatusCode)" -ForegroundColor Red
+        Exit 1
+    }
+    $adminHeaders = @{
+        "Authorization" = "Bearer $adminToken"
+    }
+
     # TC-01: GET /api/cards
     Write-Host "TC-01: GET /api/cards"
     $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards"
@@ -178,7 +216,14 @@ try {
             @{ language = "en"; name = "QA Dragon"; description = "QA test card" }
         )
     } | ConvertTo-Json -Depth 5
-    $res = Invoke-Api -Method Post -Uri "$baseUrl/api/cards" -Body $body
+
+    # TC-03a: POST /api/cards sin autenticación (debe dar 401)
+    Write-Host "TC-03a: POST /api/cards sin token"
+    $resNoAuth = Invoke-Api -Method Post -Uri "$baseUrl/api/cards" -Body $body
+    Assert-Status $resNoAuth 401 "TC-03a: POST /api/cards sin token"
+
+    # TC-03: POST /api/cards con token de administrador (debe dar 201)
+    $res = Invoke-Api -Method Post -Uri "$baseUrl/api/cards" -Body $body -headers $adminHeaders
     Assert-Status $res 201 "TC-03: POST /api/cards"
     $createdId = $null
     if ($res.StatusCode -eq 201) {
@@ -207,12 +252,12 @@ try {
                 @{ language = "en"; name = "Updated QA Dragon"; description = "Updated in test" }
             )
         } | ConvertTo-Json -Depth 5
-        $res = Invoke-Api -Method Put -Uri "$baseUrl/api/cards/$createdId" -Body $bodyUpdate
+        $res = Invoke-Api -Method Put -Uri "$baseUrl/api/cards/$createdId" -Body $bodyUpdate -headers $adminHeaders
         Assert-Status $res 200 "TC-05: PUT /api/cards/:id"
 
         # TC-06: DELETE /api/cards/:id
         Write-Host "TC-06: DELETE /api/cards/$createdId"
-        $res = Invoke-Api -Method Delete -Uri "$baseUrl/api/cards/$createdId"
+        $res = Invoke-Api -Method Delete -Uri "$baseUrl/api/cards/$createdId" -headers $adminHeaders
         Assert-Status $res 200 "TC-06: DELETE /api/cards/:id"
     } else {
         Write-Host "Skipping TC-04, TC-05, TC-06 because card creation failed." -ForegroundColor Yellow
@@ -220,7 +265,7 @@ try {
 
     # TC-07: POST /api/cards with empty body
     Write-Host "TC-07: POST /api/cards (Empty body)"
-    $res = Invoke-Api -Method Post -Uri "$baseUrl/api/cards" -Body "{}"
+    $res = Invoke-Api -Method Post -Uri "$baseUrl/api/cards" -Body "{}" -headers $adminHeaders
     Assert-Status $res 400 "TC-07: POST /api/cards (empty body)"
 
     # TC-08: POST /api/cards with invalid data
@@ -234,7 +279,7 @@ try {
         rarityId = 1
         translations = @()
     } | ConvertTo-Json -Depth 5
-    $res = Invoke-Api -Method Post -Uri "$baseUrl/api/cards" -Body $bodyInvalid
+    $res = Invoke-Api -Method Post -Uri "$baseUrl/api/cards" -Body $bodyInvalid -headers $adminHeaders
     Assert-Status $res 400 "TC-08: POST /api/cards (invalid body)"
 
     # TC-09: GET /api/cards/abc (Invalid ID)
@@ -261,12 +306,12 @@ try {
             @{ language = "en"; name = "Updated QA Dragon"; description = "Updated in test" }
         )
     } | ConvertTo-Json -Depth 5
-    $res = Invoke-Api -Method Put -Uri "$baseUrl/api/cards/999999" -Body $bodyUpdateEmpty
+    $res = Invoke-Api -Method Put -Uri "$baseUrl/api/cards/999999" -Body $bodyUpdateEmpty -headers $adminHeaders
     Assert-Status $res 404 "TC-11: PUT /api/cards/999999"
 
     # TC-12: DELETE /api/cards/999999 (Non-existent ID)
     Write-Host "TC-12: DELETE /api/cards/999999"
-    $res = Invoke-Api -Method Delete -Uri "$baseUrl/api/cards/999999"
+    $res = Invoke-Api -Method Delete -Uri "$baseUrl/api/cards/999999" -headers $adminHeaders
     Assert-Status $res 404 "TC-12: DELETE /api/cards/999999"
 
     # TC-13: CORS validation with Origin header
@@ -457,6 +502,24 @@ try {
         } else {
             Write-Host "  [FAIL] Invalid JWT token structure returned!" -ForegroundColor Red
         }
+    }
+
+    # TC-22: Authorization check (User with role 'usuario' gets 403 Forbidden on POST /api/cards)
+    Write-Host "TC-22: POST /api/cards with regular user token (debe dar 403)"
+    $userLoginBody = @{
+        email = "integration@test.com"
+        password = "password123"
+    } | ConvertTo-Json
+    $userLoginRes = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/login" -Body $userLoginBody
+    if ($userLoginRes.StatusCode -eq 200) {
+        $userData = $userLoginRes.Content | ConvertFrom-Json
+        $userHeaders = @{
+            "Authorization" = "Bearer $($userData.token)"
+        }
+        $forbiddenRes = Invoke-Api -Method Post -Uri "$baseUrl/api/cards" -Body $body -headers $userHeaders
+        Assert-Status $forbiddenRes 403 "TC-22: POST /api/cards with regular user token"
+    } else {
+        Write-Host "  [FAIL] Failed to log in as regular user for authorization test." -ForegroundColor Red
     }
 
     Write-Host "=== QA API TEST SUITE COMPLETE ===" -ForegroundColor Cyan

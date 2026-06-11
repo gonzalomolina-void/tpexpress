@@ -145,8 +145,13 @@
       },
       "post": {
         "summary": "Crear una nueva carta",
-        "description": "Crea una carta nueva con sus traducciones en múltiples idiomas.",
+        "description": "Crea una carta nueva con sus traducciones en múltiples idiomas. Requiere rol admin.",
         "tags": ["Cards"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -210,6 +215,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No autorizado (token faltante, inválido o expirado)"
+          },
+          "403": {
+            "description": "Acceso prohibido (se requiere rol admin)"
           },
           "500": { "description": "Error interno del servidor" }
         }
@@ -284,8 +295,13 @@
       },
       "put": {
         "summary": "Actualizar una carta existente",
-        "description": "Actualiza los datos de una carta existente incluyendo sus traducciones.",
+        "description": "Actualiza los datos de una carta existente incluyendo sus traducciones. Requiere rol admin.",
         "tags": ["Cards"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -358,6 +374,12 @@
               }
             }
           },
+          "401": {
+            "description": "No autorizado (token faltante, inválido o expirado)"
+          },
+          "403": {
+            "description": "Acceso prohibido (se requiere rol admin)"
+          },
           "404": {
             "description": "Recurso no encontrado",
             "content": {
@@ -376,8 +398,13 @@
       },
       "delete": {
         "summary": "Eliminar una carta",
-        "description": "Elimina una carta de la base de datos.",
+        "description": "Elimina una carta de la base de datos. Requiere rol admin.",
         "tags": ["Cards"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -399,6 +426,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "No autorizado (token faltante, inválido o expirado)"
+          },
+          "403": {
+            "description": "Acceso prohibido (se requiere rol admin)"
           },
           "404": {
             "description": "Recurso no encontrado",

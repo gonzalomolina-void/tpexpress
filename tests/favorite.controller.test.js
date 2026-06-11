@@ -14,6 +14,7 @@ describe('Favorite Controller - Unit Tests', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    getLanguage.mockReturnValue('es'); // Idioma por defecto para los tests
 
     req = {
       user: { id: 1 },
@@ -68,7 +69,7 @@ describe('Favorite Controller - Unit Tests', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Datos inválidos',
-          details: [{ field: 'cardId', message: 'El cardId debe ser un número entero válido' }]
+          details: [{ field: 'cardId', message: 'El ID de la carta debe ser un número entero válido' }]
         })
       );
     });
@@ -83,7 +84,8 @@ describe('Favorite Controller - Unit Tests', () => {
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          error: 'Recurso no encontrado'
+          error: 'Recurso no encontrado',
+          message: 'La carta solicitada no existe'
         })
       );
     });

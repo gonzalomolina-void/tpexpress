@@ -1,0 +1,44 @@
+meta {
+  name: Create Card - Forbidden
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/cards
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{userToken}}
+}
+
+body:json {
+  {
+    "cost": 4,
+    "atk": 5,
+    "def": 6,
+    "image": "dragon_forbidden.webp",
+    "typeId": 1,
+    "rarityId": 1,
+    "translations": [
+      {
+        "language": "es",
+        "name": "Dragón Prohibido",
+        "description": "Este dragón no debería poder ser creado por un usuario común."
+      }
+    ]
+  }
+}
+
+tests {
+  test("Debería retornar 403 Forbidden", function() {
+    expect(res.getStatus()).to.equal(403);
+  });
+
+  test("Debería incluir un mensaje de error explicativo", function() {
+    expect(res.getBody().error).to.equal("Forbidden");
+    expect(res.getBody().message).to.contain("se requiere el rol de admin");
+  });
+}

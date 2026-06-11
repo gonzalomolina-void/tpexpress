@@ -1,0 +1,37 @@
+meta {
+  name: Login - User
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "testuser@example.com",
+    "password": "password123"
+  }
+}
+
+tests {
+  test("Debería iniciar sesión correctamente", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Debería incluir el token JWT", function() {
+    expect(res.getBody().token).to.be.a('string');
+  });
+
+  test("Debería incluir los datos del usuario con su rol", function() {
+    expect(res.getBody().user).to.be.an('object');
+    expect(res.getBody().user.role).to.equal('usuario');
+  });
+
+  if (res.status === 200 && res.body.token) {
+    bru.setVar("userToken", res.body.token);
+  }
+}

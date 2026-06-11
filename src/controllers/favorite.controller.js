@@ -1,6 +1,7 @@
 import * as favoriteService from '../services/favorite.service.js';
 import * as cardService from '../services/card.service.js';
 import { getLanguage, mapCardToLang } from '../utils/i18n.js';
+import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 
 /**
  * Obtiene el listado de favoritos del usuario autenticado.
@@ -32,21 +33,23 @@ export async function addFavorite(req, res, next) {
   try {
     const userId = req.user.id;
     const cardId = parseInt(req.body.cardId, 10);
+    const lang = getLanguage(req);
 
     // 1. Validar que el ID sea numérico
     if (isNaN(cardId)) {
       return res.status(400).json({
-        error: 'Datos inválidos',
-        details: [{ field: 'cardId', message: 'El cardId debe ser un número entero válido' }]
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
+        details: [{ field: 'cardId', message: translate(ERROR_KEYS.INVALID_CARD_ID, lang) }]
       });
     }
 
     // 2. Validar existencia de la carta en base de datos
     const card = await cardService.getCardById(cardId);
     if (!card) {
+      const err = translate(ERROR_KEYS.CARD_NOT_FOUND, lang);
       return res.status(404).json({
-        error: 'Recurso no encontrado',
-        message: `La carta con ID ${cardId} no existe en el sistema`
+        error: err.error,
+        message: err.message
       });
     }
 
@@ -54,7 +57,7 @@ export async function addFavorite(req, res, next) {
     await favoriteService.addFavorite(userId, cardId);
 
     res.status(201).json({
-      message: 'Carta agregada a favoritos correctamente'
+      message: translate(ERROR_KEYS.FAVORITE_ADDED, lang)
     });
   } catch (error) {
     next(error);
@@ -70,12 +73,13 @@ export async function removeFavorite(req, res, next) {
   try {
     const userId = req.user.id;
     const cardId = parseInt(req.params.cardId, 10);
+    const lang = getLanguage(req);
 
     // 1. Validar que el ID de la carta sea numérico
     if (isNaN(cardId)) {
       return res.status(400).json({
-        error: 'Datos inválidos',
-        details: [{ field: 'cardId', message: 'El ID de la carta debe ser un número entero válido' }]
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
+        details: [{ field: 'cardId', message: translate(ERROR_KEYS.INVALID_CARD_ID, lang) }]
       });
     }
 
@@ -84,7 +88,7 @@ export async function removeFavorite(req, res, next) {
 
     // Retorna 200 OK según los criterios de aceptación
     res.status(200).json({
-      message: 'Carta eliminada de favoritos correctamente'
+      message: translate(ERROR_KEYS.FAVORITE_DELETED, lang)
     });
   } catch (error) {
     next(error);

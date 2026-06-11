@@ -1,6 +1,7 @@
 import * as cardService from '../services/card.service.js';
 import { getLanguage, mapCardToLang } from '../utils/i18n.js';
 import { validateCard } from '../validations/card.validation.js';
+import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 
 /**
  * Endpoint para obtener el listado de cartas.
@@ -61,23 +62,24 @@ export async function getAllCards(req, res, next) {
 export async function getCardById(req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
+    const lang = getLanguage(req);
+
     if (isNaN(id)) {
       return res.status(400).json({
-        error: 'Datos inválidos',
-        details: [{ field: 'id', message: 'El ID de la carta debe ser un número entero válido' }]
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
+        details: [{ field: 'id', message: translate(ERROR_KEYS.INVALID_CARD_ID, lang) }]
       });
     }
-
-    // Resolver el idioma del request
-    const lang = getLanguage(req);
 
     // Obtener la carta
     const card = await cardService.getCardById(id);
 
     // Si no existe, retornar 404
     if (!card) {
+      const err = translate(ERROR_KEYS.CARD_NOT_FOUND, lang);
       return res.status(404).json({
-        error: 'Recurso no encontrado'
+        error: err.error,
+        message: err.message
       });
     }
 
@@ -98,11 +100,13 @@ export async function getCardById(req, res, next) {
  */
 export async function createCard(req, res, next) {
   try {
+    const lang = getLanguage(req);
+
     // 1. Validar el body de forma manual
     const validationErrors = validateCard(req.body);
     if (validationErrors.length > 0) {
       return res.status(400).json({
-        error: 'Datos inválidos',
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
         details: validationErrors
       });
     }
@@ -113,16 +117,16 @@ export async function createCard(req, res, next) {
     const typeExists = await cardService.checkTypeExists(typeId);
     if (!typeExists) {
       return res.status(400).json({
-        error: 'Datos inválidos',
-        details: [{ field: 'typeId', message: 'El tipo de carta indicado no existe' }]
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
+        details: [{ field: 'typeId', message: translate(ERROR_KEYS.CARD_TYPE_NOT_FOUND, lang) }]
       });
     }
 
     const rarityExists = await cardService.checkRarityExists(rarityId);
     if (!rarityExists) {
       return res.status(400).json({
-        error: 'Datos inválidos',
-        details: [{ field: 'rarityId', message: 'La rareza indicada no existe' }]
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
+        details: [{ field: 'rarityId', message: translate(ERROR_KEYS.RARITY_NOT_FOUND, lang) }]
       });
     }
 
@@ -130,7 +134,6 @@ export async function createCard(req, res, next) {
     const newCard = await cardService.createCard(req.body);
 
     // 4. Retornar en el idioma adecuado, aplanada
-    const lang = getLanguage(req);
     const formattedCard = mapCardToLang(newCard, lang);
 
     res.status(201).json(formattedCard);
@@ -148,10 +151,12 @@ export async function createCard(req, res, next) {
 export async function updateCard(req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
+    const lang = getLanguage(req);
+
     if (isNaN(id)) {
       return res.status(400).json({
-        error: 'Datos inválidos',
-        details: [{ field: 'id', message: 'El ID de la carta debe ser un número entero válido' }]
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
+        details: [{ field: 'id', message: translate(ERROR_KEYS.INVALID_CARD_ID, lang) }]
       });
     }
 
@@ -159,7 +164,7 @@ export async function updateCard(req, res, next) {
     const validationErrors = validateCard(req.body);
     if (validationErrors.length > 0) {
       return res.status(400).json({
-        error: 'Datos inválidos',
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
         details: validationErrors
       });
     }
@@ -170,16 +175,16 @@ export async function updateCard(req, res, next) {
     const typeExists = await cardService.checkTypeExists(typeId);
     if (!typeExists) {
       return res.status(400).json({
-        error: 'Datos inválidos',
-        details: [{ field: 'typeId', message: 'El tipo de carta indicado no existe' }]
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
+        details: [{ field: 'typeId', message: translate(ERROR_KEYS.CARD_TYPE_NOT_FOUND, lang) }]
       });
     }
 
     const rarityExists = await cardService.checkRarityExists(rarityId);
     if (!rarityExists) {
       return res.status(400).json({
-        error: 'Datos inválidos',
-        details: [{ field: 'rarityId', message: 'La rareza indicada no existe' }]
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
+        details: [{ field: 'rarityId', message: translate(ERROR_KEYS.RARITY_NOT_FOUND, lang) }]
       });
     }
 
@@ -188,13 +193,14 @@ export async function updateCard(req, res, next) {
 
     // 4. Si la carta no existe, retornar 404
     if (!updatedCard) {
+      const err = translate(ERROR_KEYS.CARD_NOT_FOUND, lang);
       return res.status(404).json({
-        error: 'Recurso no encontrado'
+        error: err.error,
+        message: err.message
       });
     }
 
     // 5. Retornar en el idioma adecuado, aplanada
-    const lang = getLanguage(req);
     const formattedCard = mapCardToLang(updatedCard, lang);
 
     res.status(200).json(formattedCard);
@@ -212,10 +218,12 @@ export async function updateCard(req, res, next) {
 export async function deleteCard(req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
+    const lang = getLanguage(req);
+
     if (isNaN(id)) {
       return res.status(400).json({
-        error: 'Datos inválidos',
-        details: [{ field: 'id', message: 'El ID de la carta debe ser un número entero válido' }]
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
+        details: [{ field: 'id', message: translate(ERROR_KEYS.INVALID_CARD_ID, lang) }]
       });
     }
 
@@ -224,14 +232,16 @@ export async function deleteCard(req, res, next) {
 
     // 2. Si la carta no existe, retornar 404
     if (!deletedCard) {
+      const err = translate(ERROR_KEYS.CARD_NOT_FOUND, lang);
       return res.status(404).json({
-        error: 'Recurso no encontrado'
+        error: err.error,
+        message: err.message
       });
     }
 
     // 3. Retornar 200 OK con mensaje de éxito (conforme al formato de favoritos)
     res.status(200).json({
-      message: 'Carta eliminada correctamente'
+      message: translate(ERROR_KEYS.CARD_DELETED, lang)
     });
   } catch (error) {
     next(error);

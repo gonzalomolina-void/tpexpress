@@ -1,5 +1,5 @@
 meta {
-  name: Login
+  name: Login - Admin
   type: http
   seq: 2
 }
@@ -12,7 +12,7 @@ post {
 
 body:json {
   {
-    "email": "testuser@example.com",
+    "email": "admin@example.com",
     "password": "password123"
   }
 }
@@ -28,7 +28,7 @@ tests {
 
   test("Debería incluir los datos del usuario con su rol", function() {
     expect(res.getBody().user).to.be.an('object');
-    expect(res.getBody().user.role).to.be.oneOf(['usuario', 'admin']);
+    expect(res.getBody().user.role).to.equal('admin');
   });
 
   if (res.status === 200 && res.body.token) {

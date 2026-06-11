@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import * as userService from '../services/user.service.js';
+import { getLanguage } from '../utils/i18n.js';
+import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_fallback_key';
 
@@ -13,13 +15,12 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_fallback_key';
 export async function requireAuth(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
+    const lang = getLanguage(req);
 
     // 1. Validar presencia y formato de la cabecera Authorization
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
-        error: 'No autorizado',
-        message: 'Se requiere un token de autenticacion en la cabecera Authorization con formato Bearer <token>'
-      });
+      const errorMsg = translate(ERROR_KEYS.UNAUTHORIZED_HEADER, lang);
+      return res.status(401).json(errorMsg);
     }
 
     const token = authHeader.split(' ')[1];
@@ -29,19 +30,15 @@ export async function requireAuth(req, res, next) {
     try {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (err) {
-      return res.status(401).json({
-        error: 'Token invalido',
-        message: 'El token de autenticacion provisto es invalido o ha expirado'
-      });
+      const errorMsg = translate(ERROR_KEYS.TOKEN_INVALID, lang);
+      return res.status(401).json(errorMsg);
     }
 
     // 3. Obtener el usuario asociado y verificar existencia
     const user = await userService.getUserById(decoded.userId);
     if (!user) {
-      return res.status(401).json({
-        error: 'Usuario no encontrado',
-        message: 'El usuario asociado al token ya no existe en el sistema'
-      });
+      const errorMsg = translate(ERROR_KEYS.USER_NOT_FOUND, lang);
+      return res.status(401).json(errorMsg);
     }
 
     // 4. Inyectar datos del usuario autenticado en la peticion (excluyendo password)
@@ -55,4 +52,29 @@ export async function requireAuth(req, res, next) {
   } catch (error) {
     next(error);
   }
+}
+
+/**
+ * Middleware para requerir un rol especifico.
+ * Debe ejecutarse DESPUES de requireAuth.
+ * 
+ * @param {string} role - El rol requerido (por ejemplo 'admin').
+ * @returns {import('express').RequestHandler}
+ */
+export function requireRole(role) {
+  return (req, res, next) => {
+    const lang = getLanguage(req);
+
+    if (!req.user) {
+      const errorMsg = translate(ERROR_KEYS.AUTH_REQUIRED, lang);
+      return res.status(401).json(errorMsg);
+    }
+
+    if (req.user.role !== role) {
+      const errorMsg = translate(ERROR_KEYS.FORBIDDEN_ROLE, lang, role);
+      return res.status(403).json(errorMsg);
+    }
+
+    next();
+  };
 }

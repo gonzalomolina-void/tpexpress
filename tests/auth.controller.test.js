@@ -37,7 +37,7 @@ describe('Auth Controller - Unit Tests', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          error: 'Datos invalidos',
+          error: 'Datos inválidos',
           details: expect.arrayContaining([
             { field: 'email', message: 'El email es obligatorio' },
             { field: 'password', message: 'La contraseña es obligatoria' }
@@ -54,9 +54,9 @@ describe('Auth Controller - Unit Tests', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          error: 'Datos invalidos',
+          error: 'Datos inválidos',
           details: expect.arrayContaining([
-            { field: 'email', message: 'El formato del email es invalido' },
+            { field: 'email', message: 'El formato del email es inválido' },
             { field: 'password', message: 'La contraseña debe tener al menos 6 caracteres' }
           ])
         })
@@ -135,7 +135,7 @@ describe('Auth Controller - Unit Tests', () => {
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Credenciales invalidas',
+        error: 'Credenciales inválidas',
         message: 'El email o la contraseña son incorrectos'
       });
     });
@@ -154,7 +154,7 @@ describe('Auth Controller - Unit Tests', () => {
       expect(bcrypt.compare).toHaveBeenCalledWith('wrongpassword', 'hashedpassword');
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
-        error: 'Credenciales invalidas',
+        error: 'Credenciales inválidas',
         message: 'El email o la contraseña son incorrectos'
       });
     });

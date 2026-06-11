@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import prisma from '../prisma/prismaClient.js';
+import { ROLES } from '../constants/auth.constants.js';
 
 /**
  * Crea un nuevo usuario en la base de datos con la contraseña hasheada.
@@ -18,7 +19,7 @@ export async function createUser({ email, password, role }) {
       email,
       password: hashedPassword,
       role: {
-        connect: { name: role || 'usuario' }
+        connect: { name: role || ROLES.USER }
       }
     },
     include: {

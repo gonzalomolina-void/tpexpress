@@ -12,6 +12,7 @@ export async function getAllCards(req, res, next) {
   try {
     let page = req.query.page ? parseInt(req.query.page, 10) : null;
     let limit = req.query.limit ? parseInt(req.query.limit, 10) : null;
+    const { search, type, rarity } = req.query;
 
     let isPaging = false;
     // Si se pasa 'page' o 'limit', activamos la paginación.
@@ -27,7 +28,11 @@ export async function getAllCards(req, res, next) {
     // Obtener los datos del servicio
     const { cards, totalCount } = await cardService.getCards({
       page: isPaging ? page : null,
-      limit: isPaging ? limit : null
+      limit: isPaging ? limit : null,
+      search,
+      type,
+      rarity,
+      lang
     });
 
     // Si hay paginación, seteamos el header de conteo total

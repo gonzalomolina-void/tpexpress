@@ -326,6 +326,85 @@ try {
         }
     }
 
+    # TC-16: Search validation (search=Kaelen)
+    Write-Host "TC-16: GET /api/cards?search=Kaelen"
+    $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards?search=Kaelen&lang=en"
+    Assert-Status $res 200 "TC-16: Search by card name"
+    if ($res.StatusCode -eq 200) {
+        $cards = $res.Content | ConvertFrom-Json
+        if ($cards.Count -gt 0) {
+            $match = $true
+            foreach ($card in $cards) {
+                if ($card.name -notmatch "Kaelen") {
+                    $match = $false
+                    Write-Host "  [FAIL] Card does not match search criteria: $($card.name)" -ForegroundColor Red
+                }
+            }
+            if ($match) {
+                Write-Host "  [PASS] All returned cards match search criteria 'Kaelen'" -ForegroundColor Green
+            }
+        } else {
+            Write-Host "  [FAIL] Search returned 0 cards, expected at least Sir Kaelen." -ForegroundColor Red
+        }
+    }
+
+    # TC-17: Filter validation by Type (type=artifact)
+    Write-Host "TC-17: GET /api/cards?type=artifact"
+    $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards?type=artifact&lang=en"
+    Assert-Status $res 200 "TC-17: Filter by Type"
+    if ($res.StatusCode -eq 200) {
+        $cards = $res.Content | ConvertFrom-Json
+        if ($cards.Count -gt 0) {
+            $match = $true
+            foreach ($card in $cards) {
+                if ($card.type -ne "Artifact") {
+                    $match = $false
+                    Write-Host "  [FAIL] Card has incorrect type: $($card.type), expected Artifact" -ForegroundColor Red
+                }
+            }
+            if ($match) {
+                Write-Host "  [PASS] All returned cards have type 'Artifact'" -ForegroundColor Green
+            }
+        } else {
+            Write-Host "  [FAIL] Filter returned 0 cards, expected at least one Artifact." -ForegroundColor Red
+        }
+    }
+
+    # TC-18: Filter validation by Rarity (rarity=legendary)
+    Write-Host "TC-18: GET /api/cards?rarity=legendary"
+    $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards?rarity=legendary&lang=en"
+    Assert-Status $res 200 "TC-18: Filter by Rarity"
+    if ($res.StatusCode -eq 200) {
+        $cards = $res.Content | ConvertFrom-Json
+        if ($cards.Count -gt 0) {
+            $match = $true
+            foreach ($card in $cards) {
+                if ($card.rarity -ne "Legendary") {
+                    $match = $false
+                    Write-Host "  [FAIL] Card has incorrect rarity: $($card.rarity), expected Legendary" -ForegroundColor Red
+                }
+            }
+            if ($match) {
+                Write-Host "  [PASS] All returned cards have rarity 'Legendary'" -ForegroundColor Green
+            }
+        } else {
+            Write-Host "  [FAIL] Filter returned 0 cards, expected at least one Legendary card." -ForegroundColor Red
+        }
+    }
+
+    # TC-19: Combined validation (search=Lyra&type=creature&rarity=rare)
+    Write-Host "TC-19: GET /api/cards?search=Lyra&type=creature&rarity=rare"
+    $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards?search=Lyra&type=creature&rarity=rare&lang=en"
+    Assert-Status $res 200 "TC-19: Combined filters (search, type, rarity)"
+    if ($res.StatusCode -eq 200) {
+        $cards = $res.Content | ConvertFrom-Json
+        if ($cards.Count -eq 1 -and $cards[0].name -eq "Lyra") {
+            Write-Host "  [PASS] Combined filters correctly returned exactly 'Lyra'" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] Expected exactly 'Lyra', got $($cards.Count) cards." -ForegroundColor Red
+        }
+    }
+
     Write-Host "=== QA API TEST SUITE COMPLETE ===" -ForegroundColor Cyan
 } finally {
     # Clean up background server process

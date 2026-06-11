@@ -18,15 +18,45 @@ const INCLUDE_RELATIONS = {
 };
 
 /**
- * Obtiene las cartas de la base de datos, con soporte opcional para paginación.
+ * Obtiene las cartas de la base de datos, con soporte opcional para paginación y filtros.
  * 
  * @param {Object} options - Parámetros de consulta.
  * @param {number|null} options.page - Número de página (1-indexed).
  * @param {number|null} options.limit - Cantidad máxima de registros por página.
+ * @param {string} [options.search] - Término de búsqueda parcial sobre el nombre.
+ * @param {string} [options.type] - Código del tipo de carta ("creature", "spell", "artifact").
+ * @param {string} [options.rarity] - Código de la rareza de la carta ("poor", "common", etc.).
+ * @param {string} [options.lang] - Idioma de la consulta ("es" o "en", por defecto "es").
  * @returns {Promise<{ cards: Array<Object>, totalCount: number }>} Las cartas y el total general.
  */
-export async function getCards({ page, limit }) {
+export async function getCards({ page, limit, search, type, rarity, lang = 'es' }) {
   const isPaging = page !== null && limit !== null;
+
+  const where = {};
+
+  if (search) {
+    where.translations = {
+      some: {
+        language: lang,
+        name: {
+          contains: search,
+          mode: 'insensitive'
+        }
+      }
+    };
+  }
+
+  if (type) {
+    where.type = {
+      code: type
+    };
+  }
+
+  if (rarity) {
+    where.rarity = {
+      code: rarity
+    };
+  }
 
   // Si hay paginación, hacemos las dos consultas de forma paralela para mayor performance
   if (isPaging) {
@@ -35,12 +65,13 @@ export async function getCards({ page, limit }) {
 
     const [cards, totalCount] = await Promise.all([
       prisma.card.findMany({
+        where,
         skip,
         take,
         include: INCLUDE_RELATIONS,
         orderBy: { id: 'asc' } // Mantener orden estable
       }),
-      prisma.card.count()
+      prisma.card.count({ where })
     ]);
 
     return { cards, totalCount };
@@ -49,6 +80,7 @@ export async function getCards({ page, limit }) {
   // Si no se pide paginación, retornamos el listado completo con un tope de seguridad de 500 registros
   const MAX_UNPAGED_LIMIT = 500;
   const cards = await prisma.card.findMany({
+    where,
     take: MAX_UNPAGED_LIMIT,
     include: INCLUDE_RELATIONS,
     orderBy: { id: 'asc' }

@@ -91,11 +91,22 @@ model RarityTranslation {
   @@map("rarity_translations")
 }
 
+// Tabla Paramétrica de Roles (usuario, admin, etc.)
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique // "usuario", "admin"
+  users User[]
+
+  @@map("roles")
+}
+
 // Entidad de Usuario para Autenticacion
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
+  roleId    Int
+  role      Role     @relation(fields: [roleId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

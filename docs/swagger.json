@@ -791,6 +791,11 @@
             "format": "email",
             "example": "usuario@example.com"
           },
+          "role": {
+            "type": "string",
+            "enum": ["usuario", "admin"],
+            "example": "usuario"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time",

@@ -65,9 +65,12 @@ export async function register(req, res, next) {
       password
     });
 
-    // 5. Retornar el usuario creado excluyendo la contraseña
-    const { password: _, ...userWithoutPassword } = newUser;
-    res.status(201).json(userWithoutPassword);
+    // 5. Retornar el usuario creado excluyendo la contraseña y aplanando el rol
+    const { password: _, role, roleId, ...userWithoutPassword } = newUser;
+    res.status(201).json({
+      ...userWithoutPassword,
+      role: role.name
+    });
   } catch (error) {
     next(error);
   }
@@ -111,16 +114,19 @@ export async function login(req, res, next) {
 
     // 4. Generar Token JWT
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email, role: user.role.name },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
 
-    // 5. Retornar token y datos del usuario (excluyendo password)
-    const { password: _, ...userWithoutPassword } = user;
+    // 5. Retornar token y datos del usuario (excluyendo password y aplanando el rol)
+    const { password: _, role, roleId, ...userWithoutPassword } = user;
     res.status(200).json({
       token,
-      user: userWithoutPassword
+      user: {
+        ...userWithoutPassword,
+        role: role.name
+      }
     });
   } catch (error) {
     next(error);

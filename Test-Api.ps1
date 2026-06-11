@@ -35,7 +35,7 @@ try {
 $tempScriptPath = "temp-check-db.js"
 Set-Content -Path $tempScriptPath -Value $dbCheckScript
 
-$process = Start-Process node -ArgumentList $tempScriptPath -NoNewWindow -PassThru -Wait
+$process = Start-Process node -ArgumentList $tempScriptPath -WorkingDirectory $PSScriptRoot -NoNewWindow -PassThru -Wait
 $exitCode = $process.ExitCode
 Remove-Item -Path $tempScriptPath -Force
 
@@ -63,7 +63,7 @@ if ($exitCode -eq 1) {
 Write-Host "[OK] Database is up and seeded!" -ForegroundColor Green
 
 Write-Host "[START] Starting Express server in the background..." -ForegroundColor Cyan
-$nodeProcess = Start-Process node -ArgumentList "src/index.js" -NoNewWindow -PassThru
+$nodeProcess = Start-Process node -ArgumentList "src/index.js" -WorkingDirectory $PSScriptRoot -NoNewWindow -PassThru
 
 # Wait for server to boot
 Write-Host "[WAIT] Waiting for server to initialize..." -ForegroundColor Yellow
@@ -405,11 +405,65 @@ try {
         }
     }
 
+    # TC-20: POST /api/auth/register (New user with role 'usuario' by default)
+    Write-Host "TC-20: POST /api/auth/register"
+    $registerEmail = "qanewuser_" + (Get-Date -Format "yyyyMMddHHmmss") + "@example.com"
+    $bodyRegister = @{
+        email = $registerEmail
+        password = "password123"
+    } | ConvertTo-Json
+    $res = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/register" -Body $bodyRegister
+    Assert-Status $res 201 "TC-20: POST /api/auth/register"
+    if ($res.StatusCode -eq 201) {
+        $regUser = $res.Content | ConvertFrom-Json
+        if ($regUser.role -eq "usuario") {
+            Write-Host "  [PASS] Default role is 'usuario': $($regUser.role)" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] Expected default role 'usuario', got '$($regUser.role)'" -ForegroundColor Red
+        }
+    }
+
+    # TC-21: POST /api/auth/login (Login and check role in response and JWT token payload)
+    Write-Host "TC-21: POST /api/auth/login"
+    $bodyLogin = @{
+        email = "admin@example.com"
+        password = "password123"
+    } | ConvertTo-Json
+    $res = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/login" -Body $bodyLogin
+    Assert-Status $res 200 "TC-21: POST /api/auth/login"
+    if ($res.StatusCode -eq 200) {
+        $loginRes = $res.Content | ConvertFrom-Json
+        if ($loginRes.user.role -eq "admin") {
+            Write-Host "  [PASS] Login response contains role 'admin': $($loginRes.user.role)" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] Expected role 'admin' in login response, got '$($loginRes.user.role)'" -ForegroundColor Red
+        }
+        
+        # Verify JWT Token contains the role
+        $tokenParts = $loginRes.token.Split('.')
+        if ($tokenParts.Length -eq 3) {
+            # Decode payload (base64url)
+            $payloadBase64 = $tokenParts[1].Replace('-', '+').Replace('_', '/')
+            # Pad base64 if needed
+            while ($payloadBase64.Length % 4) { $payloadBase64 += "=" }
+            $payloadJsonBytes = [System.Convert]::FromBase64String($payloadBase64)
+            $payloadJson = [System.Text.Encoding]::UTF8.GetString($payloadJsonBytes)
+            $payload = $payloadJson | ConvertFrom-Json
+            if ($payload.role -eq "admin") {
+                Write-Host "  [PASS] JWT Token payload contains correct role 'admin'" -ForegroundColor Green
+            } else {
+                Write-Host "  [FAIL] Expected role 'admin' in JWT payload, got '$($payload.role)'" -ForegroundColor Red
+            }
+        } else {
+            Write-Host "  [FAIL] Invalid JWT token structure returned!" -ForegroundColor Red
+        }
+    }
+
     Write-Host "=== QA API TEST SUITE COMPLETE ===" -ForegroundColor Cyan
 } finally {
     # Clean up background server process
     if ($nodeProcess) {
         Write-Host "[STOP] Stopping Express server (PID: $($nodeProcess.Id))..." -ForegroundColor Cyan
-        Stop-Process -Id $nodeProcess.Id -Force
+        Stop-Process -Id $nodeProcess.Id -Force -ErrorAction SilentlyContinue
     }
 }

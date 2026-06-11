@@ -37,6 +37,21 @@ El dominio del sistema se modela en torno a las cartas (`Card`) de un juego de T
 * `createdAt` (`DateTime`): Fecha y hora de creación del registro.
 * `updatedAt` (`DateTime`): Fecha y hora de la última actualización.
 
+### Entidad de Seguridad: `User` y `Role`
+Para la autenticación y el control de acceso basado en roles, el sistema modela los usuarios y una tabla paramétrica de roles.
+
+**Estructura del Modelo `User`:**
+* `id` (`Int`): Identificador único autoincremental del usuario (Primary Key).
+* `email` (`String`): Correo electrónico único del usuario.
+* `password` (`String`): Contraseña del usuario (hasheada de forma segura con `bcryptjs`).
+* `roleId` (`Int`): Clave foránea que relaciona al usuario con su rol correspondiente.
+* `createdAt` (`DateTime`): Fecha y hora de registro.
+* `updatedAt` (`DateTime`): Fecha y hora de la última actualización.
+
+**Estructura del Modelo `Role`:**
+* `id` (`Int`): Identificador único autoincremental del rol (Primary Key).
+* `name` (`String`): Nombre único identificador del rol (ej: `usuario`, `admin`).
+
 ---
 
 ## Requisitos Previos

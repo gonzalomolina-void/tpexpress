@@ -79,7 +79,7 @@ if ($serverAlreadyRunning) {
     Write-Host "[OK] Express server is already running on $baseUrl. Reusing existing instance (Docker or Host)!" -ForegroundColor Green
 } else {
     Write-Host "[START] Express server is not running. Starting local Express server in the background..." -ForegroundColor Cyan
-    $nodeProcess = Start-Process node -ArgumentList "src/index.js" -WorkingDirectory $PSScriptRoot -NoNewWindow -PassThru
+    $nodeProcess = Start-Process node -ArgumentList "src/index.js" -WorkingDirectory $PSScriptRoot -RedirectStandardOutput "server.log" -RedirectStandardError "server-error.log" -NoNewWindow -PassThru
 
     # Wait for server to boot
     Write-Host "[WAIT] Waiting for server to initialize..." -ForegroundColor Yellow
@@ -87,12 +87,16 @@ if ($serverAlreadyRunning) {
 }
 
 
+# Initialize global web session for cookie handling
+$global:apiSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+
 function Invoke-Api($method, $uri, $body = $null, $headers = $null) {
     $params = @{
         Uri = $uri
         Method = $method
         ContentType = "application/json"
         UseBasicParsing = $true
+        WebSession = $global:apiSession
     }
     if ($PSVersionTable.PSVersion.Major -ge 6) {
         $params["SkipHttpErrorCheck"] = $true
@@ -105,6 +109,7 @@ function Invoke-Api($method, $uri, $body = $null, $headers = $null) {
     }
     try {
         $res = Invoke-WebRequest @params
+
         return [PSCustomObject]@{
             StatusCode = $res.StatusCode
             Content = $res.Content
@@ -521,6 +526,71 @@ try {
     } else {
         Write-Host "  [FAIL] Failed to log in as regular user for authorization test." -ForegroundColor Red
     }
+
+    # --- REFRESH TOKEN TESTS ---
+    Write-Host "=== STARTING REFRESH TOKEN QA TESTS ===" -ForegroundColor Cyan
+
+    # Login to establish active session and get refreshToken cookie in WebSession
+    Write-Host "[SETUP] Logging in to establish session with refresh token..." -ForegroundColor Yellow
+    $loginBody = @{
+        email = "integration@test.com"
+        password = "password123"
+    } | ConvertTo-Json
+    $loginRes = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/login" -Body $loginBody
+    Assert-Status $loginRes 200 "Login as integration user"
+
+    # TC-23: POST /api/auth/refresh (Valid Token via WebSession)
+    Write-Host "TC-23: POST /api/auth/refresh (Valid Session Cookie)"
+    $refreshRes = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/refresh"
+    Assert-Status $refreshRes 200 "TC-23: POST /api/auth/refresh"
+    if ($refreshRes.StatusCode -eq 200) {
+        $refreshData = $refreshRes.Content | ConvertFrom-Json
+        if ($refreshData.token) {
+            Write-Host "  [PASS] New Access Token obtained successfully!" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] Response body does not contain new token!" -ForegroundColor Red
+        }
+    }
+
+    # TC-24a: POST /api/auth/refresh (Without Cookie)
+    Write-Host "TC-24a: POST /api/auth/refresh without Cookie"
+    # Backup current session and use a clean session
+    $backupSession = $global:apiSession
+    $global:apiSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    
+    $resNoCookie = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/refresh"
+    Assert-Status $resNoCookie 401 "TC-24a: POST /api/auth/refresh without Cookie"
+    
+    # Restore session
+    $global:apiSession = $backupSession
+
+    # TC-24b: POST /api/auth/refresh (With Invalid Cookie)
+    Write-Host "TC-24b: POST /api/auth/refresh with invalid Cookie"
+    $invalidSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $invalidCookie = New-Object System.Net.Cookie("refreshToken", "thisisnotarealtoken12345", "/", "localhost")
+    $invalidSession.Cookies.Add($invalidCookie)
+    
+    $global:apiSession = $invalidSession
+    $resInvalidCookie = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/refresh"
+    Assert-Status $resInvalidCookie 401 "TC-24b: POST /api/auth/refresh with invalid Cookie"
+    
+    # Restore session
+    $global:apiSession = $backupSession
+
+    # TC-25: POST /api/auth/logout (Valid Session Cookie)
+    Write-Host "TC-25: POST /api/auth/logout (Valid Cookie)"
+    $logoutRes = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/logout"
+    Assert-Status $logoutRes 200 "TC-25: POST /api/auth/logout"
+
+    # TC-26: POST /api/auth/refresh (After Logout - Revoked Token)
+    Write-Host "TC-26: POST /api/auth/refresh (After Logout)"
+    # The session still contains the cookie (though cleared or expired by clearCookie)
+    # Let's perform the refresh. It should fail since the database record is revoked.
+    $revokedRes = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/refresh"
+    Assert-Status $revokedRes 401 "TC-26: POST /api/auth/refresh with revoked cookie"
+
+    # Clean up the session for subsequent tests
+    $global:apiSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 
     Write-Host "=== QA API TEST SUITE COMPLETE ===" -ForegroundColor Cyan
 } finally {

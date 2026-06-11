@@ -529,7 +529,7 @@
     "/api/auth/login": {
       "post": {
         "summary": "Iniciar sesión",
-        "description": "Autentica un usuario con sus credenciales (email y contraseña) y retorna un token JWT válido por 24 horas junto con los datos del usuario.",
+        "description": "Autentica un usuario con sus credenciales (email y contraseña), retornando un Access Token JWT válido por 15 minutos en el JSON e inyectando una cookie segura httpOnly 'refreshToken' válida por 7 días.",
         "requestBody": {
           "required": true,
           "content": {
@@ -609,6 +609,74 @@
                     "message": {
                       "type": "string",
                       "example": "El email o la contraseña son incorrectos"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "summary": "Refrescar token de acceso",
+        "description": "Utiliza el Refresh Token recibido en la cookie segura httpOnly para generar un nuevo Access Token JWT válido.",
+        "responses": {
+          "200": {
+            "description": "Token refrescado correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Sesión expirada o inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "No autorizado"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Sesión expirada o inválida"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "Cerrar sesión",
+        "description": "Invalida el Refresh Token del usuario en la base de datos y remueve la cookie de sesión del cliente.",
+        "responses": {
+          "200": {
+            "description": "Sesión cerrada correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Sesión cerrada correctamente"
                     }
                   }
                 }

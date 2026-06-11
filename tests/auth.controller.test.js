@@ -1,13 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { register, login } from '../src/controllers/auth.controller.js';
+import { register, login, refresh, logout } from '../src/controllers/auth.controller.js';
 import * as userService from '../src/services/user.service.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import prisma from '../src/prisma/prismaClient.js';
 
 // Mockear dependencias externas
 vi.mock('../src/services/user.service.js');
 vi.mock('bcryptjs');
 vi.mock('jsonwebtoken');
+vi.mock('../src/prisma/prismaClient.js', () => ({
+  default: {
+    refreshToken: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn()
+    }
+  }
+}));
+
 
 describe('Auth Controller - Unit Tests', () => {
   let req, res, next;
@@ -17,16 +28,20 @@ describe('Auth Controller - Unit Tests', () => {
     
     // Inicializar mocks de peticiones express
     req = {
-      body: {}
+      body: {},
+      cookies: {}
     };
     
     res = {
       status: vi.fn().mockReturnThis(),
-      json: vi.fn().mockReturnThis()
+      json: vi.fn().mockReturnThis(),
+      cookie: vi.fn().mockReturnThis(),
+      clearCookie: vi.fn().mockReturnThis()
     };
     
     next = vi.fn();
   });
+
 
   describe('POST /api/auth/register', () => {
     it('debería retornar 400 si falta el email o la contraseña', async () => {
@@ -159,7 +174,7 @@ describe('Auth Controller - Unit Tests', () => {
       });
     });
 
-    it('debería iniciar sesión con éxito y retornar el token JWT y status 200', async () => {
+    it('debería iniciar sesión con éxito y retornar el token JWT y status 200, inyectando la cookie de refresh', async () => {
       req.body = { email: 'test@example.com', password: 'correctpassword' };
       userService.getUserByEmail.mockResolvedValue({
         id: 1,
@@ -169,6 +184,9 @@ describe('Auth Controller - Unit Tests', () => {
       });
       bcrypt.compare.mockResolvedValue(true);
       jwt.sign.mockReturnValue('mocked-jwt-token');
+      prisma.refreshToken.create.mockResolvedValue({
+        token: 'mocked-refresh-token'
+      });
 
       await login(req, res, next);
 
@@ -180,7 +198,26 @@ describe('Auth Controller - Unit Tests', () => {
           role: 'admin'
         }),
         expect.any(String),
-        expect.any(Object)
+        expect.objectContaining({ expiresIn: '15m' }) // Debe expirar en 15m ahora
+      );
+      expect(prisma.refreshToken.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            userId: 1,
+            token: expect.any(String),
+            expiresAt: expect.any(Date)
+          })
+        })
+      );
+      expect(res.cookie).toHaveBeenCalledWith(
+        'refreshToken',
+        expect.any(String),
+        expect.objectContaining({
+          httpOnly: true,
+          secure: expect.any(Boolean),
+          sameSite: 'strict',
+          maxAge: expect.any(Number)
+        })
       );
       expect(res.json).toHaveBeenCalledWith({
         token: 'mocked-jwt-token',
@@ -202,4 +239,109 @@ describe('Auth Controller - Unit Tests', () => {
       expect(next).toHaveBeenCalledWith(testError);
     });
   });
+
+  describe('POST /api/auth/refresh', () => {
+    it('debería retornar 401 si no se presenta la cookie refreshToken', async () => {
+      req.cookies = {}; // Sin cookies
+
+      await refresh(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'No autorizado'
+        })
+      );
+    });
+
+    it('debería retornar 401 si el refresh token no existe en base de datos', async () => {
+      req.cookies = { refreshToken: 'invalid-token' };
+      prisma.refreshToken.findUnique.mockResolvedValue(null); // No existe en BD
+
+      await refresh(req, res, next);
+
+      expect(prisma.refreshToken.findUnique).toHaveBeenCalledWith({
+        where: { token: 'invalid-token' },
+        include: { user: { include: { role: true } } }
+      });
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'No autorizado'
+        })
+      );
+    });
+
+    it('debería retornar 401 si el refresh token está expirado', async () => {
+      req.cookies = { refreshToken: 'expired-token' };
+      prisma.refreshToken.findUnique.mockResolvedValue({
+        token: 'expired-token',
+        expiresAt: new Date(Date.now() - 1000), // Expirado hace un segundo
+        revokedAt: null,
+        user: { id: 1, email: 'test@example.com', role: { name: 'usuario' } }
+      });
+
+      await refresh(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+    });
+
+    it('debería retornar 401 si el refresh token está revocado', async () => {
+      req.cookies = { refreshToken: 'revoked-token' };
+      prisma.refreshToken.findUnique.mockResolvedValue({
+        token: 'revoked-token',
+        expiresAt: new Date(Date.now() + 100000), // Válido en fecha
+        revokedAt: new Date(), // Revocado ahora
+        user: { id: 1, email: 'test@example.com', role: { name: 'usuario' } }
+      });
+
+      await refresh(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+    });
+
+    it('debería retornar 200 y el nuevo access token si el refresh token es válido', async () => {
+      req.cookies = { refreshToken: 'valid-token' };
+      prisma.refreshToken.findUnique.mockResolvedValue({
+        token: 'valid-token',
+        expiresAt: new Date(Date.now() + 100000),
+        revokedAt: null,
+        user: { id: 1, email: 'test@example.com', role: { name: 'usuario' } }
+      });
+      jwt.sign.mockReturnValue('new-mocked-jwt-token');
+
+      await refresh(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(jwt.sign).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 1, role: 'usuario' }),
+        expect.any(String),
+        expect.objectContaining({ expiresIn: '15m' })
+      );
+      expect(res.json).toHaveBeenCalledWith({
+        token: 'new-mocked-jwt-token'
+      });
+    });
+  });
+
+  describe('POST /api/auth/logout', () => {
+    it('debería limpiar la cookie y revocar el token en base de datos', async () => {
+      req.cookies = { refreshToken: 'active-token' };
+      prisma.refreshToken.update.mockResolvedValue({});
+
+      await logout(req, res, next);
+
+      expect(prisma.refreshToken.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { token: 'active-token' },
+          data: expect.objectContaining({
+            revokedAt: expect.any(Date)
+          })
+        })
+      );
+      expect(res.clearCookie).toHaveBeenCalledWith('refreshToken', expect.any(Object));
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+  });
 });
+

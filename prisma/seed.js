@@ -14,8 +14,18 @@ async function main() {
   await prisma.rarityTranslation.deleteMany({});
   await prisma.rarity.deleteMany({});
   await prisma.user.deleteMany({});
+  await prisma.role.deleteMany({});
 
   console.log('✅ Base de datos limpia.');
+
+  console.log('🌱 Creando roles...');
+  await prisma.role.createMany({
+    data: [
+      { name: 'usuario' },
+      { name: 'admin' }
+    ]
+  });
+  console.log('✅ Roles creados.');
 
   console.log('🌱 Creando tipos de cartas...');
   const cardTypes = [
@@ -180,10 +190,17 @@ async function main() {
     {
       email: 'testuser@example.com',
       password: hashedPassword,
+      role: { connect: { name: 'usuario' } }
+    },
+    {
+      email: 'admin@example.com',
+      password: hashedPassword,
+      role: { connect: { name: 'admin' } }
     },
     {
       email: 'integration@test.com',
       password: hashedPassword,
+      role: { connect: { name: 'usuario' } }
     }
   ];
 

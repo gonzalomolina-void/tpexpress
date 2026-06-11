@@ -16,3 +16,13 @@ body:json {
     "password": "password123"
   }
 }
+
+tests {
+  test("Debería registrar un usuario correctamente", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("Debería incluir el rol del usuario por defecto", function() {
+    expect(res.getBody().role).to.equal("usuario");
+  });
+}

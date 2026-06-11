@@ -9,14 +9,20 @@ import prisma from '../prisma/prismaClient.js';
  * @param {string} userData.password
  * @returns {Promise<Object>} El usuario creado.
  */
-export async function createUser({ email, password }) {
+export async function createUser({ email, password, role }) {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
   return prisma.user.create({
     data: {
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      role: {
+        connect: { name: role || 'usuario' }
+      }
+    },
+    include: {
+      role: true
     }
   });
 }
@@ -29,7 +35,8 @@ export async function createUser({ email, password }) {
  */
 export async function getUserByEmail(email) {
   return prisma.user.findUnique({
-    where: { email }
+    where: { email },
+    include: { role: true }
   });
 }
 
@@ -41,6 +48,7 @@ export async function getUserByEmail(email) {
  */
 export async function getUserById(id) {
   return prisma.user.findUnique({
-    where: { id }
+    where: { id },
+    include: { role: true }
   });
 }

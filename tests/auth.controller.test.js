@@ -84,7 +84,8 @@ describe('Auth Controller - Unit Tests', () => {
       userService.createUser.mockResolvedValue({
         id: 2,
         email: 'new@example.com',
-        password: 'hashedpassword'
+        password: 'hashedpassword',
+        role: { name: 'usuario' }
       });
 
       await register(req, res, next);
@@ -97,7 +98,8 @@ describe('Auth Controller - Unit Tests', () => {
       // Debe excluir la contraseña de la respuesta
       expect(res.json).toHaveBeenCalledWith({
         id: 2,
-        email: 'new@example.com'
+        email: 'new@example.com',
+        role: 'usuario'
       });
     });
 
@@ -162,7 +164,8 @@ describe('Auth Controller - Unit Tests', () => {
       userService.getUserByEmail.mockResolvedValue({
         id: 1,
         email: 'test@example.com',
-        password: 'hashedpassword'
+        password: 'hashedpassword',
+        role: { name: 'admin' }
       });
       bcrypt.compare.mockResolvedValue(true);
       jwt.sign.mockReturnValue('mocked-jwt-token');
@@ -170,11 +173,21 @@ describe('Auth Controller - Unit Tests', () => {
       await login(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(200);
+      expect(jwt.sign).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 1,
+          email: 'test@example.com',
+          role: 'admin'
+        }),
+        expect.any(String),
+        expect.any(Object)
+      );
       expect(res.json).toHaveBeenCalledWith({
         token: 'mocked-jwt-token',
         user: {
           id: 1,
-          email: 'test@example.com'
+          email: 'test@example.com',
+          role: 'admin'
         }
       });
     });

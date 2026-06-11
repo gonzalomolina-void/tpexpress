@@ -18,6 +18,19 @@ body:json {
 }
 
 tests {
+  test("Debería iniciar sesión correctamente", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("Debería incluir el token JWT", function() {
+    expect(res.getBody().token).to.be.a('string');
+  });
+
+  test("Debería incluir los datos del usuario con su rol", function() {
+    expect(res.getBody().user).to.be.an('object');
+    expect(res.getBody().user.role).to.be.oneOf(['usuario', 'admin']);
+  });
+
   if (res.status === 200 && res.body.token) {
     bru.setVar("token", res.body.token);
   }

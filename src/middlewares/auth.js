@@ -45,8 +45,11 @@ export async function requireAuth(req, res, next) {
     }
 
     // 4. Inyectar datos del usuario autenticado en la peticion (excluyendo password)
-    const { password: _, ...userWithoutPassword } = user;
-    req.user = userWithoutPassword;
+    const { password: _, role, roleId, ...userWithoutPassword } = user;
+    req.user = {
+      ...userWithoutPassword,
+      role: role.name
+    };
 
     next();
   } catch (error) {

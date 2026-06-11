@@ -9,6 +9,17 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 * [US 1: Configuración Inicial del Servidor y Health Check](#us-1-configuración-inicial-del-servidor-y-health-check)
 * [US 2: Modelo de Datos, Base de Datos y Migraciones](#us-2-modelo-de-datos-base-de-datos-y-migraciones)
 * [US 3: Semillado de la Base de Datos (Seed)](#us-3-semillado-de-la-base-de-datos-seed)
+# Planificación del Proyecto (TP Express & React)
+
+Este documento contiene la planificación del desarrollo del Backend (Node.js, Express, Prisma, PostgreSQL) y la integración del Frontend (React). Los requerimientos han sido desglosados en **Historias de Usuario (User Stories)** con sus respectivos **Criterios de Aceptación** y **Tareas Técnicas**.
+
+---
+
+## Índice de Historias de Usuario
+
+* [US 1: Configuración Inicial del Servidor y Health Check](#us-1-configuración-inicial-del-servidor-y-health-check)
+* [US 2: Modelo de Datos, Base de Datos y Migraciones](#us-2-modelo-de-datos-base-de-datos-y-migraciones)
+* [US 3: Semillado de la Base de Datos (Seed)](#us-3-semillado-de-la-base-de-datos-seed)
 * [US 4: Endpoints de Lectura de la API (GET)](#us-4-endpoints-de-lectura-de-la-api-get)
 * [US 5: Endpoints de Escritura de la API con Validación Manual (POST, PUT, DELETE)](#us-5-endpoints-de-escritura-de-la-api-con-validación-manual-post-put-delete)
 * [US 6: Variables de Entorno y CORS](#us-6-variables-de-entorno-y-cors)
@@ -16,6 +27,9 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 * [US 11: Sistema de Autenticación de Usuarios (Registro/Login con JWT)](#us-11-sistema-de-autenticación-de-usuarios-registrologin-con-jwt)
 * [US 12: Endpoints para Gestión de Favoritos Relacionados con el Usuario](#us-12-endpoints-para-gestión-de-favoritos-relacionados-con-el-usuario)
 * [US 13: Configuración e Implementación de Pruebas Unitarias](#us-13-configuración-e-implementación-de-pruebas-unitarias)
+* [US 14: Esquema de Roles y Modificación del JWT](#us-14-esquema-de-roles-y-modificación-del-jwt)
+* [US 15: Autorización y Control de Acceso por JWT y Roles](#us-15-autorización-y-control-de-acceso-por-jwt-y-roles)
+* [US 16: Implementación de Refresh Tokens para Sesiones Persistentes](#us-16-implementación-de-refresh-tokens-para-sesiones-persistentes)
 
 ---
 
@@ -266,10 +280,76 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 
 ---
 
+### US 14: Esquema de Roles y Modificación del JWT
+**Como** administrador de la aplicación  
+**Quiero** incorporar un esquema simple de roles (`admin` y `usuario`) en el modelo de usuario e incluir dicho rol dentro del payload del token JWT  
+**Para** permitir que el sistema diferencie los permisos de cada usuario en las solicitudes.
+
+* **Criterios de Aceptación:**
+  * El modelo de `User` en la base de datos debe incluir un campo `role` con soporte para dos roles: `usuario` (rol por defecto) y `admin`.
+  * El script de semillado (`seed.js`) debe actualizarse para crear al menos un usuario con rol `admin` y otro con rol `usuario`.
+  * Al iniciar sesión exitosamente (`POST /api/auth/login`), el token JWT retornado en la respuesta debe contener el rol del usuario en su payload (`role`).
+  * Las pruebas unitarias de autenticación (creadas en la US 13) deben actualizarse para verificar que el token generado contenga la propiedad `role` correcta según el usuario logueado.
+
+* **Tareas Técnicas:**
+  * Modificar el esquema Prisma (`prisma/schema.prisma`) para agregar el campo `role` al modelo `User` (como un String o Enum, con valor por defecto `'usuario'`).
+  * Crear y ejecutar la migración correspondiente para aplicar el cambio en la base de datos.
+  * Modificar el script de semilla (`prisma/seed.js`) para incluir roles en los usuarios de prueba.
+  * Actualizar el controlador de login (`src/controllers/auth.controller.js`) para incluir el campo `role` del usuario al firmar el JWT.
+  * Actualizar la suite de pruebas unitarias de login en `vitest` para comprobar que el JWT retornado incluye la propiedad `role` en su payload.
+
+---
+
+### US 15: Autorización y Control de Acceso por JWT y Roles
+**Como** administrador de la aplicación  
+**Quiero** proteger los endpoints de la API de acuerdo al rol del usuario autenticado  
+**Para** asegurar que solo los usuarios con rol `admin` puedan modificar el catálogo de cartas, mientras que los usuarios con rol `usuario` solo puedan realizar consultas de lectura y gestionar sus propios favoritos.
+
+* **Criterios de Aceptación:**
+  * Las peticiones a `POST /api/cards`, `PUT /api/cards/:id` y `DELETE /api/cards/:id` deben requerir un token JWT válido y que el usuario tenga el rol `admin`.
+  * Si el usuario está autenticado pero no tiene el rol `admin`, el servidor debe responder con status `403 Forbidden` y un JSON con mensaje de error apropiado.
+  * Las peticiones a `GET /api/cards`, `GET /api/cards/:id` y todos los endpoints bajo `/api/favorites` deben estar accesibles para cualquier usuario autenticado (con rol `usuario` o `admin`).
+  * Los endpoints protegidos deben seguir ejecutando la validación manual del body (como en la US 5) una vez superada la autenticación y autorización.
+  * La documentación interactiva de Swagger UI (`/api/docs`) debe actualizarse para reflejar las restricciones por rol y los códigos de respuesta `403 Forbidden`.
+  * La colección de Bruno debe actualizarse para incluir peticiones que prueben la denegación de acceso (error 403) ante un token con rol no autorizado en endpoints administrativos.
+
+* **Tareas Técnicas:**
+  * Crear un middleware de autorización por roles (por ejemplo, `requireRole('admin')` o similar) en `src/middlewares/auth.js`.
+  * Importar e integrar los middlewares `requireAuth` y el nuevo control de rol en las rutas de escritura de `/api/cards` (`POST`, `PUT`, `DELETE`).
+  * Integrar `requireAuth` en las rutas de favoritos `/api/favorites`, permitiendo el acceso tanto a `usuario` como a `admin`.
+  * Configurar el esquema de seguridad `bearerAuth` in la configuración general de Swagger (OpenAPI).
+  * Decorar/anotar las rutas correspondientes en Swagger para especificar el requerimiento de seguridad y los roles permitidos.
+  * Actualizar y organizar la colección de Bruno para verificar las respuestas `401` y `403` según corresponda.
+
+---
+
+### US 16: Implementación de Refresh Tokens para Sesiones Persistentes (Propuesta)
+**Como** usuario de la aplicación  
+**Quiero** que mi sesión se mantenga activa de forma transparente sin tener que volver a ingresar mis credenciales constantemente  
+**Para** interactuar con la aplicación de forma segura y fluida, reduciendo la exposición del access token.
+
+* **Criterios de Aceptación:**
+  * El endpoint `POST /api/auth/login` debe retornar un access token (JWT de corta duración, ej: 15 minutos) y un refresh token (de larga duración, ej: 7 días).
+  * El refresh token debe almacenarse en la base de datos (relacionado con el usuario) para permitir la revocación manual o por cierre de sesión.
+  * El refresh token debe enviarse al cliente preferentemente mediante una cookie segura `httpOnly` (o en su defecto en el body si se decide simplificar en el frontend).
+  * Debe existir un endpoint `POST /api/auth/refresh` que reciba el refresh token, verifique su validez (y que no esté revocado en la base de datos), y devuelva un nuevo access token válido.
+  * Debe existir un endpoint `POST /api/auth/logout` que invalide el refresh token del usuario en la base de datos.
+  * Si el refresh token presentado en `/api/auth/refresh` está expirado o revocado, el servidor debe responder con status `401 Unauthorized`.
+
+* **Tareas Técnicas:**
+  * Crear el modelo `RefreshToken` en `schema.prisma` asociado al usuario (con campos para id, token, expiración, si está revocado, etc.) y ejecutar la migración.
+  * Modificar `src/controllers/auth.controller.js` para generar tanto el access token como el refresh token al loguearse.
+  * Implementar el endpoint y controlador para `POST /api/auth/refresh`.
+  * Implementar el endpoint y controlador para `POST /api/auth/logout`.
+  * Configurar las cookies seguras en Express para el envío del refresh token si se opta por esta opción.
+  * Actualizar la documentación interactiva en Swagger y añadir las peticiones de prueba a la colección de Bruno.
+
+---
+
 ## Tablero Kanban de Referencia
 
 A modo orientativo, se sugiere organizar el tablero Kanban con los siguientes estados:
-1. **Backlog (Pila de Producto):** Todas las Historias de Usuario (US 1 a US 6, US 9, y US 11 a US 13).
+1. **Backlog (Pila de Producto):** Todas las Historias de Usuario (US 1 a US 6, US 9, y US 11 a US 16).
 2. **To Do (Para Hacer):** Tareas específicas de la US activa desglosadas por el equipo.
 3. **In Progress (En Proceso):** Tarea asignada a un desarrollador en ejecución activa.
 4. **Testing / Peer Review:** Implementación finalizada que se está validando localmente o revisando mediante Pull Request.

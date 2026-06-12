@@ -7,6 +7,7 @@ import cardRoutes from './routes/card.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import favoriteRoutes from './routes/favorite.routes.js';
 import aboutRoutes from './routes/about.routes.js';
+import healthRoutes from './routes/health.routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
 
@@ -29,15 +30,9 @@ app.use(express.json());
 // Servir documentación de Swagger interactiva
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Ruta de health check directa
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    message: 'API funcionando correctamente'
-  });
-});
 
 // Registrar rutas
+app.use('/api', healthRoutes);
 app.use('/api', cardRoutes);
 app.use('/api', authRoutes);
 app.use('/api', favoriteRoutes);

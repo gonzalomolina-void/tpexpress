@@ -815,10 +815,10 @@
         }
       }
     },
-    "/api/favorites/{cardId}": {
+    "/api/favorites/{id}": {
       "delete": {
         "summary": "Eliminar una carta de favoritos",
-        "description": "Remueve la relación de favorito entre el usuario autenticado y la carta indicada por cardId de forma idempotente.",
+        "description": "Remueve la relación de favorito entre el usuario autenticado y la carta indicada por id de forma idempotente.",
         "security": [
           {
             "bearerAuth": []
@@ -826,7 +826,7 @@
         ],
         "parameters": [
           {
-            "name": "cardId",
+            "name": "id",
             "in": "path",
             "description": "Identificador entero único de la carta.",
             "required": true,

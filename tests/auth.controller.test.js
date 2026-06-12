@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { register, login, refresh, logout } from '../src/controllers/auth.controller.js';
+import { register, login, refresh, logout, getMe } from '../src/controllers/auth.controller.js';
+import { AUTH_CONFIG } from '../src/constants/auth.constants.js';
 import * as userService from '../src/services/user.service.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -341,6 +342,40 @@ describe('Auth Controller - Unit Tests', () => {
       );
       expect(res.clearCookie).toHaveBeenCalledWith('refreshToken', expect.any(Object));
       expect(res.status).toHaveBeenCalledWith(200);
+    });
+  });
+
+  describe('GET /api/auth/me', () => {
+    it('debería retornar 200 y el perfil del usuario autenticado', async () => {
+      req.user = { id: 1, email: 'test@example.com', role: 'usuario' };
+
+      await getMe(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        id: 1,
+        email: 'test@example.com',
+        role: 'usuario'
+      });
+    });
+
+    it('debería delegar el error a next si ocurre una excepción', async () => {
+      const error = new Error('Status crash');
+      res.status.mockImplementationOnce(() => { throw error; });
+
+      await getMe(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe('AUTH_CONFIG Constants', () => {
+    it('debería tener las propiedades correctas de cookies y tokens', () => {
+      expect(AUTH_CONFIG).toBeDefined();
+      expect(AUTH_CONFIG.COOKIE_NAME).toBe('refreshToken');
+      expect(AUTH_CONFIG.ACCESS_TOKEN_EXPIRY).toBe('15m');
+      expect(AUTH_CONFIG.REFRESH_TOKEN_EXPIRY).toBe('7d');
+      expect(AUTH_CONFIG.COOKIE_MAX_AGE).toBe(7 * 24 * 60 * 60 * 1000);
     });
   });
 });

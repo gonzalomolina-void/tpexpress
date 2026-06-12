@@ -30,6 +30,8 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 * [US 14: Esquema de Roles y Modificación del JWT](#us-14-esquema-de-roles-y-modificación-del-jwt)
 * [US 15: Autorización y Control de Acceso por JWT y Roles](#us-15-autorización-y-control-de-acceso-por-jwt-y-roles)
 * [US 16: Implementación de Refresh Tokens para Sesiones Persistentes](#us-16-implementación-de-refresh-tokens-para-sesiones-persistentes)
+* [US 17: Estandarización de Rutas y Refactorización de Código](#us-17-estandarización-de-rutas-y-refactorización-de-código)
+* [US 18: Esquema de Versionado y Lanzamientos en GitHub (GitHub Releases & Version Bump)](#us-18-esquema-de-versionado-y-lanzamientos-en-github-github-releases--version-bump)
 
 ---
 
@@ -346,10 +348,54 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 
 ---
 
+### US 17: Estandarización de Rutas y Refactorización de Código
+**Como** arquitecto de software  
+**Quiero** estandarizar la estructura de las rutas de la API, delegar los manejadores inline a controladores dedicados y centralizar los strings mágicos en constantes  
+**Para** mejorar la mantenibilidad, legibilidad y consistencia del código del servidor de cara al crecimiento del proyecto.
+
+* **Criterios de Aceptación:**
+  * **Estructura de Rutas Dedicada**: Todas las rutas de la API deben estar declaradas dentro de archivos de rutas dedicados en `src/routes/`. Ninguna ruta debe declararse directamente en `src/app.js` (por ejemplo, mover el healthcheck `/api/health` de `src/app.js` a un archivo de rutas).
+  * **Controllers dedicados**: Todos los endpoints declarados en las rutas deben invocar funciones controladoras específicas importadas desde `src/controllers/`. Se prohiben los callbacks inline o funciones anónimas dentro de los archivos de rutas (por ejemplo, extraer la lógica inline de `GET /auth/me` a una función en `auth.controller.js`).
+  * **Estandarización de Parámetros de Cartas**: Todas las rutas que referencien a una carta mediante un parámetro en el path de la URL deben unificar dicho parámetro bajo el nombre `:id`. Esto unifica el comportamiento de acceso de los controladores y middlewares (por ejemplo, cambiar la ruta de favoritos `/api/favorites/:cardId` por `/api/favorites/:id`).
+  * **Eliminación de Strings Mágicos**: Se deben identificar y refactorizar todos los strings mágicos harcodeados repetitivos en la base del código (como nombres de cookies, expiraciones de tokens, y roles) y centralizarlos en constantes semánticas documentadas.
+
+* **Tareas Técnicas:**
+  * Crear un archivo de rutas para utilidades generales o diagnóstico (ej. `src/routes/health.routes.js` o similar) y mover el endpoint `GET /api/health` fuera de `src/app.js`.
+  * Extraer el handler de `GET /auth/me` del archivo `auth.routes.js` y definir la función `getMe` en `src/controllers/auth.controller.js`.
+  * Modificar la ruta de favoritos en `favorite.routes.js` de `/favorites/:cardId` a `/favorites/:id`. Actualizar el controlador respectivo (`deleteFavorite`) y sus tests unitarios/integración asociados para que lean `req.params.id`.
+  * Auditar el código buscando literales recurrentes (ej: `"refreshToken"`, `"15m"`, `"7d"`, `"admin"`, `"usuario"`) y crear un archivo de constantes generales (ej: `src/config/constants.js` o similar) para su centralización.
+  * Verificar que todos los tests unitarios e integración sigan pasando al 100% tras la refactorización.
+
+---
+
+### US 18: Esquema de Versionado y Lanzamientos en GitHub (GitHub Releases & Version Bump)
+**Como** mantenedor del proyecto  
+**Quiero** contar con un proceso automatizado de versionado semántico y publicación de lanzamientos en GitHub  
+**Para** registrar de forma histórica las versiones estables del software, documentar de forma clara las novedades y automatizar la preparación del despliegue seguro en producción (Vercel) a partir de releases aprobados.
+
+* **Criterios de Aceptación:**
+  * **Versionado Semántico (Bump)**: El proyecto debe contar con un script unificado (`pnpm release` o similar) que aumente automáticamente la versión en `package.json` de acuerdo al estándar SemVer (Semantic Versioning: `PATCH` para fixes, `MINOR` para features, `MAJOR` para breaking changes).
+  * **Generación de Changelog**: Se debe generar o actualizar automáticamente un archivo `CHANGELOG.md` en la raíz del proyecto recopilando los cambios ordenados según los conventional commits (e.g. `feat`, `fix`, `docs`, `refactor`) de la nueva versión respecto a la anterior.
+  * **Publicación en GitHub (Releases)**: El script o acción de CI/CD debe crear de forma automática un tag en Git con el prefijo `vX.Y.Z`, subir los cambios a remoto y publicar un Release en el repositorio de GitHub con el título de la versión y el Changelog como cuerpo del Release.
+  * **Filtro de Calidad Pre-Release**: No debe ser posible publicar un release si las suites de pruebas unitarias o de integración están fallando en el momento del lanzamiento.
+  * **Preparación para Despliegue en Vercel**: El tag de versión (`vX.Y.Z`) debe actuar como el trigger de producción oficial en Vercel (o preparar el despliegue mediante una GitHub Action/script de CI que ejecute `vercel deploy --prod`), garantizando que solo versiones etiquetadas y validadas por los tests lleguen al entorno de producción, aislando las ramas de desarrollo.
+
+* **Tareas Técnicas:**
+  * Configurar y documentar el uso de una herramienta estándar de versionado y changelogs (e.g. `standard-version` o configurar un script nativo en PowerShell/Node junto a `gh release`).
+  * Agregar scripts dedicados en `package.json` (ej: `"release:patch"`, `"release:minor"`, `"release:major"`) que realicen la secuencia:
+    1. Ejecutar la suite completa de tests (`vitest run` y `Test-Api.ps1`).
+    2. Incrementar la versión en `package.json` y actualizar el `CHANGELOG.md`.
+    3. Crear un commit de release convencional y asociar el tag correspondiente (`vX.Y.Z`).
+  * Configurar la integración con la CLI de GitHub (`gh`) en el script para publicar el Release en remoto (`gh release create vX.Y.Z --title "Release vX.Y.Z" --notes-file CHANGELOG.md` o extrayendo el último bloque del changelog).
+  * Documentar o configurar la integración de Vercel (a través del panel de Vercel Git Integration o mediante GitHub Actions con `vercel-cli`) para que el despliegue a producción (`production`) se dispare exclusivamente ante la creación de tags de versión `v*`.
+  * Documentar todo el flujo de release y despliegue a producción en el archivo `README.md`.
+
+---
+
 ## Tablero Kanban de Referencia
 
 A modo orientativo, se sugiere organizar el tablero Kanban con los siguientes estados:
-1. **Backlog (Pila de Producto):** Todas las Historias de Usuario (US 1 a US 6, US 9, y US 11 a US 16).
+1. **Backlog (Pila de Producto):** Todas las Historias de Usuario (US 1 a US 6, US 9, y US 11 a US 18).
 2. **To Do (Para Hacer):** Tareas específicas de la US activa desglosadas por el equipo.
 3. **In Progress (En Proceso):** Tarea asignada a un desarrollador en ejecución activa.
 4. **Testing / Peer Review:** Implementación finalizada que se está validando localmente o revisando mediante Pull Request.

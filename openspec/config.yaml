@@ -2,21 +2,21 @@ schema: spec-driven
 
 context: |
   Tech stack: Node.js, Express, Prisma (PostgreSQL), ES Modules, pnpm
-  Architecture: Express app with controller/service pattern, Prisma ORM
-  Testing: None (no test runner detected)
+  Architecture: Controller/Service pattern with Prisma ORM
+  Testing: Vitest (Unit) and PowerShell (Integration)
   Style: Standard ESM
 
-strict_tdd: false
+strict_tdd: true
 
 testing:
-  strict_tdd: false
-  detected: "2026-06-04"
+  strict_tdd: true
+  detected: "2026-06-11"
   test_runner:
-    command: ""
-    framework: "None"
+    command: "cmd.exe /c \"pnpm test\""
+    framework: "Vitest"
   layers:
-    unit: false
-    integration: false
+    unit: true
+    integration: true
     e2e: false
   coverage:
     available: false
@@ -44,7 +44,7 @@ rules:
     - Follow existing code patterns and conventions
     - Load relevant coding skills for the project stack
   verify:
-    - Run manual verification since no automated test runner exists
+    - Run tests if test infrastructure exists
     - Compare implementation against every spec scenario
   archive:
     - Warn before merging destructive deltas (large removals)

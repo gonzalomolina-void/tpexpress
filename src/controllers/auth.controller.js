@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import * as userService from '../services/user.service.js';
 import { getLanguage } from '../utils/i18n.js';
+import { AUTH_CONFIG } from '../constants/auth.constants.js';
 
 import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 import prisma from '../prisma/prismaClient.js';
@@ -128,7 +129,7 @@ export async function login(req, res, next) {
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role.name },
       JWT_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: AUTH_CONFIG.ACCESS_TOKEN_EXPIRY }
     );
 
     // Generar Refresh Token opaco
@@ -146,11 +147,11 @@ export async function login(req, res, next) {
     });
 
     // Inyectar cookie httpOnly
-    res.cookie('refreshToken', refreshTokenString, {
+    res.cookie(AUTH_CONFIG.COOKIE_NAME, refreshTokenString, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días en milisegundos
+      maxAge: AUTH_CONFIG.COOKIE_MAX_AGE
     });
 
     // 5. Retornar token y datos del usuario (excluyendo password y aplanando el rol)
@@ -175,7 +176,7 @@ export async function login(req, res, next) {
  */
 export async function refresh(req, res, next) {
   try {
-    const refreshToken = req.cookies?.refreshToken;
+    const refreshToken = req.cookies?.[AUTH_CONFIG.COOKIE_NAME];
     const lang = getLanguage(req);
 
 
@@ -208,7 +209,7 @@ export async function refresh(req, res, next) {
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role.name },
       JWT_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: AUTH_CONFIG.ACCESS_TOKEN_EXPIRY }
     );
 
     res.status(200).json({ token });
@@ -225,7 +226,7 @@ export async function refresh(req, res, next) {
  */
 export async function logout(req, res, next) {
   try {
-    const refreshToken = req.cookies?.refreshToken;
+    const refreshToken = req.cookies?.[AUTH_CONFIG.COOKIE_NAME];
 
     if (refreshToken) {
       // Revocar en base de datos
@@ -238,13 +239,27 @@ export async function logout(req, res, next) {
     }
 
     // Limpiar cookie
-    res.clearCookie('refreshToken', {
+    res.clearCookie(AUTH_CONFIG.COOKIE_NAME, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict'
     });
 
     res.status(200).json({ message: 'Sesión cerrada correctamente' });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Controlador para obtener el perfil del usuario autenticado actual.
+ * GET /api/auth/me
+ * 
+ * @type {import('express').RequestHandler}
+ */
+export async function getMe(req, res, next) {
+  try {
+    res.status(200).json(req.user);
   } catch (error) {
     next(error);
   }

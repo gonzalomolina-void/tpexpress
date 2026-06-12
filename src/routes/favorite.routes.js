@@ -9,6 +9,6 @@ router.use('/favorites', requireAuth);
 
 router.get('/favorites', getFavorites);
 router.post('/favorites', addFavorite);
-router.delete('/favorites/:cardId', removeFavorite);
+router.delete('/favorites/:id', removeFavorite);
 
 export default router;

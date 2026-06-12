@@ -72,14 +72,14 @@ export async function addFavorite(req, res, next) {
 export async function removeFavorite(req, res, next) {
   try {
     const userId = req.user.id;
-    const cardId = parseInt(req.params.cardId, 10);
+    const cardId = parseInt(req.params.id, 10);
     const lang = getLanguage(req);
 
     // 1. Validar que el ID de la carta sea numérico
     if (isNaN(cardId)) {
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
-        details: [{ field: 'cardId', message: translate(ERROR_KEYS.INVALID_CARD_ID, lang) }]
+        details: [{ field: 'id', message: translate(ERROR_KEYS.INVALID_CARD_ID, lang) }]
       });
     }
 

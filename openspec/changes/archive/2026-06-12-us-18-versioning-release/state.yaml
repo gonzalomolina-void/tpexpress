@@ -1,0 +1,25 @@
+change: us-18-versioning-release
+status: active
+phase: archive
+history:
+  - phase: explore
+    status: success
+    date: "2026-06-12"
+  - phase: propose
+    status: success
+    date: "2026-06-12"
+  - phase: spec
+    status: success
+    date: "2026-06-12"
+  - phase: design
+    status: success
+    date: "2026-06-12"
+  - phase: tasks
+    status: success
+    date: "2026-06-12"
+  - phase: apply
+    status: success
+    date: "2026-06-12"
+  - phase: verify
+    status: success
+    date: "2026-06-12"

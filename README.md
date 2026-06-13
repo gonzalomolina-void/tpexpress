@@ -234,3 +234,40 @@ El proyecto sigue un patrón de separación de responsabilidades:
 | **POST** | `/api/[entidad]` | Crea un nuevo elemento (requiere validación del body). | `201`, `400`, `500` |
 | **PUT** | `/api/[entidad]/:id` | Modifica un elemento existente (requiere validación del body). | `200`, `400`, `404`, `500` |
 | **DELETE** | `/api/[entidad]/:id` | Elimina un elemento por su ID. | `200`, `204`, `404`, `500` |
+
+---
+
+## Versionado y Publicación de Releases
+
+El proyecto cuenta con un sistema automatizado para el versionado semántico y la publicación de releases oficiales en GitHub. El flujo garantiza que solo código que pase de forma exitosa las pruebas de calidad pueda publicarse y desplegarse en producción.
+
+### Prerrequisitos
+Para realizar una publicación de release a remoto, el mantenedor debe tener:
+1. La CLI de GitHub (`gh`) instalada y autenticada en su máquina (`gh auth login`).
+2. Permisos de escritura (push) en el repositorio remoto.
+
+### Scripts de Lanzamiento
+Se pueden ejecutar los siguientes comandos en la terminal desde la raíz del proyecto:
+
+```bash
+# Publicar una versión tipo PATCH (e.g. 1.0.0 -> 1.0.1) para corrección de bugs
+pnpm release:patch
+
+# Publicar una versión tipo MINOR (e.g. 1.0.0 -> 1.1.0) para nuevas funcionalidades
+pnpm release:minor
+
+# Publicar una versión tipo MAJOR (e.g. 1.0.0 -> 2.0.0) para breaking changes
+pnpm release:major
+```
+
+### Flujo de Ejecución (Bajo el capó)
+Cuando ejecutas cualquiera de los comandos anteriores, el script `scripts/Release-Project.ps1` realiza la siguiente secuencia de forma automática:
+1. **Pre-flight Checks (Filtro de Calidad)**: Ejecuta las pruebas unitarias locales (`vitest`) y la suite completa de integración de la API (`Test-Api.ps1`). Si falla una sola prueba, el proceso se aborta inmediatamente y no se genera ningún tag ni commit.
+2. **Version Bump & Changelog**: Lanza `standard-version` para incrementar la versión en `package.json` según el tipo seleccionado, actualizar localmente el archivo `CHANGELOG.md` recopilando los cambios de los *conventional commits*, y clavar el tag de Git correspondiente de forma local.
+3. **Git Push**: Sube los commits y tags generados a la rama remota (`git push origin <rama> --follow-tags`).
+4. **GitHub Release**: Invoca a la CLI de GitHub para publicar el Release oficial en la web de GitHub (`gh release create`) bajo el tag correspondiente y generando automáticamente las notas de lanzamiento en base a los commits.
+
+### Integración con Vercel
+Para asegurar que las ramas de desarrollo permanezcan aisladas y no se desplieguen directamente a producción en Vercel, se recomienda configurar la **Integración de Vercel Git**:
+1. En el panel de Vercel, ir a la configuración del proyecto y definir que el entorno de producción (`Production Branch`) se despliegue únicamente cuando ocurran tags de versión coincidiendo con el patrón `v*` (o mediante un script de build step en Vercel que ignore compilaciones si el trigger no es un Git Tag `v*`).
+2. Esto asegura que solo las versiones probadas y etiquetadas oficialmente por el script de lanzamiento lleguen al servidor de producción.

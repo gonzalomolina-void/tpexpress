@@ -5,8 +5,8 @@ import { ROLES } from '../constants/auth.constants.js';
 
 const router = Router();
 
-router.get('/cards', getAllCards);
-router.get('/cards/:id', getCardById);
+router.get('/cards', requireAuth, getAllCards);
+router.get('/cards/:id', requireAuth, getCardById);
 
 // Rutas de escritura - Protegidas para usuarios admin
 router.post('/cards', requireAuth, requireRole(ROLES.ADMIN), createCard);

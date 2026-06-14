@@ -593,6 +593,38 @@ try {
     # Clean up the session for subsequent tests
     $global:apiSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 
+    # TC-27: GET /api/cards/:id/edit (Admin - Exitoso)
+    Write-Host "TC-27: GET /api/cards/1/edit (Admin)"
+    $resEditAdmin = Invoke-Api -Method Get -Uri "$baseUrl/api/cards/1/edit" -headers $adminHeaders
+    Assert-Status $resEditAdmin 200 "TC-27: GET /api/cards/1/edit (Admin)"
+    if ($resEditAdmin.StatusCode -eq 200) {
+        $editCard = $resEditAdmin.Content | ConvertFrom-Json
+        if ($editCard.translations -and $editCard.translations.es -and $editCard.translations.es.name) {
+            Write-Host "  [PASS] translations dictionary mapping verified: $($editCard.translations.es.name)" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] translations dictionary missing or malformed!" -ForegroundColor Red
+        }
+        if ($editCard.typeCode -eq "creature") {
+            Write-Host "  [PASS] typeCode mapping verified: $($editCard.typeCode)" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] typeCode missing or incorrect: $($editCard.typeCode)" -ForegroundColor Red
+        }
+    }
+
+    # TC-28: GET /api/cards/:id/edit (Regular User - Debe dar 403)
+    Write-Host "TC-28: GET /api/cards/1/edit with regular user (debe dar 403)"
+    $resEditUser = Invoke-Api -Method Get -Uri "$baseUrl/api/cards/1/edit" -headers $userHeaders
+    Assert-Status $resEditUser 403 "TC-28: GET /api/cards/1/edit (User)"
+
+    # TC-29: GET /api/cards/:id/edit (Sin token - Debe dar 401)
+    Write-Host "TC-29: GET /api/cards/1/edit without token (debe dar 401)"
+    # Clean up session to send no cookie
+    $backupSession = $global:apiSession
+    $global:apiSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $resEditNoAuth = Invoke-Api -Method Get -Uri "$baseUrl/api/cards/1/edit"
+    Assert-Status $resEditNoAuth 401 "TC-29: GET /api/cards/1/edit (No Auth)"
+    $global:apiSession = $backupSession
+
     Write-Host "=== QA API TEST SUITE COMPLETE ===" -ForegroundColor Cyan
 } finally {
     # Clean up background server process

@@ -68,3 +68,34 @@ export function mapCardToLang(card, lang) {
     updatedAt: card.updatedAt
   };
 }
+
+/**
+ * Mapea una entidad Card de Prisma a la estructura con diccionario
+ * de traducciones indexado por idioma para el endpoint de edición.
+ * 
+ * @param {Object} card - Registro de carta obtenido de Prisma.
+ * @returns {Object} Carta mapeada para edición.
+ */
+export function mapCardForEdit(card) {
+  const translations = {};
+  
+  if (card.translations && Array.isArray(card.translations)) {
+    card.translations.forEach(t => {
+      translations[t.language] = {
+        name: t.name,
+        description: t.description
+      };
+    });
+  }
+
+  return {
+    id: card.id,
+    cost: card.cost,
+    atk: card.atk,
+    def: card.def,
+    image: card.image,
+    typeCode: card.type?.code || '',
+    rarityCode: card.rarity?.code || '',
+    translations
+  };
+}

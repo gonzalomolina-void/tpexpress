@@ -1,0 +1,19 @@
+meta {
+  name: Get Card for Edit
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{baseUrl}}/api/cards/:id/edit
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+params:path {
+  id: 1
+}

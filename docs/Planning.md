@@ -32,6 +32,7 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 * [US 16: Implementación de Refresh Tokens para Sesiones Persistentes](#us-16-implementación-de-refresh-tokens-para-sesiones-persistentes)
 * [US 17: Estandarización de Rutas y Refactorización de Código](#us-17-estandarización-de-rutas-y-refactorización-de-código)
 * [US 18: Esquema de Versionado y Lanzamientos en GitHub (GitHub Releases & Version Bump)](#us-18-esquema-de-versionado-y-lanzamientos-en-github-github-releases--version-bump)
+* [US 19: Endpoint de Consulta Completa de Carta para Edición (sin aplanar)](#us-19-endpoint-de-consulta-completa-de-carta-para-edición-sin-aplanar)
 
 ---
 
@@ -389,6 +390,40 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
   * Configurar la integración con la CLI de GitHub (`gh`) en el script para publicar el Release en remoto (`gh release create vX.Y.Z --title "Release vX.Y.Z" --notes-file CHANGELOG.md` o extrayendo el último bloque del changelog).
   * Documentar o configurar la integración de Vercel (a través del panel de Vercel Git Integration o mediante GitHub Actions con `vercel-cli`) para que el despliegue a producción (`production`) se dispare exclusivamente ante la creación de tags de versión `v*`.
   * Documentar todo el flujo de release y despliegue a producción en el archivo `README.md`.
+
+---
+
+### US 19: Endpoint de Consulta Completa de Carta para Edición (sin aplanar)
+**Como** desarrollador de la API (Backend)  
+**Quiero** proveer un endpoint protegido para obtener todos los datos de una carta con sus traducciones completas (`GET /api/cards/:id/edit`),  
+**Para** permitir que el cliente de administración cargue el formulario de edición con los valores de todos los idiomas de forma simultánea.
+
+* **Criterios de Aceptación:**
+  * **Control de Acceso (Middleware de Admin)**: El endpoint `GET /api/cards/:id/edit` debe estar protegido por autenticación JWT y requerir obligatoriamente que el usuario tenga el rol de `admin`. Peticiones no autenticadas o de usuarios comunes deben retornar `401 Unauthorized` o `403 Forbidden` respectivamente.
+  * **Retorno Completo (Diccionario de Traducciones)**: A diferencia de `GET /api/cards/:id` (que aplana y traduce la carta según el idioma del Header), este endpoint debe retornar el modelo de la base de datos con los campos de traducciones estructurados en un objeto indexado por idioma:
+    ```json
+    {
+      "id": 1,
+      "cost": 3,
+      "atk": 4,
+      "def": 5,
+      "image": "/cards/SirKaelen.png",
+      "typeCode": "creature",
+      "rarityCode": "common",
+      "translations": {
+        "es": { "name": "Sir Kaelen", "description": "Un caballero leal..." },
+        "en": { "name": "Sir Kaelen", "description": "A loyal knight..." }
+      }
+    }
+    ```
+  * **Manejo de Errores**: Si el ID de la carta no existe en la base de datos de Prisma, el servidor debe retornar `404 Not Found`.
+
+* **Tareas Técnicas:**
+  * Implementar el controlador y la ruta para `GET /api/cards/:id/edit`.
+  * Integrar los middlewares `requireAuth` y el control de rol `admin` para securizar el endpoint.
+  * Consultar Prisma incluyendo la relación `translations`, `type` y `rarity`, y formatear el output en el controlador para devolver el diccionario estructurado.
+  * Crear la suite de pruebas unitarias/integración asociadas para el nuevo endpoint.
+  * Actualizar la documentación de Swagger y la colección de Bruno.
 
 ---
 

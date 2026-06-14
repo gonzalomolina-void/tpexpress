@@ -1,5 +1,5 @@
 import * as cardService from '../services/card.service.js';
-import { getLanguage, mapCardToLang } from '../utils/i18n.js';
+import { getLanguage, mapCardToLang, mapCardForEdit } from '../utils/i18n.js';
 import { validateCard } from '../validations/card.validation.js';
 import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 
@@ -243,6 +243,41 @@ export async function deleteCard(req, res, next) {
     res.status(200).json({
       message: translate(ERROR_KEYS.CARD_DELETED, lang)
     });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Endpoint para obtener el detalle completo de una carta para su edición (sin aplanar).
+ * GET /api/cards/:id/edit
+ * 
+ * @type {import('express').RequestHandler}
+ */
+export async function getCardForEdit(req, res, next) {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const lang = getLanguage(req);
+
+    if (isNaN(id)) {
+      return res.status(400).json({
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
+        details: [{ field: 'id', message: translate(ERROR_KEYS.INVALID_CARD_ID, lang) }]
+      });
+    }
+
+    const card = await cardService.getCardById(id);
+
+    if (!card) {
+      const err = translate(ERROR_KEYS.CARD_NOT_FOUND, lang);
+      return res.status(404).json({
+        error: err.error,
+        message: err.message
+      });
+    }
+
+    const formattedCard = mapCardForEdit(card);
+    res.status(200).json(formattedCard);
   } catch (error) {
     next(error);
   }

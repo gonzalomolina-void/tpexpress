@@ -177,12 +177,12 @@ try {
 
     # TC-01: GET /api/cards
     Write-Host "TC-01: GET /api/cards"
-    $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards"
+    $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards" -headers $adminHeaders
     Assert-Status $res 200 "TC-01: GET /api/cards"
 
     # TC-02: GET /api/cards?page=1&limit=5&lang=en
     Write-Host "TC-02: GET /api/cards?page=1&limit=5&lang=en"
-    $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards?page=1&limit=5&lang=en"
+    $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards?page=1&limit=5&lang=en" -headers $adminHeaders
     Assert-Status $res 200 "TC-02: GET /api/cards with pag/i18n"
     $totalCount = $res.Headers["X-Total-Count"]
     if ($totalCount) {
@@ -224,6 +224,7 @@ try {
 
     # TC-03a: POST /api/cards sin autenticación (debe dar 401)
     Write-Host "TC-03a: POST /api/cards sin token"
+    $global:apiSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
     $resNoAuth = Invoke-Api -Method Post -Uri "$baseUrl/api/cards" -Body $body
     Assert-Status $resNoAuth 401 "TC-03a: POST /api/cards sin token"
 

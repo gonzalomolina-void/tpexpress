@@ -7,7 +7,7 @@ meta {
 get {
   url: {{baseUrl}}/api/cards
   body: none
-  auth: none
+  auth: bearer
 }
 
 params:query {
@@ -21,4 +21,8 @@ params:query {
 
 headers {
   ~Accept-Language: en
+}
+
+auth:bearer {
+  token: {{userToken}}
 }

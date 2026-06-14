@@ -450,6 +450,104 @@
         }
       }
     },
+    "/api/cards/{id}/edit": {
+      "get": {
+        "summary": "Obtener detalle completo de una carta para edición",
+        "description": "Retorna la información completa de una carta incluyendo el diccionario de traducciones indexado por idioma. Requiere rol admin.",
+        "tags": ["Cards"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Identificador entero único de la carta.",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalle completo de la carta obtenido correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer", "example": 1 },
+                    "cost": { "type": "integer", "example": 3 },
+                    "atk": { "type": "integer", "example": 4 },
+                    "def": { "type": "integer", "example": 5 },
+                    "image": { "type": "string", "example": "/cards/SirKaelen.png" },
+                    "typeCode": { "type": "string", "example": "creature" },
+                    "rarityCode": { "type": "string", "example": "common" },
+                    "translations": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string", "example": "Sir Kaelen" },
+                          "description": { "type": "string", "example": "Un caballero leal..." }
+                        }
+                      },
+                      "example": {
+                        "es": { "name": "Sir Kaelen", "description": "Un caballero leal..." },
+                        "en": { "name": "Sir Kaelen", "description": "A loyal knight..." }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "ID inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string", "example": "Datos inválidos" },
+                    "details": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": { "type": "string", "example": "id" },
+                          "message": { "type": "string", "example": "El ID de la carta debe ser un número entero válido" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado (token faltante, inválido o expirado)"
+          },
+          "403": {
+            "description": "Acceso prohibido (se requiere rol admin)"
+          },
+          "404": {
+            "description": "Carta no encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string", "example": "Recurso no encontrado" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/register": {
       "post": {
         "summary": "Registrar un nuevo usuario",

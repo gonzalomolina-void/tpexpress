@@ -46,7 +46,7 @@ describe('Auth Controller - Unit Tests', () => {
 
   describe('POST /api/auth/register', () => {
     it('debería retornar 400 si falta el email o la contraseña', async () => {
-      req.body = { email: '', password: '' };
+      req.body = { email: '', name: 'Gonzalo', password: '' };
 
       await register(req, res, next);
 
@@ -62,8 +62,24 @@ describe('Auth Controller - Unit Tests', () => {
       );
     });
 
+    it('debería retornar 400 si falta el nombre', async () => {
+      req.body = { email: 'test@example.com', name: '', password: 'password123' };
+
+      await register(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Datos inválidos',
+          details: expect.arrayContaining([
+            { field: 'name', message: 'El nombre es obligatorio' }
+          ])
+        })
+      );
+    });
+
     it('debería retornar 400 si el email no es válido o la contraseña tiene menos de 6 caracteres', async () => {
-      req.body = { email: 'invalido-email', password: '123' };
+      req.body = { email: 'invalido-email', name: 'Gonzalo', password: '123' };
 
       await register(req, res, next);
 
@@ -79,8 +95,24 @@ describe('Auth Controller - Unit Tests', () => {
       );
     });
 
+    it('debería retornar 400 si el nombre es demasiado corto', async () => {
+      req.body = { email: 'test@example.com', name: 'G', password: 'password123' };
+
+      await register(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Datos inválidos',
+          details: expect.arrayContaining([
+            { field: 'name', message: 'El nombre debe tener al menos 2 caracteres' }
+          ])
+        })
+      );
+    });
+
     it('debería retornar 400 si el email ya está registrado', async () => {
-      req.body = { email: 'test@example.com', password: 'password123' };
+      req.body = { email: 'test@example.com', name: 'Gonzalo', password: 'password123' };
       userService.getUserByEmail.mockResolvedValue({ id: 1, email: 'test@example.com' });
 
       await register(req, res, next);
@@ -95,11 +127,12 @@ describe('Auth Controller - Unit Tests', () => {
     });
 
     it('debería registrar un nuevo usuario con éxito y retornar 201', async () => {
-      req.body = { email: 'new@example.com', password: 'password123' };
+      req.body = { email: 'new@example.com', name: 'Gonzalo', password: 'password123' };
       userService.getUserByEmail.mockResolvedValue(null);
       userService.createUser.mockResolvedValue({
         id: 2,
         email: 'new@example.com',
+        name: 'Gonzalo',
         password: 'hashedpassword',
         role: { name: 'usuario' }
       });
@@ -108,6 +141,7 @@ describe('Auth Controller - Unit Tests', () => {
 
       expect(userService.createUser).toHaveBeenCalledWith({
         email: 'new@example.com',
+        name: 'Gonzalo',
         password: 'password123'
       });
       expect(res.status).toHaveBeenCalledWith(201);
@@ -115,12 +149,13 @@ describe('Auth Controller - Unit Tests', () => {
       expect(res.json).toHaveBeenCalledWith({
         id: 2,
         email: 'new@example.com',
+        name: 'Gonzalo',
         role: 'usuario'
       });
     });
 
     it('debería delegar el error a next si ocurre una excepción', async () => {
-      req.body = { email: 'test@example.com', password: 'password123' };
+      req.body = { email: 'test@example.com', name: 'Gonzalo', password: 'password123' };
       const testError = new Error('Database connection failed');
       userService.getUserByEmail.mockRejectedValue(testError);
 

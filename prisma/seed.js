@@ -189,16 +189,19 @@ async function main() {
   const testUsers = [
     {
       email: 'testuser@example.com',
+      name: 'Juan Perez',
       password: hashedPassword,
       role: { connect: { name: 'usuario' } }
     },
     {
       email: 'admin@example.com',
+      name: 'Gonzalo Molina',
       password: hashedPassword,
       role: { connect: { name: 'admin' } }
     },
     {
       email: 'integration@test.com',
+      name: 'Integration User',
       password: hashedPassword,
       role: { connect: { name: 'usuario' } }
     }

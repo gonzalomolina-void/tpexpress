@@ -7,9 +7,12 @@ export const ERROR_KEYS = {
   INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
   INVALID_DATA: 'INVALID_DATA',
   EMAIL_REQUIRED: 'EMAIL_REQUIRED',
+  NAME_REQUIRED: 'NAME_REQUIRED',
   PASSWORD_REQUIRED: 'PASSWORD_REQUIRED',
   EMAIL_INVALID_FORMAT: 'EMAIL_INVALID_FORMAT',
   PASSWORD_TOO_SHORT: 'PASSWORD_TOO_SHORT',
+  NAME_TOO_SHORT: 'NAME_TOO_SHORT',
+  NAME_TOO_LONG: 'NAME_TOO_LONG',
   EMAIL_ALREADY_REGISTERED: 'EMAIL_ALREADY_REGISTERED',
   INCOMPLETE_CREDENTIALS: 'INCOMPLETE_CREDENTIALS',
   INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
@@ -50,9 +53,12 @@ const TRANSLATIONS = {
     },
     [ERROR_KEYS.INVALID_DATA]: 'Datos inválidos',
     [ERROR_KEYS.EMAIL_REQUIRED]: 'El email es obligatorio',
+    [ERROR_KEYS.NAME_REQUIRED]: 'El nombre es obligatorio',
     [ERROR_KEYS.PASSWORD_REQUIRED]: 'La contraseña es obligatoria',
     [ERROR_KEYS.EMAIL_INVALID_FORMAT]: 'El formato del email es inválido',
     [ERROR_KEYS.PASSWORD_TOO_SHORT]: 'La contraseña debe tener al menos 6 caracteres',
+    [ERROR_KEYS.NAME_TOO_SHORT]: 'El nombre debe tener al menos 2 caracteres',
+    [ERROR_KEYS.NAME_TOO_LONG]: 'El nombre no puede superar los 50 caracteres',
     [ERROR_KEYS.EMAIL_ALREADY_REGISTERED]: {
       error: 'Email ya registrado',
       message: 'El email indicado ya se encuentra registrado en el sistema'
@@ -103,9 +109,12 @@ const TRANSLATIONS = {
     },
     [ERROR_KEYS.INVALID_DATA]: 'Invalid data',
     [ERROR_KEYS.EMAIL_REQUIRED]: 'Email is required',
+    [ERROR_KEYS.NAME_REQUIRED]: 'Name is required',
     [ERROR_KEYS.PASSWORD_REQUIRED]: 'Password is required',
     [ERROR_KEYS.EMAIL_INVALID_FORMAT]: 'Invalid email format',
     [ERROR_KEYS.PASSWORD_TOO_SHORT]: 'Password must be at least 6 characters long',
+    [ERROR_KEYS.NAME_TOO_SHORT]: 'Name must be at least 2 characters long',
+    [ERROR_KEYS.NAME_TOO_LONG]: 'Name cannot exceed 50 characters',
     [ERROR_KEYS.EMAIL_ALREADY_REGISTERED]: {
       error: 'Email already registered',
       message: 'The specified email is already registered in the system'

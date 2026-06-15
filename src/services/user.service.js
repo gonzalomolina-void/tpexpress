@@ -7,16 +7,19 @@ import { ROLES } from '../constants/auth.constants.js';
  * 
  * @param {Object} userData
  * @param {string} userData.email
+ * @param {string} userData.name
  * @param {string} userData.password
+ * @param {string} [userData.role]
  * @returns {Promise<Object>} El usuario creado.
  */
-export async function createUser({ email, password, role }) {
+export async function createUser({ email, name, password, role }) {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
   return prisma.user.create({
     data: {
       email,
+      name,
       password: hashedPassword,
       role: {
         connect: { name: role || ROLES.USER }

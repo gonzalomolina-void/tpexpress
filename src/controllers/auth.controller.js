@@ -24,13 +24,16 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 export async function register(req, res, next) {
   try {
-    const { email, password } = req.body;
+    const { email, name, password } = req.body;
     const lang = getLanguage(req);
 
     // 1. Validaciones basicas de existencia de campos
     const validationErrors = [];
     if (!email) {
       validationErrors.push({ field: 'email', message: translate(ERROR_KEYS.EMAIL_REQUIRED, lang) });
+    }
+    if (!name || !name.trim()) {
+      validationErrors.push({ field: 'name', message: translate(ERROR_KEYS.NAME_REQUIRED, lang) });
     }
     if (!password) {
       validationErrors.push({ field: 'password', message: translate(ERROR_KEYS.PASSWORD_REQUIRED, lang) });
@@ -46,6 +49,12 @@ export async function register(req, res, next) {
     // 2. Validaciones de formato y longitud
     if (!EMAIL_REGEX.test(email)) {
       validationErrors.push({ field: 'email', message: translate(ERROR_KEYS.EMAIL_INVALID_FORMAT, lang) });
+    }
+    if (name && name.trim().length < 2) {
+      validationErrors.push({ field: 'name', message: translate(ERROR_KEYS.NAME_TOO_SHORT, lang) });
+    }
+    if (name && name.trim().length > 50) {
+      validationErrors.push({ field: 'name', message: translate(ERROR_KEYS.NAME_TOO_LONG, lang) });
     }
     if (password.length < 6) {
       validationErrors.push({ field: 'password', message: translate(ERROR_KEYS.PASSWORD_TOO_SHORT, lang) });
@@ -71,6 +80,7 @@ export async function register(req, res, next) {
     // 4. Crear el usuario
     const newUser = await userService.createUser({
       email: email.toLowerCase(),
+      name: name.trim(),
       password
     });
 
@@ -127,7 +137,7 @@ export async function login(req, res, next) {
 
     // 4. Generar Token JWT de acceso (corta duración: 15m)
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role.name },
+      { userId: user.id, email: user.email, name: user.name, role: user.role.name },
       JWT_SECRET,
       { expiresIn: AUTH_CONFIG.ACCESS_TOKEN_EXPIRY }
     );
@@ -207,7 +217,7 @@ export async function refresh(req, res, next) {
 
     const user = tokenRecord.user;
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role.name },
+      { userId: user.id, email: user.email, name: user.name, role: user.role.name },
       JWT_SECRET,
       { expiresIn: AUTH_CONFIG.ACCESS_TOKEN_EXPIRY }
     );

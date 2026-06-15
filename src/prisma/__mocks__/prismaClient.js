@@ -30,9 +30,11 @@ const prismaMock = {
   },
   cardType: {
     findUnique: vi.fn(),
+    findMany: vi.fn(),
   },
   rarity: {
     findUnique: vi.fn(),
+    findMany: vi.fn(),
   },
   cardTranslation: {
     upsert: vi.fn(),

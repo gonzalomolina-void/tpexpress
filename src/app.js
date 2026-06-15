@@ -8,6 +8,8 @@ import authRoutes from './routes/auth.routes.js';
 import favoriteRoutes from './routes/favorite.routes.js';
 import aboutRoutes from './routes/about.routes.js';
 import healthRoutes from './routes/health.routes.js';
+import typeRoutes from './routes/type.routes.js';
+import rarityRoutes from './routes/rarity.routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 
 
@@ -37,6 +39,8 @@ app.use('/api', cardRoutes);
 app.use('/api', authRoutes);
 app.use('/api', favoriteRoutes);
 app.use('/api', aboutRoutes);
+app.use('/api', typeRoutes);
+app.use('/api', rarityRoutes);
 
 
 // Middleware global de errores

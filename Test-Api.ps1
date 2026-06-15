@@ -625,6 +625,90 @@ try {
     Assert-Status $resEditNoAuth 401 "TC-29: GET /api/cards/1/edit (No Auth)"
     $global:apiSession = $backupSession
 
+    # TC-30: GET /api/types (Authenticated)
+    Write-Host "TC-30: GET /api/types (Authenticated)"
+    $resTypes = Invoke-Api -Method Get -Uri "$baseUrl/api/types" -headers $adminHeaders
+    Assert-Status $resTypes 200 "TC-30: GET /api/types"
+    if ($resTypes.StatusCode -eq 200) {
+        $types = $resTypes.Content | ConvertFrom-Json
+        if ($types.Count -gt 0) {
+            $firstType = $types[0]
+            if ($null -ne $firstType.id -and $null -ne $firstType.code -and $null -ne $firstType.name -and $null -ne $firstType.labelKey) {
+                Write-Host "  [PASS] Types fields structure is correct (id, code, name, labelKey)" -ForegroundColor Green
+            } else {
+                Write-Host "  [FAIL] Types structure invalid: $($resTypes.Content)" -ForegroundColor Red
+            }
+        } else {
+            Write-Host "  [FAIL] Returned empty list of types!" -ForegroundColor Red
+        }
+    }
+
+    # TC-31: GET /api/types sin token (debe dar 401)
+    Write-Host "TC-31: GET /api/types sin token (debe dar 401)"
+    $backupSession = $global:apiSession
+    $global:apiSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $resTypesNoAuth = Invoke-Api -Method Get -Uri "$baseUrl/api/types"
+    Assert-Status $resTypesNoAuth 401 "TC-31: GET /api/types sin token"
+    $global:apiSession = $backupSession
+
+    # TC-32: GET /api/types con internacionalización (?lang=en)
+    Write-Host "TC-32: GET /api/types?lang=en (i18n)"
+    $resTypesEn = Invoke-Api -Method Get -Uri "$baseUrl/api/types?lang=en" -headers $adminHeaders
+    Assert-Status $resTypesEn 200 "TC-32: GET /api/types?lang=en"
+    if ($resTypesEn.StatusCode -eq 200) {
+        $typesEn = $resTypesEn.Content | ConvertFrom-Json
+        $creatureType = $typesEn | Where-Object { $_.code -eq "creature" }
+        if ($creatureType -and $creatureType.name -eq "Creature") {
+            Write-Host "  [PASS] Dynamic translation for type 'creature' matches 'Creature'" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] i18n translation failed or missing. Got: $($creatureType | ConvertTo-Json)" -ForegroundColor Red
+        }
+    }
+
+    # TC-33: GET /api/rarities (Authenticated)
+    Write-Host "TC-33: GET /api/rarities (Authenticated)"
+    $resRarities = Invoke-Api -Method Get -Uri "$baseUrl/api/rarities" -headers $adminHeaders
+    Assert-Status $resRarities 200 "TC-33: GET /api/rarities"
+    if ($resRarities.StatusCode -eq 200) {
+        $rarities = $resRarities.Content | ConvertFrom-Json
+        if ($rarities.Count -gt 0) {
+            $firstRarity = $rarities[0]
+            if ($null -ne $firstRarity.id -and $null -ne $firstRarity.code -and $null -ne $firstRarity.name -and $null -ne $firstRarity.labelKey) {
+                Write-Host "  [PASS] Rarities fields structure is correct (id, code, name, labelKey)" -ForegroundColor Green
+            } else {
+                Write-Host "  [FAIL] Rarities structure invalid: $($resRarities.Content)" -ForegroundColor Red
+            }
+        } else {
+            Write-Host "  [FAIL] Returned empty list of rarities!" -ForegroundColor Red
+        }
+    }
+
+    # TC-34: GET /api/rarities sin token (debe dar 401)
+    Write-Host "TC-34: GET /api/rarities sin token (debe dar 401)"
+    $backupSession = $global:apiSession
+    $global:apiSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $resRaritiesNoAuth = Invoke-Api -Method Get -Uri "$baseUrl/api/rarities"
+    Assert-Status $resRaritiesNoAuth 401 "TC-34: GET /api/rarities sin token"
+    $global:apiSession = $backupSession
+
+    # TC-35: GET /api/rarities con internacionalización (Accept-Language: en)
+    Write-Host "TC-35: GET /api/rarities with Accept-Language: en (i18n)"
+    $headersAcceptLangEn = @{
+        "Authorization" = "Bearer $adminToken"
+        "Accept-Language" = "en"
+    }
+    $resRaritiesEn = Invoke-Api -Method Get -Uri "$baseUrl/api/rarities" -headers $headersAcceptLangEn
+    Assert-Status $resRaritiesEn 200 "TC-35: GET /api/rarities with Accept-Language: en"
+    if ($resRaritiesEn.StatusCode -eq 200) {
+        $raritiesEn = $resRaritiesEn.Content | ConvertFrom-Json
+        $legendaryRarity = $raritiesEn | Where-Object { $_.code -eq "legendary" }
+        if ($legendaryRarity -and $legendaryRarity.name -eq "Legendary") {
+            Write-Host "  [PASS] Dynamic translation for rarity 'legendary' matches 'Legendary'" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] i18n translation failed or missing. Got: $($legendaryRarity | ConvertTo-Json)" -ForegroundColor Red
+        }
+    }
+
     Write-Host "=== QA API TEST SUITE COMPLETE ===" -ForegroundColor Cyan
 } finally {
     # Clean up background server process

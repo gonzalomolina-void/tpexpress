@@ -1,0 +1,23 @@
+meta {
+  name: Get Types
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/types
+  body: none
+  auth: bearer
+}
+
+params:query {
+  ~lang: es
+}
+
+headers {
+  ~Accept-Language: es
+}
+
+auth:bearer {
+  token: {{userToken}}
+}

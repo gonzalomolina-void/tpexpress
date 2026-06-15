@@ -953,6 +953,94 @@
           }
         }
       }
+    },
+    "/api/types": {
+      "get": {
+        "summary": "Obtener tipos de cartas",
+        "description": "Retorna el listado de tipos de cartas. Soporta internacionalización (mediante query parameter o cabecera HTTP Accept-Language) y requiere estar autenticado.",
+        "tags": ["Types"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Idioma preferido para los nombres de los tipos ('es' o 'en').",
+            "required": false,
+            "schema": { "type": "string", "enum": ["es", "en"] }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Idioma preferido alternativo ('es' o 'en'). Por defecto es 'es'.",
+            "required": false,
+            "schema": { "type": "string", "enum": ["es", "en"], "default": "es" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de tipos de cartas obtenido correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/CardType" }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado (token faltante, inválido o expirado)"
+          }
+        }
+      }
+    },
+    "/api/rarities": {
+      "get": {
+        "summary": "Obtener rarezas de cartas",
+        "description": "Retorna el listado de rarezas de cartas. Soporta internacionalización (mediante query parameter o cabecera HTTP Accept-Language) y requiere estar autenticado.",
+        "tags": ["Rarities"],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Idioma preferido para los nombres de las rarezas ('es' o 'en').",
+            "required": false,
+            "schema": { "type": "string", "enum": ["es", "en"] }
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "description": "Idioma preferido alternativo ('es' o 'en'). Por defecto es 'es'.",
+            "required": false,
+            "schema": { "type": "string", "enum": ["es", "en"], "default": "es" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Listado de rarezas de cartas obtenido correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Rarity" }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado (token faltante, inválido o expirado)"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1029,6 +1117,25 @@
               "quote": { "type": "string", "example": "No busques que los eventos sucedan como deseas, sino desea que sucedan como suceden, y fluirás bien." }
             }
           }
+        }
+      }
+      },
+      "CardType": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "code": { "type": "string", "example": "creature" },
+          "name": { "type": "string", "example": "Criatura" },
+          "labelKey": { "type": "string", "example": "card.types.creature" }
+        }
+      },
+      "Rarity": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 1 },
+          "code": { "type": "string", "example": "poor" },
+          "name": { "type": "string", "example": "Pobre" },
+          "labelKey": { "type": "string", "example": "card.rarities.poor" }
         }
       }
     }

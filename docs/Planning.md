@@ -33,6 +33,7 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 * [US 17: Estandarización de Rutas y Refactorización de Código](#us-17-estandarización-de-rutas-y-refactorización-de-código)
 * [US 18: Esquema de Versionado y Lanzamientos en GitHub (GitHub Releases & Version Bump)](#us-18-esquema-de-versionado-y-lanzamientos-en-github-github-releases--version-bump)
 * [US 19: Endpoint de Consulta Completa de Carta para Edición (sin aplanar)](#us-19-endpoint-de-consulta-completa-de-carta-para-edición-sin-aplanar)
+* [US 20: API de Consulta Dinámica de Tipos y Rarezas](#us-20-api-de-consulta-dinámica-de-tipos-y-rarezas)
 
 ---
 
@@ -421,9 +422,28 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 * **Tareas Técnicas:**
   * Implementar el controlador y la ruta para `GET /api/cards/:id/edit`.
   * Integrar los middlewares `requireAuth` y el control de rol `admin` para securizar el endpoint.
-  * Consultar Prisma incluyendo la relación `translations`, `type` y `rarity`, y formatear el output en el controlador para devolver el diccionario estructurado.
   * Crear la suite de pruebas unitarias/integración asociadas para el nuevo endpoint.
   * Actualizar la documentación de Swagger y la colección de Bruno.
+
+---
+
+### US 20: API de Consulta Dinámica de Tipos y Rarezas
+**Como** consumidor de la API (Frontend)  
+**Quiero** obtener el listado completo de tipos de cartas y rarezas con sus traducciones según el idioma solicitado (`GET /api/types` y `GET /api/rarities`),  
+**Para** desacoplar las constantes visuales en el frontend y permitir modificaciones dinámicas en el catálogo.
+
+* **Criterios de Aceptación:**
+  * Crear el endpoint `GET /api/types` que retorne todos los tipos de cartas registrados, traduciendo sus nombres de forma aplanada.
+  * Crear el endpoint `GET /api/rarities` que retorne todas las rarezas registradas, traduciendo sus nombres de forma aplanada.
+  * Ambos endpoints deben soportar la cabecera `Accept-Language` o query `lang` (híbrido) y retornar código `200 OK`.
+  * La documentación de Swagger UI debe ser actualizada con estos nuevos endpoints.
+  * Crear la suite de pruebas unitarias correspondientes.
+
+* **Tareas Técnicas:**
+  * Crear los controladores y rutas para `GET /api/types` y `GET /api/rarities`.
+  * Consultar Prisma incluyendo la relación de traducciones y mapear la respuesta al formato plano i18n.
+  * Agregar anotaciones Swagger.
+  * Escribir pruebas unitarias y agregarlos a la colección Bruno.
 
 ---
 

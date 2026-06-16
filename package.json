@@ -1,7 +1,7 @@
 {
-  "name": "tpexpress",
+  "name": "hexa-tcg-api",
   "version": "1.0.1",
-  "description": "Este repositorio contiene el desarrollo del backend (API REST) para dar soporte a la aplicación web desarrollada en React, reemplazando la persistencia en `localStorage` por una base de datos PostgreSQL persistida de forma real.",
+  "description": "API REST oficial para Hexa TCG, proporcionando soporte para gestión de cartas, autenticación de usuarios, favoritos y más, con persistencia en base de datos PostgreSQL mediante Prisma ORM.",
   "main": "src/index.js",
   "directories": {
     "doc": "docs"

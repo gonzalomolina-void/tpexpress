@@ -33,7 +33,7 @@ Neon provee una base de datos PostgreSQL serverless muy fácil de integrar.
    * Seleccioná la región más cercana (ej: `us-east-2` o `sa-east-1` si está disponible para menor latencia).
 
 2. **Obtener la cadena de conexión (DSN)**:
-   * En el panel principal de tu proyecto en Neon, copiá la cadena de conexión. Asegurate de seleccionar la opción de conexión directa o pooling según sea necesario (se recomienda la estándar que tiene la forma `postgresql://...`).
+   * En el panel principal de tu proyecto en Neon, copiá la cadena de conexión. Asegurate de seleccionar la opción de conexión directa o pooling según sea necesario.
    * La cadena tendrá un formato similar a este:
      `postgresql://gonzalomolina:password@ep-cool-snowflake-123456.us-east-2.aws.neon.tech/neondb?sslmode=require`
 
@@ -75,17 +75,38 @@ DATABASE_URL="TU_CADENA_DE_CONEXION_DE_NEON" pnpm prisma db seed
 
 ## Paso 3: Desplegar el Backend en Vercel
 
-Hemos configurado un entrypoint dedicado en `api/index.js` y un archivo `vercel.json` en la raíz de `tpexpress` para que Vercel rutee correctamente las peticiones Express de forma serverless.
+Hemos configurado un entrypoint dedicado en `api/index.js` y un archivo `vercel.json` en la raíz de `tpexpress` para que Vercel rutee correctamente las peticiones Express de forma serverless. 
+
+Además, se agregó un archivo `.vercelignore` para evitar subir carpetas innecesarias para producción (como `docs/`, `openspec/`, `tests/`, `bruno/` y scripts locales de automatización).
+
+### 🚀 Mejor Práctica: Desplegar desde un Tag de Versión Limpio
+Para garantizar que solo despliegues código estable y libre de experimentos locales inconclusos:
+
+1. **Generar la versión** desde tu rama de desarrollo (ej: `develop` o `main`):
+   ```bash
+   pnpm release:patch   # (Corre el script Release-Project.ps1, genera el tag v1.0.x y lo sube)
+   ```
+2. **Hacer checkout del tag** recién creado:
+   ```bash
+   git checkout v1.0.2  # (Reemplazar por el tag correspondiente)
+   ```
+3. **Proceder con el despliegue** (pasos a continuación).
+4. Al finalizar, volver a tu rama de desarrollo:
+   ```bash
+   git checkout develop
+   ```
+
+### Pasos de Configuración en Vercel:
 
 1. **Instalar Vercel CLI** (si no lo tenés instalado):
    ```bash
-   npm install -g vercel
+   npm install -g vercel  # O usar "npx vercel" en los comandos posteriores
    ```
 
 2. **Iniciar el despliegue**:
    Desde la raíz de la carpeta `tpexpress`, ejecutá:
    ```bash
-   vercel
+   npx vercel
    ```
    * Te pedirá iniciar sesión (si es la primera vez).
    * Respondé a las preguntas de configuración del proyecto:
@@ -96,17 +117,17 @@ Hemos configurado un entrypoint dedicado en `api/index.js` y un archivo `vercel.
      * *In which directory is your code located?* `./` (la raíz actual).
      * *Want to override the settings?* `no` (Vercel detecta automáticamente que es un proyecto Node.js).
 
-3. **Configurar las Variables de Entorno en Vercel**:
-   Ingresá al dashboard de Vercel (el link te lo dará la CLI) de tu nuevo proyecto `tpexpress-backend`, andá a **Settings > Environment Variables** y agregá las siguientes tres variables obligatorias:
+3. **Configurar las Variables de Env en Vercel**:
+   Ingresá al dashboard de Vercel de tu nuevo proyecto `tpexpress-backend`, andá a **Settings > Environment Variables** y agregá las siguientes tres variables obligatorias:
 
-   * `DATABASE_URL`: La cadena de conexión de Neon (ej: `postgresql://...`).
+   * `DATABASE_URL`: La cadena de conexión de Neon.
    * `FRONTEND_URL`: La URL de producción de tu frontend (ej: `https://hexa-tcg.vercel.app` o la que te asigne Vercel al subir el front en el Paso 4).
-   * `JWT_SECRET`: Una cadena de caracteres segura y secreta para firmar y validar tokens (ej: podés generar una aleatoria usando `openssl rand -base64 32` en tu terminal).
+   * `JWT_SECRET`: Una cadena de caracteres segura y secreta para firmar y validar tokens (puedes generarla con `openssl rand -base64 32`).
 
 4. **Desplegar a Producción**:
    Una vez configuradas las variables de entorno, ejecutá en tu terminal:
    ```bash
-   vercel --prod
+   npx vercel --prod
    ```
    Esto compilará el backend, generará el cliente de Prisma automáticamente a través del script `postinstall` de `package.json`, y publicará la API de producción. Al finalizar te dará la URL pública (ej: `https://tpexpress-backend.vercel.app`).
 
@@ -122,7 +143,7 @@ El frontend React está ubicado en `pwatpo2react2` y ya cuenta con un archivo `v
 2. **Iniciar el despliegue del Frontend**:
    Navegá a la raíz de la carpeta `pwatpo2react2` y ejecutá:
    ```bash
-   vercel
+   npx vercel
    ```
    * Respondé a las preguntas iniciales para enlazar el proyecto:
      * *Link to existing project?* `no`
@@ -140,7 +161,7 @@ El frontend React está ubicado en `pwatpo2react2` y ya cuenta con un archivo `v
 4. **Desplegar el Frontend a Producción**:
    Una vez configuradas las variables de entorno en Vercel, ejecutá en la terminal de la carpeta `pwatpo2react2`:
    ```bash
-   vercel --prod
+   npx vercel --prod
    ```
    Esto generará el build de producción inyectando las variables de entorno y desplegará la app React. Al finalizar, la CLI te dará tu URL definitiva del frontend (ej: `https://hexa-tcg.vercel.app`).
 

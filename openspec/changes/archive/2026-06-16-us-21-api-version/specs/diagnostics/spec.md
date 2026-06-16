@@ -1,12 +1,11 @@
-# Diagnostics Specification
+# Delta for diagnostics
 
-## Purpose
-Definir los endpoints de diagnóstico y salud del servidor para monitoreo externo.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Health Check Endpoint
+
 El sistema MUST proveer un endpoint público para verificar la disponibilidad de la API y retornar información de versión y metadata básica.
+(Previously: El sistema MUST proveer un endpoint público para verificar la disponibilidad de la API.)
 
 #### Scenario: Successful Health Check
 - GIVEN que el servidor está encendido y funcionando correctamente

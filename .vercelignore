@@ -1,0 +1,25 @@
+# Carpetas de especificaciones y documentación
+openspec/
+docs/
+.atl/
+
+# Entornos de desarrollo y contenedores
+docker-compose.yml
+.vscode/
+
+# Pruebas y suites de testeo
+tests/
+
+# Clientes HTTP y colecciones
+bruno/
+
+# Scripts de automatización y PowerShell
+scripts/
+*.ps1
+
+# Archivos de registro y logs locales
+*.log
+node_modules/
+.pnpm-store/
+.env*
+!.env.example

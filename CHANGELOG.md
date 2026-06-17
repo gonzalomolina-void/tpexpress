@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/gonzalomolina-void/tpexpress/compare/v1.1.0...v1.1.1) (2026-06-17)
+
+
+### Bug Fixes
+
+* **deploy:** configure node 22 and resolve pnpm build placeholders ([ed43591](https://github.com/gonzalomolina-void/tpexpress/commit/ed43591d590666f6111d1909892ddce308dfb473))
+
 ## [1.1.0](https://github.com/gonzalomolina-void/tpexpress/compare/v1.0.1...v1.1.0) (2026-06-16)
 
 

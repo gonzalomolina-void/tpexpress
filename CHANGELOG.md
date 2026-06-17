@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/gonzalomolina-void/tpexpress/compare/v1.1.1...v1.1.2) (2026-06-17)
+
+
+### Bug Fixes
+
+* **deploy:** allow swagger.json in vercel build ([2d9d766](https://github.com/gonzalomolina-void/tpexpress/commit/2d9d7668dbb1064487f0562ac619fa54776d34c7))
+
 ### [1.1.1](https://github.com/gonzalomolina-void/tpexpress/compare/v1.1.0...v1.1.1) (2026-06-17)
 
 

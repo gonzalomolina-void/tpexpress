@@ -1,0 +1,16 @@
+meta {
+  name: About
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://localhost:3000/api/about
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

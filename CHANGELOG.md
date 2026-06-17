@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.3](https://github.com/gonzalomolina-void/tpexpress/compare/v1.1.2...v1.1.3) (2026-06-17)
+
+
+### Features
+
+* **health:** add database check and favicon ([3ae3b0a](https://github.com/gonzalomolina-void/tpexpress/commit/3ae3b0a3424151a63047c658a94e9c8c857ffaae))
+
 ### [1.1.2](https://github.com/gonzalomolina-void/tpexpress/compare/v1.1.1...v1.1.2) (2026-06-17)
 
 

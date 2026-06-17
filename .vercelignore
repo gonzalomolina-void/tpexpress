@@ -1,6 +1,7 @@
 # Carpetas de especificaciones y documentación
 openspec/
-docs/
+docs/*
+!docs/swagger.json
 .atl/
 
 # Entornos de desarrollo y contenedores

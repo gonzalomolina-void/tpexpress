@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "release:patch": "powershell -ExecutionPolicy Bypass -File ./scripts/Release-Project.ps1 -ReleaseType patch",
     "release:minor": "powershell -ExecutionPolicy Bypass -File ./scripts/Release-Project.ps1 -ReleaseType minor",
-    "release:major": "powershell -ExecutionPolicy Bypass -File ./scripts/Release-Project.ps1 -ReleaseType major"
+    "release:major": "powershell -ExecutionPolicy Bypass -File ./scripts/Release-Project.ps1 -ReleaseType major",
+    "db:update-users": "node scripts/Update-Users.js"
   },
   "repository": {
     "type": "git",

@@ -5,5 +5,5 @@ dist/
 /src/generated/prisma
 .pnpm-store/
 .atl/
-*.log
+*.log
 .vercel

@@ -1,9 +1,7 @@
 import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../src/prisma/prismaClient.js';
 import bcrypt from 'bcryptjs';
 import readline from 'readline';
-
-const prisma = new PrismaClient();
 
 const rl = readline.createInterface({
   input: process.stdin,

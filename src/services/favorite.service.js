@@ -35,6 +35,20 @@ export async function getFavorites(userId) {
     orderBy: { createdAt: 'desc' }
   });
 }
+/**
+ * Obtiene un registro de favorito específico para un usuario y carta.
+ * 
+ * @param {number} userId - ID del usuario.
+ * @param {number} cardId - ID de la carta.
+ * @returns {Promise<Object|null>} El registro de favorito o null si no existe.
+ */
+export async function getFavorite(userId, cardId) {
+  return prisma.favorite.findUnique({
+    where: {
+      userId_cardId: { userId, cardId }
+    }
+  });
+}
 
 /**
  * Agrega una carta a favoritos de forma idempotente.

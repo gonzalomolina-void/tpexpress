@@ -29,6 +29,7 @@ describe('Favorite Controller - Unit Tests', () => {
     };
 
     next = vi.fn();
+    favoriteService.getFavorite.mockResolvedValue(null);
   });
 
   describe('GET /api/favorites', () => {
@@ -93,16 +94,36 @@ describe('Favorite Controller - Unit Tests', () => {
     it('debería agregar la carta a favoritos con éxito e indicar 201', async () => {
       req.body = { cardId: 10 };
       cardService.getCardById.mockResolvedValue({ id: 10, cost: 4 });
+      favoriteService.getFavorite.mockResolvedValue(null);
       favoriteService.addFavorite.mockResolvedValue({ userId: 1, cardId: 10 });
 
       await addFavorite(req, res, next);
 
       expect(cardService.getCardById).toHaveBeenCalledWith(10);
+      expect(favoriteService.getFavorite).toHaveBeenCalledWith(1, 10);
       expect(favoriteService.addFavorite).toHaveBeenCalledWith(1, 10);
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
         message: 'Carta agregada a favoritos correctamente'
       });
+    });
+
+    it('debería retornar 409 si la carta ya está en favoritos', async () => {
+      req.body = { cardId: 10 };
+      cardService.getCardById.mockResolvedValue({ id: 10, cost: 4 });
+      favoriteService.getFavorite.mockResolvedValue({ userId: 1, cardId: 10 });
+
+      await addFavorite(req, res, next);
+
+      expect(cardService.getCardById).toHaveBeenCalledWith(10);
+      expect(favoriteService.getFavorite).toHaveBeenCalledWith(1, 10);
+      expect(res.status).toHaveBeenCalledWith(409);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Conflicto',
+          message: 'Esta carta ya se encuentra en tus favoritos'
+        })
+      );
     });
 
     it('debería delegar el error a next si ocurre una excepción', async () => {
@@ -143,6 +164,22 @@ describe('Favorite Controller - Unit Tests', () => {
       expect(res.json).toHaveBeenCalledWith({
         message: 'Carta eliminada de favoritos correctamente'
       });
+    });
+
+    it('debería retornar 404 si el favorito no existe para ese usuario', async () => {
+      req.params = { id: '10' };
+      favoriteService.removeFavorite.mockResolvedValue(null);
+
+      await removeFavorite(req, res, next);
+
+      expect(favoriteService.removeFavorite).toHaveBeenCalledWith(1, 10);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Recurso no encontrado',
+          message: 'El favorito especificado no existe para este usuario'
+        })
+      );
     });
 
     it('debería delegar el error a next si ocurre una excepción al eliminar', async () => {

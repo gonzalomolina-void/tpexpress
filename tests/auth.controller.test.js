@@ -111,14 +111,14 @@ describe('Auth Controller - Unit Tests', () => {
       );
     });
 
-    it('debería retornar 400 si el email ya está registrado', async () => {
+    it('debería retornar 409 si el email ya está registrado', async () => {
       req.body = { email: 'test@example.com', name: 'Gonzalo', password: 'password123' };
       userService.getUserByEmail.mockResolvedValue({ id: 1, email: 'test@example.com' });
 
       await register(req, res, next);
 
       expect(userService.getUserByEmail).toHaveBeenCalledWith('test@example.com');
-      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Email ya registrado'

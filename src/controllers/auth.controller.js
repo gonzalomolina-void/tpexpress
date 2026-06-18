@@ -71,7 +71,7 @@ export async function register(req, res, next) {
     const existingUser = await userService.getUserByEmail(email.toLowerCase());
     if (existingUser) {
       const err = translate(ERROR_KEYS.EMAIL_ALREADY_REGISTERED, lang);
-      return res.status(400).json({
+      return res.status(409).json({
         error: err.error,
         details: [{ field: 'email', message: err.message }]
       });

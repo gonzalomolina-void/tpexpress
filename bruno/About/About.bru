@@ -1,0 +1,16 @@
+meta {
+  name: About
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/about
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

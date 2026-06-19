@@ -10,6 +10,14 @@ delete {
   auth: bearer
 }
 
+params:query {
+  ~lang: es
+}
+
+headers {
+  ~Accept-Language: en
+}
+
 auth:bearer {
   token: {{token}}
 }

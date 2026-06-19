@@ -10,6 +10,14 @@ post {
   auth: none
 }
 
+params:query {
+  ~lang: es
+}
+
+headers {
+  ~Accept-Language: en
+}
+
 body:json {
   {
     "email": "testuser@example.com",

@@ -11,6 +11,7 @@ import healthRoutes from './routes/health.routes.js';
 import typeRoutes from './routes/type.routes.js';
 import rarityRoutes from './routes/rarity.routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import { i18nMiddleware } from './utils/errors.i18n.js';
 
 
 const require = createRequire(import.meta.url);
@@ -27,6 +28,7 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(express.json());
+app.use(i18nMiddleware);
 
 
 // Servir documentación de Swagger interactiva

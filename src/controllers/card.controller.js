@@ -105,9 +105,13 @@ export async function createCard(req, res, next) {
     // 1. Validar el body de forma manual
     const validationErrors = validateCard(req.body);
     if (validationErrors.length > 0) {
+      const details = validationErrors.map(err => ({
+        field: err.field,
+        message: translate(err.errorKey, lang)
+      }));
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
-        details: validationErrors
+        details
       });
     }
 
@@ -163,9 +167,13 @@ export async function updateCard(req, res, next) {
     // 1. Validar el body de forma manual
     const validationErrors = validateCard(req.body);
     if (validationErrors.length > 0) {
+      const details = validationErrors.map(err => ({
+        field: err.field,
+        message: translate(err.errorKey, lang)
+      }));
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
-        details: validationErrors
+        details
       });
     }
 

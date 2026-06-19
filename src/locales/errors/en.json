@@ -1,0 +1,77 @@
+{
+  "UNAUTHORIZED_HEADER": {
+    "error": "Unauthorized",
+    "message": "An authentication token is required in the Authorization header with Bearer <token> format"
+  },
+  "TOKEN_INVALID": {
+    "error": "Invalid token",
+    "message": "The provided authentication token is invalid or has expired"
+  },
+  "USER_NOT_FOUND": {
+    "error": "User not found",
+    "message": "The user associated with the token no longer exists in the system"
+  },
+  "AUTH_REQUIRED": {
+    "error": "Unauthorized",
+    "message": "Prior authentication is required to verify the role"
+  },
+  "FORBIDDEN_ROLE": {
+    "error": "Forbidden",
+    "message": "Access denied: the {{role}} role is required to perform this operation"
+  },
+  "INTERNAL_SERVER_ERROR": {
+    "error": "Internal Server Error",
+    "message": "An internal server error occurred"
+  },
+  "INVALID_DATA": "Invalid data",
+  "EMAIL_REQUIRED": "Email is required",
+  "NAME_REQUIRED": "Name is required",
+  "PASSWORD_REQUIRED": "Password is required",
+  "EMAIL_INVALID_FORMAT": "Invalid email format",
+  "PASSWORD_TOO_SHORT": "Password must be at least 6 characters long",
+  "NAME_TOO_SHORT": "Name must be at least 2 characters long",
+  "NAME_TOO_LONG": "Name cannot exceed 50 characters",
+  "EMAIL_ALREADY_REGISTERED": {
+    "error": "Email already registered",
+    "message": "The specified email is already registered in the system"
+  },
+  "INCOMPLETE_CREDENTIALS": {
+    "error": "Incomplete credentials",
+    "message": "You must provide both email and password"
+  },
+  "INVALID_CREDENTIALS": {
+    "error": "Invalid credentials",
+    "message": "The email or password is incorrect"
+  },
+  "INVALID_CARD_ID": "The card ID must be a valid integer",
+  "CARD_NOT_FOUND": {
+    "error": "Resource not found",
+    "message": "The requested card does not exist"
+  },
+  "CARD_TYPE_NOT_FOUND": "The specified card type does not exist",
+  "RARITY_NOT_FOUND": "The specified rarity does not exist",
+  "CARD_DELETED": "Card deleted successfully",
+  "FAVORITE_ADDED": "Card successfully added to favorites",
+  "FAVORITE_DELETED": "Card successfully removed from favorites",
+  "FAVORITE_ALREADY_EXISTS": {
+    "error": "Conflict",
+    "message": "This card is already in your favorites"
+  },
+  "FAVORITE_NOT_FOUND": {
+    "error": "Resource not found",
+    "message": "The specified favorite does not exist for this user"
+  },
+  "INVALID_COST": "Must be an integer >= 0",
+  "INVALID_ATK": "Must be an integer >= 0",
+  "INVALID_DEF": "Must be an integer >= 0",
+  "INVALID_IMAGE": "Must be a non-empty string",
+  "INVALID_TYPE_ID": "Must be a valid ID (number > 0)",
+  "INVALID_RARITY_ID": "Must be a valid ID (number > 0)",
+  "TRANSLATIONS_REQUIRED": "Is required",
+  "TRANSLATIONS_NOT_ARRAY": "Must be an array",
+  "TRANSLATIONS_EMPTY": "Must have at least one translation",
+  "TRANSLATION_LANGUAGE_INVALID": "Must be \"es\" or \"en\"",
+  "TRANSLATION_NAME_INVALID": "Must be a non-empty string",
+  "TRANSLATION_DESCRIPTION_INVALID": "Must be a non-empty string",
+  "BODY_REQUIRED": "The body cannot be empty"
+}

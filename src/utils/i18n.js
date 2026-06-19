@@ -4,24 +4,7 @@
  * @returns {"es" | "en"} El idioma resuelto ("es" por defecto).
  */
 export function getLanguage(req) {
-  // 1. Buscar en el query parameter ?lang=
-  const queryLang = req?.query?.lang;
-  if (queryLang === 'en' || queryLang === 'es') {
-    return queryLang;
-  }
-
-  // 2. Buscar en la cabecera HTTP Accept-Language
-  const acceptLanguage = req?.headers?.['accept-language'];
-  if (acceptLanguage) {
-    // Buscar la primera ocurrencia de "es" o "en" (case-insensitive)
-    const matches = acceptLanguage.match(/(es|en)/i);
-    if (matches) {
-      return matches[0].toLowerCase();
-    }
-  }
-
-  // 3. Fallback por defecto a español
-  return 'es';
+  return req.language || 'es';
 }
 
 /**

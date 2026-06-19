@@ -18,6 +18,7 @@ export function getLanguage(req) {
 export function mapCardToLang(card, lang) {
   // Buscar traducción específica para la carta
   let cardTrans = card.translations.find(t => t.language === lang);
+
   if (!cardTrans) {
     // Fallback al idioma por defecto 'es'
     cardTrans = card.translations.find(t => t.language === 'es') || card.translations[0];
@@ -25,6 +26,7 @@ export function mapCardToLang(card, lang) {
 
   // Buscar traducción específica para el tipo de carta
   let typeTrans = card.type?.translations.find(t => t.language === lang);
+  
   if (!typeTrans) {
     // Fallback al idioma por defecto 'es'
     typeTrans = card.type?.translations.find(t => t.language === 'es') || card.type?.translations[0];
@@ -61,7 +63,7 @@ export function mapCardToLang(card, lang) {
  */
 export function mapCardForEdit(card) {
   const translations = {};
-  
+
   if (card.translations && Array.isArray(card.translations)) {
     card.translations.forEach(t => {
       translations[t.language] = {

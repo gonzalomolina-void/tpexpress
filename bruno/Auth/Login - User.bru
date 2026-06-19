@@ -32,6 +32,6 @@ tests {
   });
 
   if (res.status === 200 && res.body.token) {
-    bru.setVar("userToken", res.body.token);
+    bru.setVar("token", res.body.token);
   }
 }

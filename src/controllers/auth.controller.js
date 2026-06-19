@@ -7,6 +7,7 @@ import { AUTH_CONFIG } from '../constants/auth.constants.js';
 
 import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 import prisma from '../prisma/prismaClient.js';
+import { validateRegister, validateLogin } from '../validations/auth.validation.js';
 
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_fallback_key';
@@ -27,43 +28,15 @@ export async function register(req, res, next) {
     const { email, name, password } = req.body;
     const lang = getLanguage(req);
 
-    // 1. Validaciones basicas de existencia de campos
-    const validationErrors = [];
-    if (!email) {
-      validationErrors.push({ field: 'email', message: translate(ERROR_KEYS.EMAIL_REQUIRED, lang) });
-    }
-    if (!name || !name.trim()) {
-      validationErrors.push({ field: 'name', message: translate(ERROR_KEYS.NAME_REQUIRED, lang) });
-    }
-    if (!password) {
-      validationErrors.push({ field: 'password', message: translate(ERROR_KEYS.PASSWORD_REQUIRED, lang) });
-    }
-
+    const validationErrors = validateRegister(req.body);
     if (validationErrors.length > 0) {
+      const details = validationErrors.map((err) => ({
+        field: err.field,
+        message: translate(err.errorKey, lang)
+      }));
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
-        details: validationErrors
-      });
-    }
-
-    // 2. Validaciones de formato y longitud
-    if (!EMAIL_REGEX.test(email)) {
-      validationErrors.push({ field: 'email', message: translate(ERROR_KEYS.EMAIL_INVALID_FORMAT, lang) });
-    }
-    if (name && name.trim().length < 2) {
-      validationErrors.push({ field: 'name', message: translate(ERROR_KEYS.NAME_TOO_SHORT, lang) });
-    }
-    if (name && name.trim().length > 50) {
-      validationErrors.push({ field: 'name', message: translate(ERROR_KEYS.NAME_TOO_LONG, lang) });
-    }
-    if (password.length < 6) {
-      validationErrors.push({ field: 'password', message: translate(ERROR_KEYS.PASSWORD_TOO_SHORT, lang) });
-    }
-
-    if (validationErrors.length > 0) {
-      return res.status(400).json({
-        error: translate(ERROR_KEYS.INVALID_DATA, lang),
-        details: validationErrors
+        details
       });
     }
 
@@ -106,9 +79,9 @@ export async function login(req, res, next) {
     const { email, password } = req.body;
     const lang = getLanguage(req);
 
-    // 1. Validaciones basicas de existencia de campos
-    if (!email || !password) {
-      const err = translate(ERROR_KEYS.INCOMPLETE_CREDENTIALS, lang);
+    const validationError = validateLogin(req.body);
+    if (validationError) {
+      const err = translate(validationError.errorKey, lang);
       return res.status(400).json({
         error: err.error,
         message: err.message

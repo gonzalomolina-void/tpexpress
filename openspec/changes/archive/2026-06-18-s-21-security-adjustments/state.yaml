@@ -1,0 +1,9 @@
+current_phase: archive
+completed_phases:
+  - explore
+  - propose
+  - spec
+  - design
+  - tasks
+  - apply
+  - verify

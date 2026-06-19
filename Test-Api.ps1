@@ -461,6 +461,7 @@ try {
     $registerEmail = "qanewuser_" + (Get-Date -Format "yyyyMMddHHmmss") + "@example.com"
     $bodyRegister = @{
         email = $registerEmail
+        name = "QA User"
         password = "password123"
     } | ConvertTo-Json
     $res = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/register" -Body $bodyRegister
@@ -473,6 +474,11 @@ try {
             Write-Host "  [FAIL] Expected default role 'usuario', got '$($regUser.role)'" -ForegroundColor Red
         }
     }
+
+    # TC-20a: POST /api/auth/register (Duplicate email register, debe dar 409)
+    Write-Host "TC-20a: POST /api/auth/register (Duplicado)"
+    $resDup = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/register" -Body $bodyRegister
+    Assert-Status $resDup 409 "TC-20a: POST /api/auth/register (Duplicado)"
 
     # TC-21: POST /api/auth/login (Login and check role in response and JWT token payload)
     Write-Host "TC-21: POST /api/auth/login"

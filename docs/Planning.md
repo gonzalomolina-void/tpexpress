@@ -34,6 +34,7 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
 * [US 18: Esquema de Versionado y Lanzamientos en GitHub (GitHub Releases & Version Bump)](#us-18-esquema-de-versionado-y-lanzamientos-en-github-github-releases--version-bump)
 * [US 19: Endpoint de Consulta Completa de Carta para Edición (sin aplanar)](#us-19-endpoint-de-consulta-completa-de-carta-para-edición-sin-aplanar)
 * [US 20: API de Consulta Dinámica de Tipos y Rarezas](#us-20-api-de-consulta-dinámica-de-tipos-y-rarezas)
+* [US 21: Ajustes de Seguridad y Códigos de Estado HTTP (Fullstack)](#us-21-ajustes-de-seguridad-y-códigos-de-estado-http-fullstack)
 
 ---
 
@@ -444,6 +445,30 @@ Este documento contiene la planificación del desarrollo del Backend (Node.js, E
   * Consultar Prisma incluyendo la relación de traducciones y mapear la respuesta al formato plano i18n.
   * Agregar anotaciones Swagger.
   * Escribir pruebas unitarias y agregarlos a la colección Bruno.
+
+---
+
+### US 21: Ajustes de Seguridad y Códigos de Estado HTTP (Fullstack)
+**Como** desarrollador / QA  
+**Quiero** alinear los códigos de estado HTTP y las validaciones de los endpoints con los estándares exigidos  
+**Para** garantizar una respuesta semántica correcta de la API y una mejor experiencia de usuario en el frontend ante errores de duplicación o inexistencia.
+
+* **Criterios de Aceptación (Backend):**
+  * `POST /api/auth/register` debe retornar `409 Conflict` si el email ya existe.
+  * `POST /api/favorites` debe retornar `409 Conflict` si la carta ya está en favoritos de ese usuario.
+  * `DELETE /api/favorites/:id` debe retornar `404 Not Found` si el favorito no existe para el usuario autenticado.
+  * Actualizar la suite de pruebas unitarias en `auth.controller.test.js` y `favorite.controller.test.js` para validar estos códigos.
+
+* **Criterios de Aceptación (Frontend):**
+  * El formulario de registro de React debe detectar el código `409` y mostrar el error "El email ya está registrado".
+  * El gestor de favoritos de React debe manejar los códigos `404` (al eliminar) y `409` (al agregar) sin romper el estado de la UI.
+
+* **Tareas Técnicas:**
+  * Modificar `auth.controller.js` para retornar `409` en registro de email duplicado.
+  * Crear helper `getFavorite` en `favorite.service.js` y usarlo en `favorite.controller.js` para retornar `409` si el favorito ya existe.
+  * Modificar `removeFavorite` en `favorite.controller.js` para retornar `404` si el servicio devuelve null.
+  * Actualizar las pruebas unitarias de backend en `tests/auth.controller.test.js` y `tests/favorite.controller.test.js`.
+  * Actualizar la integración del frontend (React) para manejar adecuadamente los códigos `409` y `404`.
 
 ---
 

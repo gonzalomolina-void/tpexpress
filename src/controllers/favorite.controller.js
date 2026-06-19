@@ -53,7 +53,17 @@ export async function addFavorite(req, res, next) {
       });
     }
 
-    // 3. Crear favorito (idempotente)
+    // 2.5. Validar que la carta no haya sido agregada previamente
+    const existingFavorite = await favoriteService.getFavorite(userId, cardId);
+    if (existingFavorite) {
+      const err = translate(ERROR_KEYS.FAVORITE_ALREADY_EXISTS, lang);
+      return res.status(409).json({
+        error: err.error,
+        message: err.message
+      });
+    }
+
+    // 3. Crear favorito
     await favoriteService.addFavorite(userId, cardId);
 
     res.status(201).json({
@@ -84,7 +94,14 @@ export async function removeFavorite(req, res, next) {
     }
 
     // 2. Borrar favorito de base de datos
-    await favoriteService.removeFavorite(userId, cardId);
+    const deletedFavorite = await favoriteService.removeFavorite(userId, cardId);
+    if (!deletedFavorite) {
+      const err = translate(ERROR_KEYS.FAVORITE_NOT_FOUND, lang);
+      return res.status(404).json({
+        error: err.error,
+        message: err.message
+      });
+    }
 
     // Retorna 200 OK según los criterios de aceptación
     res.status(200).json({

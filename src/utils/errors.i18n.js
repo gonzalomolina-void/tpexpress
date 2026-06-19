@@ -22,7 +22,9 @@ export const ERROR_KEYS = {
   RARITY_NOT_FOUND: 'RARITY_NOT_FOUND',
   CARD_DELETED: 'CARD_DELETED',
   FAVORITE_ADDED: 'FAVORITE_ADDED',
-  FAVORITE_DELETED: 'FAVORITE_DELETED'
+  FAVORITE_DELETED: 'FAVORITE_DELETED',
+  FAVORITE_ALREADY_EXISTS: 'FAVORITE_ALREADY_EXISTS',
+  FAVORITE_NOT_FOUND: 'FAVORITE_NOT_FOUND'
 };
 
 const TRANSLATIONS = {
@@ -80,7 +82,15 @@ const TRANSLATIONS = {
     [ERROR_KEYS.RARITY_NOT_FOUND]: 'La rareza indicada no existe',
     [ERROR_KEYS.CARD_DELETED]: 'Carta eliminada correctamente',
     [ERROR_KEYS.FAVORITE_ADDED]: 'Carta agregada a favoritos correctamente',
-    [ERROR_KEYS.FAVORITE_DELETED]: 'Carta eliminada de favoritos correctamente'
+    [ERROR_KEYS.FAVORITE_DELETED]: 'Carta eliminada de favoritos correctamente',
+    [ERROR_KEYS.FAVORITE_ALREADY_EXISTS]: {
+      error: 'Conflicto',
+      message: 'Esta carta ya se encuentra en tus favoritos'
+    },
+    [ERROR_KEYS.FAVORITE_NOT_FOUND]: {
+      error: 'Recurso no encontrado',
+      message: 'El favorito especificado no existe para este usuario'
+    }
   },
   en: {
     [ERROR_KEYS.UNAUTHORIZED_HEADER]: {
@@ -136,7 +146,15 @@ const TRANSLATIONS = {
     [ERROR_KEYS.RARITY_NOT_FOUND]: 'The specified rarity does not exist',
     [ERROR_KEYS.CARD_DELETED]: 'Card deleted successfully',
     [ERROR_KEYS.FAVORITE_ADDED]: 'Card successfully added to favorites',
-    [ERROR_KEYS.FAVORITE_DELETED]: 'Card successfully removed from favorites'
+    [ERROR_KEYS.FAVORITE_DELETED]: 'Card successfully removed from favorites',
+    [ERROR_KEYS.FAVORITE_ALREADY_EXISTS]: {
+      error: 'Conflict',
+      message: 'This card is already in your favorites'
+    },
+    [ERROR_KEYS.FAVORITE_NOT_FOUND]: {
+      error: 'Resource not found',
+      message: 'The specified favorite does not exist for this user'
+    }
   }
 };
 

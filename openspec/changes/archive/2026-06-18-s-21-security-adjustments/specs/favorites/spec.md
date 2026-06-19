@@ -1,9 +1,6 @@
-# Favorites Specification
+# Delta for Favorites
 
-## Purpose
-Definir el comportamiento del sistema para la gestión de cartas favoritas por parte de los usuarios autenticados.
-
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Add Favorite Card
 El sistema MUST permitir a un usuario autenticado agregar una carta a su listado de favoritos. Si la carta ya se encuentra en sus favoritos, el sistema MUST retornar un error con estado `409 Conflict`.
@@ -20,10 +17,11 @@ El sistema MUST permitir a un usuario autenticado agregar una carta a su listado
 - THEN el sistema MUST denegar el registro
 - AND retornar un estado 409 Conflict
 
----
+## MODIFIED Requirements
 
 ### Requirement: Remove Favorite Card by ID
 El sistema MUST permitir a un usuario autenticado eliminar una carta de su listado de favoritos utilizando el parámetro `:id` en la ruta de eliminación. Si la carta no se encuentra en la lista de favoritos del usuario, el sistema MUST retornar un error con estado `404 Not Found`.
+(Previously: El sistema no validaba si la relación de favoritos existía antes de eliminar y respondía 200 OK de forma incondicional.)
 
 #### Scenario: Successful Favorite Deletion
 - GIVEN un usuario autenticado con una carta con ID `10` en su lista de favoritos

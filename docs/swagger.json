@@ -590,7 +590,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos o email ya registrado",
+            "description": "Datos inválidos",
             "content": {
               "application/json": {
                 "schema": {
@@ -612,6 +612,38 @@
                           "message": {
                             "type": "string",
                             "example": "El formato del email es invalido"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email ya registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Email ya registrado"
+                    },
+                    "details": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "example": "email"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "El email indicado ya se encuentra registrado en el sistema"
                           }
                         }
                       }
@@ -909,6 +941,9 @@
           },
           "404": {
             "description": "Carta no encontrada"
+          },
+          "409": {
+            "description": "Conflicto (La carta ya está en favoritos del usuario)"
           }
         }
       }
@@ -950,6 +985,9 @@
           },
           "401": {
             "description": "No autorizado"
+          },
+          "404": {
+            "description": "El favorito especificado no existe para este usuario"
           }
         }
       }

@@ -11,7 +11,8 @@ export async function getAllRarities(req, res, next) {
   try {
     const lang = getLanguage(req);
     const rarities = await rarityService.getRarities({ lang });
-    res.status(200).json(rarities);
+
+    return res.status(200).json(rarities);
   } catch (error) {
     next(error);
   }

@@ -31,7 +31,6 @@ const INCLUDE_RELATIONS = {
  */
 export async function getCards({ page, limit, search, type, rarity, lang = 'es' }) {
   const isPaging = page !== null && limit !== null;
-
   const where = {};
 
   if (search) {
@@ -72,7 +71,6 @@ export async function getCards({ page, limit, search, type, rarity, lang = 'es' 
   if (isPaging) {
     const skip = (page - 1) * limit;
     const take = limit;
-
     const [cards, totalCount] = await Promise.all([
       prisma.card.findMany({
         where,
@@ -119,6 +117,7 @@ export async function getCardById(id) {
  */
 export async function checkTypeExists(id) {
   const type = await prisma.cardType.findUnique({ where: { id } });
+
   return type !== null;
 }
 
@@ -129,6 +128,7 @@ export async function checkTypeExists(id) {
  */
 export async function checkRarityExists(id) {
   const rarity = await prisma.rarity.findUnique({ where: { id } });
+
   return rarity !== null;
 }
 

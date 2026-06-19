@@ -30,11 +30,13 @@ function validateTranslations(translations) {
 
   if (!Array.isArray(translations)) {
     errors.push({ field: 'translations', errorKey: ERROR_KEYS.TRANSLATIONS_NOT_ARRAY });
+
     return errors;
   }
 
   if (translations.length === 0) {
     errors.push({ field: 'translations', errorKey: ERROR_KEYS.TRANSLATIONS_EMPTY });
+
     return errors;
   }
 
@@ -77,6 +79,7 @@ export function validateCard(body) {
   // 1. Validar que no sea un objeto vacío o nulo
   if (isEmptyObject(body)) {
     errors.push({ field: 'body', errorKey: ERROR_KEYS.BODY_REQUIRED });
+
     return errors;
   }
 

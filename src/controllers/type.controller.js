@@ -11,7 +11,8 @@ export async function getAllTypes(req, res, next) {
   try {
     const lang = getLanguage(req);
     const types = await typeService.getTypes({ lang });
-    res.status(200).json(types);
+
+    return res.status(200).json(types);
   } catch (error) {
     next(error);
   }

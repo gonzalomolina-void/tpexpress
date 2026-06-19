@@ -4,7 +4,6 @@ import crypto from 'crypto';
 import * as userService from '../services/user.service.js';
 import { getLanguage } from '../utils/i18n.js';
 import { AUTH_CONFIG } from '../constants/auth.constants.js';
-
 import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 import prisma from '../prisma/prismaClient.js';
 import { validateRegister, validateLogin } from '../validations/auth.validation.js';
@@ -26,7 +25,6 @@ export async function register(req, res, next) {
   try {
     const { email, name, password } = req.body;
     const lang = getLanguage(req);
-
     const validationErrors = validateRegister(req.body);
 
     if (validationErrors.length > 0) {
@@ -34,6 +32,7 @@ export async function register(req, res, next) {
         field: err.field,
         message: translate(err.errorKey, lang)
       }));
+
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
         details
@@ -45,6 +44,7 @@ export async function register(req, res, next) {
 
     if (existingUser) {
       const err = translate(ERROR_KEYS.EMAIL_ALREADY_REGISTERED, lang);
+
       return res.status(409).json({
         error: err.error,
         details: [{ field: 'email', message: err.message }]
@@ -60,7 +60,8 @@ export async function register(req, res, next) {
 
     // 5. Retornar el usuario creado excluyendo la contraseña y aplanando el rol
     const { password: _, role, roleId, ...userWithoutPassword } = newUser;
-    res.status(201).json({
+
+    return res.status(201).json({
       ...userWithoutPassword,
       role: role.name
     });
@@ -84,6 +85,7 @@ export async function login(req, res, next) {
 
     if (validationError) {
       const err = translate(validationError.errorKey, lang);
+
       return res.status(400).json({
         error: err.error,
         message: err.message
@@ -95,6 +97,7 @@ export async function login(req, res, next) {
 
     if (!user) {
       const err = translate(ERROR_KEYS.INVALID_CREDENTIALS, lang);
+
       return res.status(401).json({
         error: err.error,
         message: err.message
@@ -106,6 +109,7 @@ export async function login(req, res, next) {
 
     if (!isPasswordValid) {
       const err = translate(ERROR_KEYS.INVALID_CREDENTIALS, lang);
+
       return res.status(401).json({
         error: err.error,
         message: err.message
@@ -143,7 +147,8 @@ export async function login(req, res, next) {
 
     // 5. Retornar token y datos del usuario (excluyendo password y aplanando el rol)
     const { password: _, role, roleId, ...userWithoutPassword } = user;
-    res.status(200).json({
+
+    return res.status(200).json({
       token,
       user: {
         ...userWithoutPassword,
@@ -171,6 +176,7 @@ export async function refresh(req, res, next) {
         error: 'No autorizado',
         message: 'Sesión expirada o inválida'
       };
+
       return res.status(401).json({
         error: err.error || 'No autorizado',
         message: err.message || 'Sesión expirada o inválida'
@@ -187,6 +193,7 @@ export async function refresh(req, res, next) {
         error: 'No autorizado',
         message: 'Sesión expirada o inválida'
       };
+
       return res.status(401).json({
         error: err.error || 'No autorizado',
         message: err.message || 'Sesión expirada o inválida'
@@ -200,7 +207,7 @@ export async function refresh(req, res, next) {
       { expiresIn: AUTH_CONFIG.ACCESS_TOKEN_EXPIRY }
     );
 
-    res.status(200).json({ token });
+    return res.status(200).json({ token });
   } catch (error) {
     next(error);
   }
@@ -235,7 +242,7 @@ export async function logout(req, res, next) {
       sameSite: 'strict'
     });
 
-    res.status(200).json({ message: 'Sesión cerrada correctamente' });
+    return res.status(200).json({ message: 'Sesión cerrada correctamente' });
   } catch (error) {
     next(error);
   }
@@ -249,7 +256,7 @@ export async function logout(req, res, next) {
  */
 export async function getMe(req, res, next) {
   try {
-    res.status(200).json(req.user);
+    return res.status(200).json(req.user);
   } catch (error) {
     next(error);
   }

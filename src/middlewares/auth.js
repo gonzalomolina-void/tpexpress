@@ -20,6 +20,7 @@ export async function requireAuth(req, res, next) {
     // 1. Validar presencia y formato de la cabecera Authorization
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       const errorMsg = translate(ERROR_KEYS.UNAUTHORIZED_HEADER, lang);
+
       return res.status(401).json(errorMsg);
     }
 
@@ -31,6 +32,7 @@ export async function requireAuth(req, res, next) {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (err) {
       const errorMsg = translate(ERROR_KEYS.TOKEN_INVALID, lang);
+
       return res.status(401).json(errorMsg);
     }
 
@@ -39,6 +41,7 @@ export async function requireAuth(req, res, next) {
 
     if (!user) {
       const errorMsg = translate(ERROR_KEYS.USER_NOT_FOUND, lang);
+
       return res.status(401).json(errorMsg);
     }
 
@@ -68,11 +71,13 @@ export function requireRole(role) {
 
     if (!req.user) {
       const errorMsg = translate(ERROR_KEYS.AUTH_REQUIRED, lang);
+
       return res.status(401).json(errorMsg);
     }
 
     if (req.user.role !== role) {
       const errorMsg = translate(ERROR_KEYS.FORBIDDEN_ROLE, lang, role);
+
       return res.status(403).json(errorMsg);
     }
 

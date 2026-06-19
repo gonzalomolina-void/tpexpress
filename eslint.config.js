@@ -44,7 +44,8 @@ export default [
       'padding-line-between-statements': [
         'error',
         { 'blankLine': 'always', 'prev': '*', 'next': 'if' },
-        { 'blankLine': 'always', 'prev': 'if', 'next': '*' }
+        { 'blankLine': 'always', 'prev': 'if', 'next': '*' },
+        { 'blankLine': 'always', 'prev': '*', 'next': 'return' }
       ]
     }
   }

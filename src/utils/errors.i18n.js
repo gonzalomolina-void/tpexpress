@@ -77,5 +77,6 @@ export const i18nMiddleware = i18nextMiddleware.handle(i18next);
  */
 export function translate(key, lang = 'es', ...args) {
   const translation = i18next.t(key, { lng: lang, returnObjects: true, role: args[0] });
+
   return translation;
 }

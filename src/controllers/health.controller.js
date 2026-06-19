@@ -13,6 +13,7 @@ const packageJson = require('../../package.json');
 export async function getHealth(req, res, next) {
   try {
     let databaseStatus = 'ok';
+    
     try {
       await prisma.$queryRaw`SELECT 1`;
     } catch (dbError) {
@@ -21,7 +22,7 @@ export async function getHealth(req, res, next) {
 
     const isHealthy = databaseStatus === 'ok';
 
-    res.status(isHealthy ? 200 : 500).json({
+    return res.status(isHealthy ? 200 : 500).json({
       status: isHealthy ? 'ok' : 'error',
       database: databaseStatus,
       name: packageJson.name,

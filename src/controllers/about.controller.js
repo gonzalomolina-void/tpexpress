@@ -17,7 +17,7 @@ export function getAboutInfo(req, res, next) {
     const lang = getLanguage(req);
     const translation = aboutData[lang] || aboutData['es'];
 
-    res.status(200).json(translation);
+    return res.status(200).json(translation);
   } catch (error) {
     next(error);
   }

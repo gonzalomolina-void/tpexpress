@@ -12,13 +12,12 @@ export async function getFavorites(req, res, next) {
   try {
     const userId = req.user.id;
     const lang = getLanguage(req);
-
     const favorites = await favoriteService.getFavorites(userId);
 
     // Mapear y aplanar la estructura de i18n para cada carta favorita
     const formattedCards = favorites.map(fav => mapCardToLang(fav.card, lang));
 
-    res.status(200).json(formattedCards);
+    return res.status(200).json(formattedCards);
   } catch (error) {
     next(error);
   }
@@ -48,6 +47,7 @@ export async function addFavorite(req, res, next) {
 
     if (!card) {
       const err = translate(ERROR_KEYS.CARD_NOT_FOUND, lang);
+
       return res.status(404).json({
         error: err.error,
         message: err.message
@@ -59,6 +59,7 @@ export async function addFavorite(req, res, next) {
 
     if (existingFavorite) {
       const err = translate(ERROR_KEYS.FAVORITE_ALREADY_EXISTS, lang);
+
       return res.status(409).json({
         error: err.error,
         message: err.message
@@ -68,7 +69,7 @@ export async function addFavorite(req, res, next) {
     // 3. Crear favorito
     await favoriteService.addFavorite(userId, cardId);
 
-    res.status(201).json({
+    return res.status(201).json({
       message: translate(ERROR_KEYS.FAVORITE_ADDED, lang)
     });
   } catch (error) {
@@ -100,6 +101,7 @@ export async function removeFavorite(req, res, next) {
 
     if (!deletedFavorite) {
       const err = translate(ERROR_KEYS.FAVORITE_NOT_FOUND, lang);
+
       return res.status(404).json({
         error: err.error,
         message: err.message
@@ -107,7 +109,7 @@ export async function removeFavorite(req, res, next) {
     }
 
     // Retorna 200 OK según los criterios de aceptación
-    res.status(200).json({
+    return res.status(200).json({
       message: translate(ERROR_KEYS.FAVORITE_DELETED, lang)
     });
   } catch (error) {

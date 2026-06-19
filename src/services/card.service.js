@@ -38,10 +38,20 @@ export async function getCards({ page, limit, search, type, rarity, lang = 'es' 
     where.translations = {
       some: {
         language: lang,
-        name: {
-          contains: search,
-          mode: 'insensitive'
-        }
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive'
+            }
+          },
+          {
+            description: {
+              contains: search,
+              mode: 'insensitive'
+            }
+          }
+        ]
       }
     };
   }

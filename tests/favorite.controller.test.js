@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getFavorites, addFavorite, removeFavorite } from '../src/controllers/favorite.controller.js';
+import {
+  getFavorites,
+  addFavorite,
+  removeFavorite
+} from '../src/controllers/favorite.controller.js';
 import * as favoriteService from '../src/services/favorite.service.js';
 import * as cardService from '../src/services/card.service.js';
 import { getLanguage, mapCardToLang } from '../src/utils/i18n.js';
@@ -35,9 +39,7 @@ describe('Favorite Controller - Unit Tests', () => {
   describe('GET /api/favorites', () => {
     it('debería retornar el listado de favoritos formateado en el idioma correcto', async () => {
       getLanguage.mockReturnValue('en');
-      const mockRawFavorites = [
-        { userId: 1, cardId: 10, card: { id: 10, cost: 3 } }
-      ];
+      const mockRawFavorites = [{ userId: 1, cardId: 10, card: { id: 10, cost: 3 } }];
       favoriteService.getFavorites.mockResolvedValue(mockRawFavorites);
       mapCardToLang.mockReturnValue({ id: 10, cost: 3, name: 'QA Card' });
 
@@ -70,7 +72,9 @@ describe('Favorite Controller - Unit Tests', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Datos inválidos',
-          details: [{ field: 'cardId', message: 'El ID de la carta debe ser un número entero válido' }]
+          details: [
+            { field: 'cardId', message: 'El ID de la carta debe ser un número entero válido' }
+          ]
         })
       );
     });

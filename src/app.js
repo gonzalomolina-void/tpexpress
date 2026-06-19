@@ -13,27 +13,26 @@ import rarityRoutes from './routes/rarity.routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { i18nMiddleware } from './utils/errors.i18n.js';
 
-
 const require = createRequire(import.meta.url);
 const swaggerDocument = require('../docs/swagger.json');
 
 const app = express();
 
 // Middlewares
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true,
-  optionsSuccessStatus: 200,
-  exposedHeaders: ['X-Total-Count']
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+    optionsSuccessStatus: 200,
+    exposedHeaders: ['X-Total-Count']
+  })
+);
 app.use(cookieParser());
 app.use(express.json());
 app.use(i18nMiddleware);
 
-
 // Servir documentación de Swagger interactiva
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-
 
 // Registrar rutas
 app.use('/api', healthRoutes);
@@ -43,7 +42,6 @@ app.use('/api', favoriteRoutes);
 app.use('/api', aboutRoutes);
 app.use('/api', typeRoutes);
 app.use('/api', rarityRoutes);
-
 
 // Middleware global de errores
 app.use(errorHandler);

@@ -7,8 +7,8 @@ import { getLanguage, mapCardToLang, mapCardForEdit } from '../src/utils/i18n.js
 vi.mock('../src/services/card.service.js');
 vi.mock('../src/utils/i18n.js', () => ({
   getLanguage: vi.fn(),
-  mapCardToLang: vi.fn((card) => card), // Mock simple que devuelve el mismo objeto
-  mapCardForEdit: vi.fn((card) => card)
+  mapCardToLang: vi.fn(card => card), // Mock simple que devuelve el mismo objeto
+  mapCardForEdit: vi.fn(card => card)
 }));
 
 describe('Card Controller - Unit Tests', () => {
@@ -113,12 +113,14 @@ describe('Card Controller - Unit Tests', () => {
       await getCardForEdit(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-        error: expect.any(String),
-        details: expect.arrayContaining([
-          expect.objectContaining({ field: 'id', message: expect.any(String) })
-        ])
-      }));
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: expect.any(String),
+          details: expect.arrayContaining([
+            expect.objectContaining({ field: 'id', message: expect.any(String) })
+          ])
+        })
+      );
     });
 
     it('debería retornar 404 si la carta no existe', async () => {
@@ -130,10 +132,12 @@ describe('Card Controller - Unit Tests', () => {
 
       expect(cardService.getCardById).toHaveBeenCalledWith(999);
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-        error: expect.any(String),
-        message: expect.any(String)
-      }));
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: expect.any(String),
+          message: expect.any(String)
+        })
+      );
     });
 
     it('debería retornar 200 y el objeto de la carta sin aplanar (con traducciones) si existe', async () => {
@@ -149,7 +153,7 @@ describe('Card Controller - Unit Tests', () => {
           { language: 'en', name: 'Sir Kaelen', description: 'A knight...' }
         ]
       };
-      
+
       const mockFormattedCard = {
         id: 1,
         cost: 3,

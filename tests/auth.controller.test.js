@@ -20,29 +20,27 @@ vi.mock('../src/prisma/prismaClient.js', () => ({
   }
 }));
 
-
 describe('Auth Controller - Unit Tests', () => {
   let req, res, next;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Inicializar mocks de peticiones express
     req = {
       body: {},
       cookies: {}
     };
-    
+
     res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
       cookie: vi.fn().mockReturnThis(),
       clearCookie: vi.fn().mockReturnThis()
     };
-    
+
     next = vi.fn();
   });
-
 
   describe('POST /api/auth/register', () => {
     it('debería retornar 400 si falta el email o la contraseña', async () => {
@@ -71,9 +69,7 @@ describe('Auth Controller - Unit Tests', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Datos inválidos',
-          details: expect.arrayContaining([
-            { field: 'name', message: 'El nombre es obligatorio' }
-          ])
+          details: expect.arrayContaining([{ field: 'name', message: 'El nombre es obligatorio' }])
         })
       );
     });
@@ -396,7 +392,9 @@ describe('Auth Controller - Unit Tests', () => {
 
     it('debería delegar el error a next si ocurre una excepción', async () => {
       const error = new Error('Status crash');
-      res.status.mockImplementationOnce(() => { throw error; });
+      res.status.mockImplementationOnce(() => {
+        throw error;
+      });
 
       await getMe(req, res, next);
 
@@ -414,4 +412,3 @@ describe('Auth Controller - Unit Tests', () => {
     });
   });
 });
-

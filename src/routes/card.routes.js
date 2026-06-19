@@ -1,5 +1,12 @@
 import { Router } from 'express';
-import { getAllCards, getCardById, getCardForEdit, createCard, updateCard, deleteCard } from '../controllers/card.controller.js';
+import {
+  getAllCards,
+  getCardById,
+  getCardForEdit,
+  createCard,
+  updateCard,
+  deleteCard
+} from '../controllers/card.controller.js';
 import { requireAuth, requireRole } from '../middlewares/auth.js';
 import { ROLES } from '../constants/auth.constants.js';
 

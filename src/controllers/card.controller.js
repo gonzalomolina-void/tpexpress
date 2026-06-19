@@ -6,7 +6,7 @@ import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 /**
  * Endpoint para obtener el listado de cartas.
  * Soporta internacionalización híbrida y paginación opcional emulando mockapi.io.
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function getAllCards(req, res, next) {
@@ -14,13 +14,13 @@ export async function getAllCards(req, res, next) {
     let page = req.query.page ? parseInt(req.query.page, 10) : null;
     let limit = req.query.limit ? parseInt(req.query.limit, 10) : null;
     const { search, type, rarity } = req.query;
-
     let isPaging = false;
+
     // Si se pasa 'page' o 'limit', activamos la paginación.
     if (page !== null || limit !== null) {
       isPaging = true;
-      page = (page && page > 0) ? page : 1;
-      limit = (limit && limit > 0) ? limit : 10; // 10 elementos por página por defecto si se omite limit
+      page = page && page > 0 ? page : 1;
+      limit = limit && limit > 0 ? limit : 10; // 10 elementos por página por defecto si se omite limit
     }
 
     // Resolver el idioma del request
@@ -47,7 +47,7 @@ export async function getAllCards(req, res, next) {
     const formattedCards = cards.map(card => mapCardToLang(card, lang));
 
     // Retornar array JSON plano
-    res.status(200).json(formattedCards);
+    return res.status(200).json(formattedCards);
   } catch (error) {
     next(error);
   }
@@ -56,7 +56,7 @@ export async function getAllCards(req, res, next) {
 /**
  * Endpoint para obtener el detalle de una carta por ID.
  * Soporta internacionalización híbrida.
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function getCardById(req, res, next) {
@@ -77,6 +77,7 @@ export async function getCardById(req, res, next) {
     // Si no existe, retornar 404
     if (!card) {
       const err = translate(ERROR_KEYS.CARD_NOT_FOUND, lang);
+
       return res.status(404).json({
         error: err.error,
         message: err.message
@@ -86,7 +87,7 @@ export async function getCardById(req, res, next) {
     // Mapear y aplanar la carta individual
     const formattedCard = mapCardToLang(card, lang);
 
-    res.status(200).json(formattedCard);
+    return res.status(200).json(formattedCard);
   } catch (error) {
     next(error);
   }
@@ -95,7 +96,7 @@ export async function getCardById(req, res, next) {
 /**
  * Endpoint para crear una nueva carta.
  * POST /api/cards
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function createCard(req, res, next) {
@@ -104,11 +105,13 @@ export async function createCard(req, res, next) {
 
     // 1. Validar el body de forma manual
     const validationErrors = validateCard(req.body);
+
     if (validationErrors.length > 0) {
       const details = validationErrors.map(err => ({
         field: err.field,
         message: translate(err.errorKey, lang)
       }));
+
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
         details
@@ -119,6 +122,7 @@ export async function createCard(req, res, next) {
 
     // 2. Validar referencialidad de typeId y rarityId
     const typeExists = await cardService.checkTypeExists(typeId);
+
     if (!typeExists) {
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
@@ -127,6 +131,7 @@ export async function createCard(req, res, next) {
     }
 
     const rarityExists = await cardService.checkRarityExists(rarityId);
+
     if (!rarityExists) {
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
@@ -140,7 +145,7 @@ export async function createCard(req, res, next) {
     // 4. Retornar en el idioma adecuado, aplanada
     const formattedCard = mapCardToLang(newCard, lang);
 
-    res.status(201).json(formattedCard);
+    return res.status(201).json(formattedCard);
   } catch (error) {
     next(error);
   }
@@ -149,7 +154,7 @@ export async function createCard(req, res, next) {
 /**
  * Endpoint para actualizar una carta existente.
  * PUT /api/cards/:id
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function updateCard(req, res, next) {
@@ -166,11 +171,13 @@ export async function updateCard(req, res, next) {
 
     // 1. Validar el body de forma manual
     const validationErrors = validateCard(req.body);
+
     if (validationErrors.length > 0) {
       const details = validationErrors.map(err => ({
         field: err.field,
         message: translate(err.errorKey, lang)
       }));
+
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
         details
@@ -181,6 +188,7 @@ export async function updateCard(req, res, next) {
 
     // 2. Validar referencialidad de typeId y rarityId
     const typeExists = await cardService.checkTypeExists(typeId);
+
     if (!typeExists) {
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
@@ -189,6 +197,7 @@ export async function updateCard(req, res, next) {
     }
 
     const rarityExists = await cardService.checkRarityExists(rarityId);
+
     if (!rarityExists) {
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
@@ -202,6 +211,7 @@ export async function updateCard(req, res, next) {
     // 4. Si la carta no existe, retornar 404
     if (!updatedCard) {
       const err = translate(ERROR_KEYS.CARD_NOT_FOUND, lang);
+
       return res.status(404).json({
         error: err.error,
         message: err.message
@@ -211,7 +221,7 @@ export async function updateCard(req, res, next) {
     // 5. Retornar en el idioma adecuado, aplanada
     const formattedCard = mapCardToLang(updatedCard, lang);
 
-    res.status(200).json(formattedCard);
+    return res.status(200).json(formattedCard);
   } catch (error) {
     next(error);
   }
@@ -220,7 +230,7 @@ export async function updateCard(req, res, next) {
 /**
  * Endpoint para eliminar una carta.
  * DELETE /api/cards/:id
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function deleteCard(req, res, next) {
@@ -241,6 +251,7 @@ export async function deleteCard(req, res, next) {
     // 2. Si la carta no existe, retornar 404
     if (!deletedCard) {
       const err = translate(ERROR_KEYS.CARD_NOT_FOUND, lang);
+
       return res.status(404).json({
         error: err.error,
         message: err.message
@@ -248,7 +259,7 @@ export async function deleteCard(req, res, next) {
     }
 
     // 3. Retornar 200 OK con mensaje de éxito (conforme al formato de favoritos)
-    res.status(200).json({
+    return res.status(200).json({
       message: translate(ERROR_KEYS.CARD_DELETED, lang)
     });
   } catch (error) {
@@ -259,7 +270,7 @@ export async function deleteCard(req, res, next) {
 /**
  * Endpoint para obtener el detalle completo de una carta para su edición (sin aplanar).
  * GET /api/cards/:id/edit
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function getCardForEdit(req, res, next) {
@@ -278,6 +289,7 @@ export async function getCardForEdit(req, res, next) {
 
     if (!card) {
       const err = translate(ERROR_KEYS.CARD_NOT_FOUND, lang);
+
       return res.status(404).json({
         error: err.error,
         message: err.message
@@ -285,9 +297,9 @@ export async function getCardForEdit(req, res, next) {
     }
 
     const formattedCard = mapCardForEdit(card);
-    res.status(200).json(formattedCard);
+
+    return res.status(200).json(formattedCard);
   } catch (error) {
     next(error);
   }
 }
-

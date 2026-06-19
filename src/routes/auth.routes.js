@@ -11,5 +11,3 @@ router.post('/auth/logout', logout);
 router.get('/auth/me', requireAuth, getMe);
 
 export default router;
-
-

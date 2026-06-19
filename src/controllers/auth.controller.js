@@ -92,8 +92,10 @@ export async function login(req, res, next) {
       });
     }
 
+    console.log(`[LOGIN DEBUG] email: ${email}, normalized: ${email.toLowerCase()}`);
     // 2. Buscar usuario por email
     const user = await userService.getUserByEmail(email.toLowerCase());
+    console.log(`[LOGIN DEBUG] user found: ${user ? 'YES' : 'NO'}`);
 
     if (!user) {
       const err = translate(ERROR_KEYS.INVALID_CREDENTIALS, lang);
@@ -106,6 +108,7 @@ export async function login(req, res, next) {
 
     // 3. Validar contraseña
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log(`[LOGIN DEBUG] password valid: ${isPasswordValid}`);
 
     if (!isPasswordValid) {
       const err = translate(ERROR_KEYS.INVALID_CREDENTIALS, lang);

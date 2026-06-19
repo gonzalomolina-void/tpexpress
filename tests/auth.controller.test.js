@@ -130,7 +130,8 @@ describe('Auth Controller - Unit Tests', () => {
         email: 'new@example.com',
         name: 'Gonzalo',
         password: 'hashedpassword',
-        role: { name: 'usuario' }
+        role: { name: 'usuario' },
+        profile: { id: 2, userId: 2, darkMode: false, language: 'es' }
       });
 
       await register(req, res, next);
@@ -146,7 +147,8 @@ describe('Auth Controller - Unit Tests', () => {
         id: 2,
         email: 'new@example.com',
         name: 'Gonzalo',
-        role: 'usuario'
+        role: 'usuario',
+        profile: { id: 2, userId: 2, darkMode: false, language: 'es' }
       });
     });
 
@@ -212,7 +214,8 @@ describe('Auth Controller - Unit Tests', () => {
         id: 1,
         email: 'test@example.com',
         password: 'hashedpassword',
-        role: { name: 'admin' }
+        role: { name: 'admin' },
+        profile: { id: 1, userId: 1, darkMode: false, language: 'es' }
       });
       bcrypt.compare.mockResolvedValue(true);
       jwt.sign.mockReturnValue('mocked-jwt-token');
@@ -256,7 +259,8 @@ describe('Auth Controller - Unit Tests', () => {
         user: {
           id: 1,
           email: 'test@example.com',
-          role: 'admin'
+          role: 'admin',
+          profile: { id: 1, userId: 1, darkMode: false, language: 'es' }
         }
       });
     });
@@ -378,7 +382,12 @@ describe('Auth Controller - Unit Tests', () => {
 
   describe('GET /api/auth/me', () => {
     it('debería retornar 200 y el perfil del usuario autenticado', async () => {
-      req.user = { id: 1, email: 'test@example.com', role: 'usuario' };
+      req.user = {
+        id: 1,
+        email: 'test@example.com',
+        role: 'usuario',
+        profile: { id: 1, userId: 1, darkMode: false, language: 'es' }
+      };
 
       await getMe(req, res, next);
 
@@ -386,7 +395,8 @@ describe('Auth Controller - Unit Tests', () => {
       expect(res.json).toHaveBeenCalledWith({
         id: 1,
         email: 'test@example.com',
-        role: 'usuario'
+        role: 'usuario',
+        profile: { id: 1, userId: 1, darkMode: false, language: 'es' }
       });
     });
 

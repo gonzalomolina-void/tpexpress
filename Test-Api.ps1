@@ -715,6 +715,68 @@ try {
         }
     }
 
+    # TC-36: GET /api/profile (Authenticated)
+    Write-Host "TC-36: GET /api/profile (Authenticated)"
+    $resProfile = Invoke-Api -Method Get -Uri "$baseUrl/api/profile" -headers $adminHeaders
+    Assert-Status $resProfile 200 "TC-36: GET /api/profile"
+    if ($resProfile.StatusCode -eq 200) {
+        $profile = $resProfile.Content | ConvertFrom-Json
+        if ($null -ne $profile.darkMode -and $null -ne $profile.language) {
+            Write-Host "  [PASS] Profile structure verified (darkMode: $($profile.darkMode), language: $($profile.language))" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] Profile structure invalid: $($resProfile.Content)" -ForegroundColor Red
+        }
+    }
+
+    # TC-37: PUT /api/profile (Valid Update)
+    Write-Host "TC-37: PUT /api/profile (Valid Update)"
+    $updateBody = @{
+        darkMode = $true
+        language = "en"
+    } | ConvertTo-Json
+    $resUpdate = Invoke-Api -Method Put -Uri "$baseUrl/api/profile" -body $updateBody -headers $adminHeaders
+    Assert-Status $resUpdate 200 "TC-37: PUT /api/profile (Valid)"
+    if ($resUpdate.StatusCode -eq 200) {
+        $updated = $resUpdate.Content | ConvertFrom-Json
+        if ($updated.darkMode -eq $true -and $updated.language -eq "en") {
+            Write-Host "  [PASS] Profile updated successfully" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] Profile update did not apply properly: $($resUpdate.Content)" -ForegroundColor Red
+        }
+    }
+
+    # TC-38: PUT /api/profile (Invalid language "fr")
+    Write-Host "TC-38: PUT /api/profile (Invalid language 'fr')"
+    $invalidLangBody = @{
+        language = "fr"
+    } | ConvertTo-Json
+    $resInvalidLang = Invoke-Api -Method Put -Uri "$baseUrl/api/profile" -body $invalidLangBody -headers $adminHeaders
+    Assert-Status $resInvalidLang 400 "TC-38: PUT /api/profile (Invalid language)"
+    if ($resInvalidLang.StatusCode -eq 400) {
+        $errResponse = $resInvalidLang.Content | ConvertFrom-Json
+        if ($errResponse.details -and $errResponse.details[0].field -eq "language") {
+            Write-Host "  [PASS] Rejected invalid language error message: $($errResponse.details[0].message)" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] Error payload missing or field incorrect: $($resInvalidLang.Content)" -ForegroundColor Red
+        }
+    }
+
+    # TC-39: PUT /api/profile (Invalid darkMode type "yes")
+    Write-Host "TC-39: PUT /api/profile (Invalid darkMode type 'yes')"
+    $invalidDarkModeBody = @{
+        darkMode = "yes"
+    } | ConvertTo-Json
+    $resInvalidDarkMode = Invoke-Api -Method Put -Uri "$baseUrl/api/profile" -body $invalidDarkModeBody -headers $adminHeaders
+    Assert-Status $resInvalidDarkMode 400 "TC-39: PUT /api/profile (Invalid darkMode)"
+
+    # TC-40: GET /api/profile sin token (debe dar 401)
+    Write-Host "TC-40: GET /api/profile sin token"
+    $backupSession = $global:apiSession
+    $global:apiSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $resProfileNoAuth = Invoke-Api -Method Get -Uri "$baseUrl/api/profile"
+    Assert-Status $resProfileNoAuth 401 "TC-40: GET /api/profile sin token"
+    $global:apiSession = $backupSession
+
     Write-Host "=== QA API TEST SUITE COMPLETE ===" -ForegroundColor Cyan
 } finally {
     # Clean up background server process

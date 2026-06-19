@@ -23,10 +23,14 @@ export async function createUser({ email, name, password, role }) {
       password: hashedPassword,
       role: {
         connect: { name: role || ROLES.USER }
+      },
+      profile: {
+        create: {}
       }
     },
     include: {
-      role: true
+      role: true,
+      profile: true
     }
   });
 }
@@ -40,7 +44,7 @@ export async function createUser({ email, name, password, role }) {
 export async function getUserByEmail(email) {
   return prisma.user.findUnique({
     where: { email },
-    include: { role: true }
+    include: { role: true, profile: true }
   });
 }
 
@@ -53,6 +57,6 @@ export async function getUserByEmail(email) {
 export async function getUserById(id) {
   return prisma.user.findUnique({
     where: { id },
-    include: { role: true }
+    include: { role: true, profile: true }
   });
 }

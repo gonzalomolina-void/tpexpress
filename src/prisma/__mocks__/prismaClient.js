@@ -11,6 +11,13 @@ const prismaMock = {
     update: vi.fn(),
     delete: vi.fn()
   },
+  profile: {
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn()
+  },
   favorite: {
     findUnique: vi.fn(),
     findFirst: vi.fn(),

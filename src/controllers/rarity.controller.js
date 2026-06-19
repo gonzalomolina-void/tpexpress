@@ -4,7 +4,7 @@ import { getLanguage } from '../utils/i18n.js';
 /**
  * Endpoint para obtener el listado de rarezas de cartas.
  * Soporta internacionalización.
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function getAllRarities(req, res, next) {

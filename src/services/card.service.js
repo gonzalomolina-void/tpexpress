@@ -19,7 +19,7 @@ const INCLUDE_RELATIONS = {
 
 /**
  * Obtiene las cartas de la base de datos, con soporte opcional para paginación y filtros.
- * 
+ *
  * @param {Object} options - Parámetros de consulta.
  * @param {number|null} options.page - Número de página (1-indexed).
  * @param {number|null} options.limit - Cantidad máxima de registros por página.
@@ -101,7 +101,7 @@ export async function getCards({ page, limit, search, type, rarity, lang = 'es' 
 
 /**
  * Obtiene una carta específica por su ID.
- * 
+ *
  * @param {number} id - Identificador único de la carta.
  * @returns {Promise<Object|null>} El registro de la carta con sus traducciones o null si no se encuentra.
  */
@@ -134,7 +134,7 @@ export async function checkRarityExists(id) {
 
 /**
  * Crea una nueva carta y sus traducciones correspondientes en la base de datos.
- * 
+ *
  * @param {Object} data - Datos de la carta y sus traducciones.
  * @returns {Promise<Object>} La carta creada con sus relaciones.
  */
@@ -163,15 +163,16 @@ export async function createCard({ cost, atk, def, image, typeId, rarityId, tran
 
 /**
  * Actualiza una carta existente y sus traducciones asociadas en una transacción.
- * 
+ *
  * @param {number} id - El ID de la carta a actualizar.
  * @param {Object} data - Nuevos datos de la carta.
  * @returns {Promise<Object|null>} La carta actualizada o null si no se encuentra.
  */
 export async function updateCard(id, { cost, atk, def, image, typeId, rarityId, translations }) {
-  return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async tx => {
     // Verificar si la carta existe
     const existing = await tx.card.findUnique({ where: { id } });
+
     if (!existing) return null;
 
     // Actualizar datos base de la carta
@@ -221,7 +222,7 @@ export async function updateCard(id, { cost, atk, def, image, typeId, rarityId, 
 
 /**
  * Elimina una carta de la base de datos por su ID (la eliminación es en cascada).
- * 
+ *
  * @param {number} id - El ID de la carta a eliminar.
  * @returns {Promise<Object|null>} El registro eliminado o null si no existe.
  */
@@ -234,7 +235,7 @@ export async function deleteCard(id) {
     if (error.code === 'P2025') {
       return null;
     }
+
     throw error;
   }
 }
-

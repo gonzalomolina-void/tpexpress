@@ -7,7 +7,7 @@ const packageJson = require('../../package.json');
 /**
  * Controlador de salud/diagnóstico de la API.
  * GET /api/health
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function getHealth(req, res, next) {

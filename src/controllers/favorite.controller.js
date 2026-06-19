@@ -5,7 +5,7 @@ import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 
 /**
  * Obtiene el listado de favoritos del usuario autenticado.
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function getFavorites(req, res, next) {
@@ -14,7 +14,7 @@ export async function getFavorites(req, res, next) {
     const lang = getLanguage(req);
 
     const favorites = await favoriteService.getFavorites(userId);
-    
+
     // Mapear y aplanar la estructura de i18n para cada carta favorita
     const formattedCards = favorites.map(fav => mapCardToLang(fav.card, lang));
 
@@ -26,7 +26,7 @@ export async function getFavorites(req, res, next) {
 
 /**
  * Agrega una carta al listado de favoritos del usuario autenticado.
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function addFavorite(req, res, next) {
@@ -45,6 +45,7 @@ export async function addFavorite(req, res, next) {
 
     // 2. Validar existencia de la carta en base de datos
     const card = await cardService.getCardById(cardId);
+
     if (!card) {
       const err = translate(ERROR_KEYS.CARD_NOT_FOUND, lang);
       return res.status(404).json({
@@ -55,6 +56,7 @@ export async function addFavorite(req, res, next) {
 
     // 2.5. Validar que la carta no haya sido agregada previamente
     const existingFavorite = await favoriteService.getFavorite(userId, cardId);
+
     if (existingFavorite) {
       const err = translate(ERROR_KEYS.FAVORITE_ALREADY_EXISTS, lang);
       return res.status(409).json({
@@ -76,7 +78,7 @@ export async function addFavorite(req, res, next) {
 
 /**
  * Remueve una carta del listado de favoritos del usuario autenticado.
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function removeFavorite(req, res, next) {
@@ -95,6 +97,7 @@ export async function removeFavorite(req, res, next) {
 
     // 2. Borrar favorito de base de datos
     const deletedFavorite = await favoriteService.removeFavorite(userId, cardId);
+
     if (!deletedFavorite) {
       const err = translate(ERROR_KEYS.FAVORITE_NOT_FOUND, lang);
       return res.status(404).json({

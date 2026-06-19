@@ -21,7 +21,7 @@ function isEmptyObject(obj) {
 
 /**
  * Valida el array de traducciones enviado en el body.
- * 
+ *
  * @param {Array} translations - Array de traducciones.
  * @returns {Array<{field: string, errorKey: string}>} Errores de validación de traducciones.
  */
@@ -40,22 +40,22 @@ function validateTranslations(translations) {
 
   translations.forEach((translation, index) => {
     if (!translation.language || !['es', 'en'].includes(translation.language)) {
-      errors.push({ 
-        field: `translations[${index}].language`, 
+      errors.push({
+        field: `translations[${index}].language`,
         errorKey: ERROR_KEYS.TRANSLATION_LANGUAGE_INVALID
       });
     }
 
     if (!isNonEmptyString(translation.name)) {
-      errors.push({ 
-        field: `translations[${index}].name`, 
+      errors.push({
+        field: `translations[${index}].name`,
         errorKey: ERROR_KEYS.TRANSLATION_NAME_INVALID
       });
     }
 
     if (!isNonEmptyString(translation.description)) {
-      errors.push({ 
-        field: `translations[${index}].description`, 
+      errors.push({
+        field: `translations[${index}].description`,
         errorKey: ERROR_KEYS.TRANSLATION_DESCRIPTION_INVALID
       });
     }
@@ -67,7 +67,7 @@ function validateTranslations(translations) {
 /**
  * Valida los datos del body de una carta de forma manual, soportando traducciones anidadas.
  * Retorna un array con los detalles de los errores encontrados.
- * 
+ *
  * @param {Object} body - El cuerpo de la petición.
  * @returns {Array<{field: string, errorKey: string}>} Array de errores de validación.
  */

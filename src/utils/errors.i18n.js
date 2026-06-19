@@ -49,29 +49,27 @@ export const ERROR_KEYS = {
   BODY_REQUIRED: 'BODY_REQUIRED'
 };
 
-i18next
-  .use(i18nextMiddleware.LanguageDetector)
-  .init({
-    preload: ['es', 'en'],
-    fallbackLng: 'es',
-    detection: {
-      order: ['querystring', 'header'],
-      lookupQuerystring: 'lang'
-    },
-    resources: {
-      es: { translation: es },
-      en: { translation: en }
-    },
-    interpolation: {
-      escapeValue: false
-    }
-  });
+i18next.use(i18nextMiddleware.LanguageDetector).init({
+  preload: ['es', 'en'],
+  fallbackLng: 'es',
+  detection: {
+    order: ['querystring', 'header'],
+    lookupQuerystring: 'lang'
+  },
+  resources: {
+    es: { translation: es },
+    en: { translation: en }
+  },
+  interpolation: {
+    escapeValue: false
+  }
+});
 
 export const i18nMiddleware = i18nextMiddleware.handle(i18next);
 
 /**
  * Traduce una clave de error al idioma seleccionado.
- * 
+ *
  * @param {string} key - Clave del error (de ERROR_KEYS).
  * @param {"es" | "en"} lang - Idioma seleccionado ("es" por defecto).
  * @param {Array} args - Argumentos para mensajes dinámicos (funciones).

@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_fallback_key';
  * Middleware para requerir autenticacion mediante JWT.
  * Valida la cabecera 'Authorization: Bearer <token>', verifica la firma del JWT,
  * obtiene el usuario de la base de datos y lo inyecta en 'req.user' (excluyendo password).
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function requireAuth(req, res, next) {
@@ -36,6 +36,7 @@ export async function requireAuth(req, res, next) {
 
     // 3. Obtener el usuario asociado y verificar existencia
     const user = await userService.getUserById(decoded.userId);
+
     if (!user) {
       const errorMsg = translate(ERROR_KEYS.USER_NOT_FOUND, lang);
       return res.status(401).json(errorMsg);
@@ -57,7 +58,7 @@ export async function requireAuth(req, res, next) {
 /**
  * Middleware para requerir un rol especifico.
  * Debe ejecutarse DESPUES de requireAuth.
- * 
+ *
  * @param {string} role - El rol requerido (por ejemplo 'admin').
  * @returns {import('express').RequestHandler}
  */

@@ -6,7 +6,7 @@ import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 /**
  * Endpoint para obtener el listado de cartas.
  * Soporta internacionalización híbrida y paginación opcional emulando mockapi.io.
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function getAllCards(req, res, next) {
@@ -16,11 +16,12 @@ export async function getAllCards(req, res, next) {
     const { search, type, rarity } = req.query;
 
     let isPaging = false;
+
     // Si se pasa 'page' o 'limit', activamos la paginación.
     if (page !== null || limit !== null) {
       isPaging = true;
-      page = (page && page > 0) ? page : 1;
-      limit = (limit && limit > 0) ? limit : 10; // 10 elementos por página por defecto si se omite limit
+      page = page && page > 0 ? page : 1;
+      limit = limit && limit > 0 ? limit : 10; // 10 elementos por página por defecto si se omite limit
     }
 
     // Resolver el idioma del request
@@ -56,7 +57,7 @@ export async function getAllCards(req, res, next) {
 /**
  * Endpoint para obtener el detalle de una carta por ID.
  * Soporta internacionalización híbrida.
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function getCardById(req, res, next) {
@@ -95,7 +96,7 @@ export async function getCardById(req, res, next) {
 /**
  * Endpoint para crear una nueva carta.
  * POST /api/cards
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function createCard(req, res, next) {
@@ -104,6 +105,7 @@ export async function createCard(req, res, next) {
 
     // 1. Validar el body de forma manual
     const validationErrors = validateCard(req.body);
+
     if (validationErrors.length > 0) {
       const details = validationErrors.map(err => ({
         field: err.field,
@@ -119,6 +121,7 @@ export async function createCard(req, res, next) {
 
     // 2. Validar referencialidad de typeId y rarityId
     const typeExists = await cardService.checkTypeExists(typeId);
+
     if (!typeExists) {
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
@@ -127,6 +130,7 @@ export async function createCard(req, res, next) {
     }
 
     const rarityExists = await cardService.checkRarityExists(rarityId);
+
     if (!rarityExists) {
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
@@ -149,7 +153,7 @@ export async function createCard(req, res, next) {
 /**
  * Endpoint para actualizar una carta existente.
  * PUT /api/cards/:id
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function updateCard(req, res, next) {
@@ -166,6 +170,7 @@ export async function updateCard(req, res, next) {
 
     // 1. Validar el body de forma manual
     const validationErrors = validateCard(req.body);
+
     if (validationErrors.length > 0) {
       const details = validationErrors.map(err => ({
         field: err.field,
@@ -181,6 +186,7 @@ export async function updateCard(req, res, next) {
 
     // 2. Validar referencialidad de typeId y rarityId
     const typeExists = await cardService.checkTypeExists(typeId);
+
     if (!typeExists) {
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
@@ -189,6 +195,7 @@ export async function updateCard(req, res, next) {
     }
 
     const rarityExists = await cardService.checkRarityExists(rarityId);
+
     if (!rarityExists) {
       return res.status(400).json({
         error: translate(ERROR_KEYS.INVALID_DATA, lang),
@@ -220,7 +227,7 @@ export async function updateCard(req, res, next) {
 /**
  * Endpoint para eliminar una carta.
  * DELETE /api/cards/:id
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function deleteCard(req, res, next) {
@@ -259,7 +266,7 @@ export async function deleteCard(req, res, next) {
 /**
  * Endpoint para obtener el detalle completo de una carta para su edición (sin aplanar).
  * GET /api/cards/:id/edit
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function getCardForEdit(req, res, next) {
@@ -290,4 +297,3 @@ export async function getCardForEdit(req, res, next) {
     next(error);
   }
 }
-

@@ -4,7 +4,7 @@ import { ROLES } from '../constants/auth.constants.js';
 
 /**
  * Crea un nuevo usuario en la base de datos con la contraseña hasheada.
- * 
+ *
  * @param {Object} userData
  * @param {string} userData.email
  * @param {string} userData.name
@@ -33,7 +33,7 @@ export async function createUser({ email, name, password, role }) {
 
 /**
  * Obtiene un usuario de la base de datos por su email.
- * 
+ *
  * @param {string} email
  * @returns {Promise<Object|null>} El usuario o null si no se encuentra.
  */
@@ -46,7 +46,7 @@ export async function getUserByEmail(email) {
 
 /**
  * Obtiene un usuario de la base de datos por su ID.
- * 
+ *
  * @param {number} id
  * @returns {Promise<Object|null>} El usuario o null si no se encuentra.
  */

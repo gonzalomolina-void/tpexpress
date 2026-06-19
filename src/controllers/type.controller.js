@@ -4,7 +4,7 @@ import { getLanguage } from '../utils/i18n.js';
 /**
  * Endpoint para obtener el listado de tipos de cartas.
  * Soporta internacionalización.
- * 
+ *
  * @type {import('express').RequestHandler}
  */
 export async function getAllTypes(req, res, next) {

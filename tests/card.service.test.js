@@ -35,7 +35,14 @@ describe('Card Service - Unit Tests', () => {
     prisma.card.findMany.mockResolvedValue(mockDbCards);
     prisma.card.count.mockResolvedValue(1);
 
-    const result = await getCards({ page: 1, limit: 10, search: undefined, type: undefined, rarity: undefined, lang: 'es' });
+    const result = await getCards({
+      page: 1,
+      limit: 10,
+      search: undefined,
+      type: undefined,
+      rarity: undefined,
+      lang: 'es'
+    });
 
     expect(prisma.card.findMany).toHaveBeenCalledWith({
       where: {},
@@ -52,7 +59,14 @@ describe('Card Service - Unit Tests', () => {
     prisma.card.findMany.mockResolvedValue(mockDbCards);
     prisma.card.count.mockResolvedValue(1);
 
-    const result = await getCards({ page: 1, limit: 10, search: 'kaelen', type: undefined, rarity: undefined, lang: 'en' });
+    const result = await getCards({
+      page: 1,
+      limit: 10,
+      search: 'kaelen',
+      type: undefined,
+      rarity: undefined,
+      lang: 'en'
+    });
 
     expect(prisma.card.findMany).toHaveBeenCalledWith({
       where: {
@@ -78,7 +92,15 @@ describe('Card Service - Unit Tests', () => {
     const dbError = new Error('Prisma error');
     prisma.card.findMany.mockRejectedValue(dbError);
 
-    await expect(getCards({ page: 1, limit: 10, search: undefined, type: undefined, rarity: undefined, lang: 'es' }))
-      .rejects.toThrow('Prisma error');
+    await expect(
+      getCards({
+        page: 1,
+        limit: 10,
+        search: undefined,
+        type: undefined,
+        rarity: undefined,
+        lang: 'es'
+      })
+    ).rejects.toThrow('Prisma error');
   });
 });

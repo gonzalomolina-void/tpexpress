@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/gonzalomolina-void/tpexpress/compare/v1.1.3...v1.5.0) (2026-06-20)
+
+
+### Features
+
+* **about:** add About API configuration ([12d15cf](https://github.com/gonzalomolina-void/tpexpress/commit/12d15cf6fe1c967b7e36267485ce83d2fcd9d750))
+* **about:** add language parameter to About API query ([a6d2fb4](https://github.com/gonzalomolina-void/tpexpress/commit/a6d2fb4b636e2a709d5f150724b6358843b49903))
+* **about:** update API URL to use baseUrl variable ([78469df](https://github.com/gonzalomolina-void/tpexpress/commit/78469df20c3515ca06cfed356e489a17caed7a0e))
+* **auth:** implement endpoint to change user password ([2795a92](https://github.com/gonzalomolina-void/tpexpress/commit/2795a92f515e70b2a24cfd3d91b2c5bc717054cd))
+* **db:** add interactive user update utility script ([9893749](https://github.com/gonzalomolina-void/tpexpress/commit/9893749866194943f17df29e55478b1f9a5317c1))
+* **health:** localize application description in health endpoint response ([39ff56f](https://github.com/gonzalomolina-void/tpexpress/commit/39ff56fc16bc1c6e7f76a4af4cf0bef712536024))
+* implement user profile model and API endpoints ([6a261f9](https://github.com/gonzalomolina-void/tpexpress/commit/6a261f990e078ae4e8b962eb2f42cdc14ca2445f))
+* **search:** extend card search to match name or description ([13cc310](https://github.com/gonzalomolina-void/tpexpress/commit/13cc3105079da82e57be564d0147da0c78fc5577))
+* **security:** implement HTTP status code adjustments for user registration and favorites management ([5c543a4](https://github.com/gonzalomolina-void/tpexpress/commit/5c543a4b8cd575b9194ae7a92d3ee49240fbce7b))
+
 ### [1.1.3](https://github.com/gonzalomolina-void/tpexpress/compare/v1.1.2...v1.1.3) (2026-06-17)
 
 

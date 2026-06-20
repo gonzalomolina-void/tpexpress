@@ -37,38 +37,48 @@ describe('Profile Service - Unit Tests', () => {
   });
 
   describe('updateProfile', () => {
-    it('debería actualizar y retornar el perfil correspondiente al userId', async () => {
+    it('debería actualizar y retornar el perfil correspondiente al userId usando upsert', async () => {
       const updatedProfile = {
         id: 1,
         userId: 10,
         darkMode: true,
         language: 'en'
       };
-      prisma.profile.update.mockResolvedValue(updatedProfile);
+      prisma.profile.upsert.mockResolvedValue(updatedProfile);
 
       const result = await updateProfile(10, { darkMode: true, language: 'en' });
 
-      expect(prisma.profile.update).toHaveBeenCalledWith({
+      expect(prisma.profile.upsert).toHaveBeenCalledWith({
         where: { userId: 10 },
-        data: { darkMode: true, language: 'en' }
+        update: { darkMode: true, language: 'en' },
+        create: {
+          userId: 10,
+          darkMode: true,
+          language: 'en'
+        }
       });
       expect(result).toEqual(updatedProfile);
     });
 
-    it('debería permitir actualizar parcialmente solo el campo darkMode', async () => {
+    it('debería permitir actualizar parcialmente solo el campo darkMode usando upsert con valores por defecto', async () => {
       const updatedProfile = {
         id: 1,
         userId: 10,
         darkMode: false,
         language: 'en'
       };
-      prisma.profile.update.mockResolvedValue(updatedProfile);
+      prisma.profile.upsert.mockResolvedValue(updatedProfile);
 
       const result = await updateProfile(10, { darkMode: false });
 
-      expect(prisma.profile.update).toHaveBeenCalledWith({
+      expect(prisma.profile.upsert).toHaveBeenCalledWith({
         where: { userId: 10 },
-        data: { darkMode: false }
+        update: { darkMode: false },
+        create: {
+          userId: 10,
+          darkMode: false,
+          language: 'es'
+        }
       });
       expect(result).toEqual(updatedProfile);
     });

@@ -35,13 +35,13 @@ app.use(i18nMiddleware);
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Registrar rutas
-app.use('/api', healthRoutes);
-app.use('/api', cardRoutes);
-app.use('/api', authRoutes);
-app.use('/api', favoriteRoutes);
-app.use('/api', aboutRoutes);
-app.use('/api', typeRoutes);
-app.use('/api', rarityRoutes);
+app.use('/api/health', healthRoutes);
+app.use('/api/about', aboutRoutes);
+app.use('/api/cards', cardRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/favorites', favoriteRoutes);
+app.use('/api/types', typeRoutes);
+app.use('/api/rarities', rarityRoutes);
 
 // Middleware global de errores
 app.use(errorHandler);

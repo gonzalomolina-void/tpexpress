@@ -14,13 +14,13 @@ const router = Router();
 
 router.use(requireAuth);
 
-router.get('/cards', getAllCards);
-router.get('/cards/:id', getCardById);
-router.get('/cards/:id/edit', requireRole(ROLES.ADMIN), getCardForEdit);
+router.get('/', getAllCards);
+router.get('/:id', getCardById);
+router.get('/:id/edit', requireRole(ROLES.ADMIN), getCardForEdit);
 
 // Rutas de escritura - Protegidas para usuarios admin
-router.post('/cards', requireRole(ROLES.ADMIN), createCard);
-router.put('/cards/:id', requireRole(ROLES.ADMIN), updateCard);
-router.delete('/cards/:id', requireRole(ROLES.ADMIN), deleteCard);
+router.post('/', requireRole(ROLES.ADMIN), createCard);
+router.put('/:id', requireRole(ROLES.ADMIN), updateCard);
+router.delete('/:id', requireRole(ROLES.ADMIN), deleteCard);
 
 export default router;

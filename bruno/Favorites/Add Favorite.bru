@@ -10,6 +10,14 @@ post {
   auth: bearer
 }
 
+params:query {
+  ~lang: es
+}
+
+headers {
+  ~Accept-Language: en
+}
+
 body:json {
   {
     "cardId": 1
@@ -17,5 +25,5 @@ body:json {
 }
 
 auth:bearer {
-  token: {{userToken}}
+  token: {{token}}
 }

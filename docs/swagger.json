@@ -590,7 +590,7 @@
             }
           },
           "400": {
-            "description": "Datos inválidos o email ya registrado",
+            "description": "Datos inválidos",
             "content": {
               "application/json": {
                 "schema": {
@@ -612,6 +612,38 @@
                           "message": {
                             "type": "string",
                             "example": "El formato del email es invalido"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email ya registrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Email ya registrado"
+                    },
+                    "details": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "field": {
+                            "type": "string",
+                            "example": "email"
+                          },
+                          "message": {
+                            "type": "string",
+                            "example": "El email indicado ya se encuentra registrado en el sistema"
                           }
                         }
                       }
@@ -827,6 +859,101 @@
         }
       }
     },
+    "/api/auth/change-password": {
+      "put": {
+        "summary": "Cambiar contraseña del usuario autenticado",
+        "description": "Actualiza la contraseña del usuario autenticado después de validar su contraseña actual.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentPassword": {
+                    "type": "string",
+                    "description": "Contraseña actual del usuario",
+                    "example": "password123"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "description": "Nueva contraseña del usuario (mínimo 6 caracteres)",
+                    "example": "newSecurePassword123"
+                  }
+                },
+                "required": [
+                  "currentPassword",
+                  "newPassword"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contraseña actualizada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Contraseña actualizada correctamente"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Petición incorrecta (campos requeridos faltantes o nueva contraseña demasiado corta)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Nueva contraseña requerida"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "La nueva contraseña debe tener al menos 6 caracteres"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado (token faltante/inválido o contraseña actual incorrecta)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Contraseña actual invalida"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "La contraseña actual es incorrecta"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/favorites": {
       "get": {
         "summary": "Obtener catálogo de cartas favoritas",
@@ -909,6 +1036,9 @@
           },
           "404": {
             "description": "Carta no encontrada"
+          },
+          "409": {
+            "description": "Conflicto (La carta ya está en favoritos del usuario)"
           }
         }
       }
@@ -950,6 +1080,9 @@
           },
           "401": {
             "description": "No autorizado"
+          },
+          "404": {
+            "description": "El favorito especificado no existe para este usuario"
           }
         }
       }

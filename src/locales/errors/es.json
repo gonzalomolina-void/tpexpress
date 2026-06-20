@@ -1,0 +1,86 @@
+{
+  "UNAUTHORIZED_HEADER": {
+    "error": "No autorizado",
+    "message": "Se requiere un token de autenticación en la cabecera Authorization con formato Bearer <token>"
+  },
+  "TOKEN_INVALID": {
+    "error": "Token inválido",
+    "message": "El token de autenticación provisto es inválido o ha expirado"
+  },
+  "USER_NOT_FOUND": {
+    "error": "Usuario no encontrado",
+    "message": "El usuario asociado al token ya no existe en el sistema"
+  },
+  "AUTH_REQUIRED": {
+    "error": "No autorizado",
+    "message": "Se requiere autenticación previa para verificar el rol"
+  },
+  "FORBIDDEN_ROLE": {
+    "error": "Forbidden",
+    "message": "Acceso denegado: se requiere el rol de {{role}} para realizar esta operación"
+  },
+  "INTERNAL_SERVER_ERROR": {
+    "error": "Internal Server Error",
+    "message": "Ocurrió un error interno en el servidor"
+  },
+  "INVALID_DATA": "Datos inválidos",
+  "EMAIL_REQUIRED": "El email es obligatorio",
+  "NAME_REQUIRED": "El nombre es obligatorio",
+  "PASSWORD_REQUIRED": "La contraseña es obligatoria",
+  "EMAIL_INVALID_FORMAT": "El formato del email es inválido",
+  "PASSWORD_TOO_SHORT": "La contraseña debe tener al menos 6 caracteres",
+  "NAME_TOO_SHORT": "El nombre debe tener al menos 2 caracteres",
+  "NAME_TOO_LONG": "El nombre no puede superar los 50 caracteres",
+  "EMAIL_ALREADY_REGISTERED": {
+    "error": "Email ya registrado",
+    "message": "El email indicado ya se encuentra registrado en el sistema"
+  },
+  "INCOMPLETE_CREDENTIALS": {
+    "error": "Credenciales incompletas",
+    "message": "Debes proporcionar email y contraseña"
+  },
+  "INVALID_CREDENTIALS": {
+    "error": "Credenciales inválidas",
+    "message": "El email o la contraseña son incorrectos"
+  },
+  "INVALID_CARD_ID": "El ID de la carta debe ser un número entero válido",
+  "CARD_NOT_FOUND": {
+    "error": "Recurso no encontrado",
+    "message": "La carta solicitada no existe"
+  },
+  "CARD_TYPE_NOT_FOUND": "El tipo de carta indicado no existe",
+  "RARITY_NOT_FOUND": "La rareza indicada no existe",
+  "CARD_DELETED": "Carta eliminada correctamente",
+  "FAVORITE_ADDED": "Carta agregada a favoritos correctamente",
+  "FAVORITE_DELETED": "Carta eliminada de favoritos correctamente",
+  "FAVORITE_ALREADY_EXISTS": {
+    "error": "Conflicto",
+    "message": "Esta carta ya se encuentra en tus favoritos"
+  },
+  "FAVORITE_NOT_FOUND": {
+    "error": "Recurso no encontrado",
+    "message": "El favorito especificado no existe para este usuario"
+  },
+  "INVALID_COST": "Debe ser un número entero >= 0",
+  "INVALID_ATK": "Debe ser un número entero >= 0",
+  "INVALID_DEF": "Debe ser un número entero >= 0",
+  "INVALID_IMAGE": "Debe ser un string no vacío",
+  "INVALID_TYPE_ID": "Debe ser un ID válido (número > 0)",
+  "INVALID_RARITY_ID": "Debe ser un ID válido (número > 0)",
+  "TRANSLATIONS_REQUIRED": "Es requerido",
+  "TRANSLATIONS_NOT_ARRAY": "Debe ser un array",
+  "TRANSLATIONS_EMPTY": "Debe tener al menos una traducción",
+  "TRANSLATION_LANGUAGE_INVALID": "Debe ser \"es\" o \"en\"",
+  "TRANSLATION_NAME_INVALID": "Debe ser un string no vacío",
+  "TRANSLATION_DESCRIPTION_INVALID": "Debe ser un string no vacío",
+  "BODY_REQUIRED": "El body no puede estar vacío",
+  "INVALID_LANGUAGE": "El idioma debe ser \"es\" o \"en\"",
+  "INVALID_DARK_MODE": "El modo oscuro debe ser un valor booleano",
+  "CURRENT_PASSWORD_REQUIRED": "La contraseña actual es obligatoria",
+  "NEW_PASSWORD_REQUIRED": "La nueva contraseña es obligatoria",
+  "INVALID_CURRENT_PASSWORD": {
+    "error": "No autorizado",
+    "message": "La contraseña actual es incorrecta"
+  },
+  "HEALTH_DESCRIPTION": "API REST oficial para Hexa TCG, proporcionando soporte para gestión de cartas, autenticación de usuarios, favoritos y más, con persistencia en base de datos PostgreSQL mediante Prisma ORM."
+}

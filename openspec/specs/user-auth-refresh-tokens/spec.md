@@ -56,3 +56,49 @@ El sistema MUST permitir la obtención de los datos del usuario actualmente aute
 - THEN el sistema MUST retornar un estado 200 OK
 - AND retornar los datos del usuario en el body JSON (ID, email, y rol aplanado)
 - AND no incluir el campo password en la respuesta
+
+---
+
+### Requirement: User Registration
+El sistema MUST permitir el registro de un nuevo usuario mediante un email único y contraseña. Si el email ya está registrado, el sistema MUST retornar un error con estado `409 Conflict`.
+
+#### Scenario: Successful Registration
+- GIVEN un email que no existe en el sistema
+- WHEN se realiza una petición POST a `/api/auth/register` con nombre, email y contraseña válidos
+- THEN el sistema MUST guardar el usuario con la contraseña hasheada
+- AND retornar un estado 201 Created
+- AND el objeto del usuario sin el campo password
+
+#### Scenario: Duplicate Email Registration
+- GIVEN un usuario registrado existente con el email "dup@example.com"
+- WHEN se realiza una petición POST a `/api/auth/register` con el mismo email "dup@example.com"
+- THEN el sistema MUST denegar la creación
+- AND retornar un estado 409 Conflict
+- AND un mensaje de error indicando que el email ya está registrado
+
+---
+
+### Requirement: Change Password
+El sistema MUST permitir a un usuario autenticado cambiar su contraseña actual validando sus credenciales e imponiendo restricciones sobre la nueva clave.
+
+#### Scenario: Successful Password Change
+- GIVEN un usuario autenticado con un token de acceso válido
+- AND su contraseña actual es "password123"
+- WHEN el usuario realiza un PUT a `/api/auth/change-password` con `currentPassword` como "password123" y `newPassword` como "newSecurePassword123"
+- THEN el sistema MUST retornar status 200 OK
+- AND actualizar la contraseña del usuario hasheándola en la base de datos
+- AND retornar un mensaje de éxito indicando que la contraseña fue actualizada
+
+#### Scenario: Incorrect Current Password
+- GIVEN un usuario autenticado con un token de acceso válido
+- AND su contraseña actual es "password123"
+- WHEN el usuario realiza un PUT a `/api/auth/change-password` con `currentPassword` como "wrongPassword" y `newPassword` como "newSecurePassword123"
+- THEN el sistema MUST denegar la actualización
+- AND retornar status 401 Unauthorized
+- AND retornar un mensaje de error indicando que la contraseña actual es incorrecta
+
+#### Scenario: Invalid New Password (Too Short)
+- GIVEN un usuario autenticado con un token de acceso válido
+- WHEN el usuario realiza un PUT a `/api/auth/change-password` con `currentPassword` como "password123" y `newPassword` como "123"
+- THEN el sistema MUST retornar status 400 Bad Request
+- AND retornar detalles del error indicando que la nueva contraseña debe tener al menos 6 caracteres

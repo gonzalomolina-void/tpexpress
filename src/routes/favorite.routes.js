@@ -5,10 +5,10 @@ import { getFavorites, addFavorite, removeFavorite } from '../controllers/favori
 const router = Router();
 
 // Proteger todas las rutas de favoritos bajo este enrutador
-router.use('/favorites', requireAuth);
+router.use(requireAuth);
 
-router.get('/favorites', getFavorites);
-router.post('/favorites', addFavorite);
-router.delete('/favorites/:id', removeFavorite);
+router.get('/', getFavorites);
+router.post('/', addFavorite);
+router.delete('/:id', removeFavorite);
 
 export default router;

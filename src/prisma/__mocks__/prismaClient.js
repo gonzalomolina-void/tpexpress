@@ -9,7 +9,15 @@ const prismaMock = {
     findFirst: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+    delete: vi.fn()
+  },
+  profile: {
+    findUnique: vi.fn(),
+    findFirst: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
     delete: vi.fn(),
+    upsert: vi.fn()
   },
   favorite: {
     findUnique: vi.fn(),
@@ -17,7 +25,7 @@ const prismaMock = {
     findMany: vi.fn(),
     create: vi.fn(),
     delete: vi.fn(),
-    upsert: vi.fn(),
+    upsert: vi.fn()
   },
   card: {
     findUnique: vi.fn(),
@@ -26,26 +34,27 @@ const prismaMock = {
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
-    count: vi.fn(),
+    count: vi.fn()
   },
   cardType: {
     findUnique: vi.fn(),
-    findMany: vi.fn(),
+    findMany: vi.fn()
   },
   rarity: {
     findUnique: vi.fn(),
-    findMany: vi.fn(),
+    findMany: vi.fn()
   },
   cardTranslation: {
-    upsert: vi.fn(),
+    upsert: vi.fn()
   },
-  $transaction: vi.fn(async (callback) => {
+  $transaction: vi.fn(async callback => {
     // Si se pasa una función callback (función transaccional), la ejecutamos pasándole el mock
     if (typeof callback === 'function') {
       return callback(prismaMock);
     }
+
     return [];
-  }),
+  })
 };
 
 export default prismaMock;

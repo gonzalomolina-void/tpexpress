@@ -4,6 +4,8 @@ import { requireAuth } from '../middlewares/auth.js';
 
 const router = Router();
 
-router.get('/rarities', requireAuth, getAllRarities);
+router.use(requireAuth);
+
+router.get('/', getAllRarities);
 
 export default router;

@@ -10,10 +10,18 @@ delete {
   auth: bearer
 }
 
+params:query {
+  ~lang: es
+}
+
+headers {
+  ~Accept-Language: en
+}
+
 params:path {
   cardId: 1
 }
 
 auth:bearer {
-  token: {{userToken}}
+  token: {{token}}
 }

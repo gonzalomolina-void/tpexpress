@@ -461,6 +461,7 @@ try {
     $registerEmail = "qanewuser_" + (Get-Date -Format "yyyyMMddHHmmss") + "@example.com"
     $bodyRegister = @{
         email = $registerEmail
+        name = "QA User"
         password = "password123"
     } | ConvertTo-Json
     $res = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/register" -Body $bodyRegister
@@ -473,6 +474,11 @@ try {
             Write-Host "  [FAIL] Expected default role 'usuario', got '$($regUser.role)'" -ForegroundColor Red
         }
     }
+
+    # TC-20a: POST /api/auth/register (Duplicate email register, debe dar 409)
+    Write-Host "TC-20a: POST /api/auth/register (Duplicado)"
+    $resDup = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/register" -Body $bodyRegister
+    Assert-Status $resDup 409 "TC-20a: POST /api/auth/register (Duplicado)"
 
     # TC-21: POST /api/auth/login (Login and check role in response and JWT token payload)
     Write-Host "TC-21: POST /api/auth/login"
@@ -708,6 +714,131 @@ try {
             Write-Host "  [FAIL] i18n translation failed or missing. Got: $($legendaryRarity | ConvertTo-Json)" -ForegroundColor Red
         }
     }
+
+    # TC-36: GET /api/profile (Authenticated)
+    Write-Host "TC-36: GET /api/profile (Authenticated)"
+    $resProfile = Invoke-Api -Method Get -Uri "$baseUrl/api/profile" -headers $adminHeaders
+    Assert-Status $resProfile 200 "TC-36: GET /api/profile"
+    if ($resProfile.StatusCode -eq 200) {
+        $profile = $resProfile.Content | ConvertFrom-Json
+        if ($null -ne $profile.darkMode -and $null -ne $profile.language) {
+            Write-Host "  [PASS] Profile structure verified (darkMode: $($profile.darkMode), language: $($profile.language))" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] Profile structure invalid: $($resProfile.Content)" -ForegroundColor Red
+        }
+    }
+
+    # TC-37: PUT /api/profile (Valid Update)
+    Write-Host "TC-37: PUT /api/profile (Valid Update)"
+    $updateBody = @{
+        darkMode = $true
+        language = "en"
+    } | ConvertTo-Json
+    $resUpdate = Invoke-Api -Method Put -Uri "$baseUrl/api/profile" -body $updateBody -headers $adminHeaders
+    Assert-Status $resUpdate 200 "TC-37: PUT /api/profile (Valid)"
+    if ($resUpdate.StatusCode -eq 200) {
+        $updated = $resUpdate.Content | ConvertFrom-Json
+        if ($updated.darkMode -eq $true -and $updated.language -eq "en") {
+            Write-Host "  [PASS] Profile updated successfully" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] Profile update did not apply properly: $($resUpdate.Content)" -ForegroundColor Red
+        }
+    }
+
+    # TC-38: PUT /api/profile (Invalid language "fr")
+    Write-Host "TC-38: PUT /api/profile (Invalid language 'fr')"
+    $invalidLangBody = @{
+        language = "fr"
+    } | ConvertTo-Json
+    $resInvalidLang = Invoke-Api -Method Put -Uri "$baseUrl/api/profile" -body $invalidLangBody -headers $adminHeaders
+    Assert-Status $resInvalidLang 400 "TC-38: PUT /api/profile (Invalid language)"
+    if ($resInvalidLang.StatusCode -eq 400) {
+        $errResponse = $resInvalidLang.Content | ConvertFrom-Json
+        if ($errResponse.details -and $errResponse.details[0].field -eq "language") {
+            Write-Host "  [PASS] Rejected invalid language error message: $($errResponse.details[0].message)" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] Error payload missing or field incorrect: $($resInvalidLang.Content)" -ForegroundColor Red
+        }
+    }
+
+    # TC-39: PUT /api/profile (Invalid darkMode type "yes")
+    Write-Host "TC-39: PUT /api/profile (Invalid darkMode type 'yes')"
+    $invalidDarkModeBody = @{
+        darkMode = "yes"
+    } | ConvertTo-Json
+    $resInvalidDarkMode = Invoke-Api -Method Put -Uri "$baseUrl/api/profile" -body $invalidDarkModeBody -headers $adminHeaders
+    Assert-Status $resInvalidDarkMode 400 "TC-39: PUT /api/profile (Invalid darkMode)"
+
+    # TC-40: GET /api/profile sin token (debe dar 401)
+    Write-Host "TC-40: GET /api/profile sin token"
+    $backupSession = $global:apiSession
+    $global:apiSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $resProfileNoAuth = Invoke-Api -Method Get -Uri "$baseUrl/api/profile"
+    Assert-Status $resProfileNoAuth 401 "TC-40: GET /api/profile sin token"
+    $global:apiSession = $backupSession
+
+    # --- CHANGE PASSWORD TESTS ---
+    Write-Host "=== STARTING CHANGE PASSWORD QA TESTS ===" -ForegroundColor Cyan
+
+    # TC-41: PUT /api/auth/change-password (Successful change and verify login)
+    Write-Host "TC-41: PUT /api/auth/change-password (Successful and verify login)"
+    $pwdUserEmail = "pwduser_" + (Get-Date -Format "yyyyMMddHHmmss") + "@example.com"
+    $pwdUserRegister = @{
+        email = $pwdUserEmail
+        name = "Password User"
+        password = "oldPassword123"
+    } | ConvertTo-Json
+    $resReg = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/register" -Body $pwdUserRegister
+    Assert-Status $resReg 201 "TC-41: Setup - Register Pwd User"
+
+    $pwdUserLogin = @{
+        email = $pwdUserEmail
+        password = "oldPassword123"
+    } | ConvertTo-Json
+    $resLogin = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/login" -Body $pwdUserLogin
+    $pwdUserToken = ($resLogin.Content | ConvertFrom-Json).token
+    $pwdUserHeaders = @{ "Authorization" = "Bearer $pwdUserToken" }
+
+    $changePwdBody = @{
+        currentPassword = "oldPassword123"
+        newPassword = "newSecurePassword123"
+    } | ConvertTo-Json
+    $resChange = Invoke-Api -Method Put -Uri "$baseUrl/api/auth/change-password" -Body $changePwdBody -Headers $pwdUserHeaders
+    Assert-Status $resChange 200 "TC-41: PUT /api/auth/change-password (Valid)"
+
+    # Verify that we can log in with the new password
+    $newLoginBody = @{
+        email = $pwdUserEmail
+        password = "newSecurePassword123"
+    } | ConvertTo-Json
+    $resNewLogin = Invoke-Api -Method Post -Uri "$baseUrl/api/auth/login" -Body $newLoginBody
+    Assert-Status $resNewLogin 200 "TC-41: Verify - Login with new password"
+
+    # TC-42: PUT /api/auth/change-password (Incorrect currentPassword - 401)
+    Write-Host "TC-42: PUT /api/auth/change-password (Incorrect currentPassword)"
+    $wrongPwdBody = @{
+        currentPassword = "wrongOldPassword"
+        newPassword = "anotherPassword123"
+    } | ConvertTo-Json
+    $resWrong = Invoke-Api -Method Put -Uri "$baseUrl/api/auth/change-password" -Body $wrongPwdBody -Headers $pwdUserHeaders
+    Assert-Status $resWrong 401 "TC-42: PUT /api/auth/change-password (Incorrect current)"
+
+    # TC-43: PUT /api/auth/change-password (Short newPassword - 400)
+    Write-Host "TC-43: PUT /api/auth/change-password (Short newPassword)"
+    $shortPwdBody = @{
+        currentPassword = "newSecurePassword123"
+        newPassword = "123"
+    } | ConvertTo-Json
+    $resShort = Invoke-Api -Method Put -Uri "$baseUrl/api/auth/change-password" -Body $shortPwdBody -Headers $pwdUserHeaders
+    Assert-Status $resShort 400 "TC-43: PUT /api/auth/change-password (Short new)"
+
+    # TC-44: PUT /api/auth/change-password without token (401)
+    Write-Host "TC-44: PUT /api/auth/change-password without token"
+    $backupSession = $global:apiSession
+    $global:apiSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+    $resNoAuthPwd = Invoke-Api -Method Put -Uri "$baseUrl/api/auth/change-password" -Body $changePwdBody
+    Assert-Status $resNoAuthPwd 401 "TC-44: PUT /api/auth/change-password sin token"
+    $global:apiSession = $backupSession
 
     Write-Host "=== QA API TEST SUITE COMPLETE ===" -ForegroundColor Cyan
 } finally {

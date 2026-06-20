@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { register, login, refresh, logout, getMe } from '../src/controllers/auth.controller.js';
+import { register, login, refresh, logout, getMe, changePassword } from '../src/controllers/auth.controller.js';
 import { AUTH_CONFIG } from '../src/constants/auth.constants.js';
 import * as userService from '../src/services/user.service.js';
 import bcrypt from 'bcryptjs';
@@ -20,29 +20,27 @@ vi.mock('../src/prisma/prismaClient.js', () => ({
   }
 }));
 
-
 describe('Auth Controller - Unit Tests', () => {
   let req, res, next;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Inicializar mocks de peticiones express
     req = {
       body: {},
       cookies: {}
     };
-    
+
     res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
       cookie: vi.fn().mockReturnThis(),
       clearCookie: vi.fn().mockReturnThis()
     };
-    
+
     next = vi.fn();
   });
-
 
   describe('POST /api/auth/register', () => {
     it('debería retornar 400 si falta el email o la contraseña', async () => {
@@ -71,9 +69,7 @@ describe('Auth Controller - Unit Tests', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Datos inválidos',
-          details: expect.arrayContaining([
-            { field: 'name', message: 'El nombre es obligatorio' }
-          ])
+          details: expect.arrayContaining([{ field: 'name', message: 'El nombre es obligatorio' }])
         })
       );
     });
@@ -111,14 +107,14 @@ describe('Auth Controller - Unit Tests', () => {
       );
     });
 
-    it('debería retornar 400 si el email ya está registrado', async () => {
+    it('debería retornar 409 si el email ya está registrado', async () => {
       req.body = { email: 'test@example.com', name: 'Gonzalo', password: 'password123' };
       userService.getUserByEmail.mockResolvedValue({ id: 1, email: 'test@example.com' });
 
       await register(req, res, next);
 
       expect(userService.getUserByEmail).toHaveBeenCalledWith('test@example.com');
-      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: 'Email ya registrado'
@@ -134,7 +130,8 @@ describe('Auth Controller - Unit Tests', () => {
         email: 'new@example.com',
         name: 'Gonzalo',
         password: 'hashedpassword',
-        role: { name: 'usuario' }
+        role: { name: 'usuario' },
+        profile: { id: 2, userId: 2, darkMode: false, language: 'es' }
       });
 
       await register(req, res, next);
@@ -150,7 +147,8 @@ describe('Auth Controller - Unit Tests', () => {
         id: 2,
         email: 'new@example.com',
         name: 'Gonzalo',
-        role: 'usuario'
+        role: 'usuario',
+        profile: { id: 2, userId: 2, darkMode: false, language: 'es' }
       });
     });
 
@@ -216,7 +214,8 @@ describe('Auth Controller - Unit Tests', () => {
         id: 1,
         email: 'test@example.com',
         password: 'hashedpassword',
-        role: { name: 'admin' }
+        role: { name: 'admin' },
+        profile: { id: 1, userId: 1, darkMode: false, language: 'es' }
       });
       bcrypt.compare.mockResolvedValue(true);
       jwt.sign.mockReturnValue('mocked-jwt-token');
@@ -260,7 +259,8 @@ describe('Auth Controller - Unit Tests', () => {
         user: {
           id: 1,
           email: 'test@example.com',
-          role: 'admin'
+          role: 'admin',
+          profile: { id: 1, userId: 1, darkMode: false, language: 'es' }
         }
       });
     });
@@ -382,7 +382,12 @@ describe('Auth Controller - Unit Tests', () => {
 
   describe('GET /api/auth/me', () => {
     it('debería retornar 200 y el perfil del usuario autenticado', async () => {
-      req.user = { id: 1, email: 'test@example.com', role: 'usuario' };
+      req.user = {
+        id: 1,
+        email: 'test@example.com',
+        role: 'usuario',
+        profile: { id: 1, userId: 1, darkMode: false, language: 'es' }
+      };
 
       await getMe(req, res, next);
 
@@ -390,17 +395,122 @@ describe('Auth Controller - Unit Tests', () => {
       expect(res.json).toHaveBeenCalledWith({
         id: 1,
         email: 'test@example.com',
-        role: 'usuario'
+        role: 'usuario',
+        profile: { id: 1, userId: 1, darkMode: false, language: 'es' }
       });
     });
 
     it('debería delegar el error a next si ocurre una excepción', async () => {
       const error = new Error('Status crash');
-      res.status.mockImplementationOnce(() => { throw error; });
+      res.status.mockImplementationOnce(() => {
+        throw error;
+      });
 
       await getMe(req, res, next);
 
       expect(next).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe('PUT /api/auth/change-password', () => {
+    beforeEach(() => {
+      req.user = { id: 10 };
+    });
+
+    it('debería retornar 400 si falta currentPassword o newPassword', async () => {
+      req.body = { currentPassword: '', newPassword: '' };
+
+      await changePassword(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Datos inválidos'
+        })
+      );
+    });
+
+    it('debería retornar 400 si la nueva contraseña es muy corta (menor a 6 caracteres)', async () => {
+      req.body = { currentPassword: 'password123', newPassword: '123' };
+
+      await changePassword(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Datos inválidos',
+          details: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'newPassword',
+              message: 'La contraseña debe tener al menos 6 caracteres'
+            })
+          ])
+        })
+      );
+    });
+
+    it('debería retornar 401 si el usuario no existe', async () => {
+      req.body = { currentPassword: 'password123', newPassword: 'newSecurePassword123' };
+      userService.getUserById.mockResolvedValue(null);
+
+      await changePassword(req, res, next);
+
+      expect(userService.getUserById).toHaveBeenCalledWith(10);
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Usuario no encontrado'
+        })
+      );
+    });
+
+    it('debería retornar 401 si la contraseña actual es incorrecta', async () => {
+      req.body = { currentPassword: 'wrongPassword', newPassword: 'newSecurePassword123' };
+      userService.getUserById.mockResolvedValue({
+        id: 10,
+        email: 'test@example.com',
+        password: 'hashedOldPassword'
+      });
+      bcrypt.compare.mockResolvedValue(false);
+
+      await changePassword(req, res, next);
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('wrongPassword', 'hashedOldPassword');
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'No autorizado',
+        message: 'La contraseña actual es incorrecta'
+      });
+    });
+
+    it('debería cambiar la contraseña con éxito y retornar 200 si los datos son correctos', async () => {
+      req.body = { currentPassword: 'correctPassword', newPassword: 'newSecurePassword123' };
+      userService.getUserById.mockResolvedValue({
+        id: 10,
+        email: 'test@example.com',
+        password: 'hashedOldPassword'
+      });
+      bcrypt.compare.mockResolvedValue(true);
+      userService.updateUserPassword.mockResolvedValue({ id: 10 });
+
+      await changePassword(req, res, next);
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('correctPassword', 'hashedOldPassword');
+      expect(userService.updateUserPassword).toHaveBeenCalledWith(10, 'newSecurePassword123');
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Contraseña actualizada exitosamente'
+      });
+    });
+
+    it('debería delegar el error a next si ocurre una excepción', async () => {
+      req.body = { currentPassword: 'correctPassword', newPassword: 'newSecurePassword123' };
+      const testError = new Error('Database connection failed');
+      userService.getUserById.mockRejectedValue(testError);
+
+      await changePassword(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(testError);
     });
   });
 
@@ -414,4 +524,3 @@ describe('Auth Controller - Unit Tests', () => {
     });
   });
 });
-

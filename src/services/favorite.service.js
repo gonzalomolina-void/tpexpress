@@ -24,7 +24,7 @@ const INCLUDE_FAVORITE_CARD = {
 
 /**
  * Obtiene el listado de favoritos de un usuario.
- * 
+ *
  * @param {number} userId - ID del usuario.
  * @returns {Promise<Array<Object>>} Lista de registros favoritos.
  */
@@ -35,10 +35,24 @@ export async function getFavorites(userId) {
     orderBy: { createdAt: 'desc' }
   });
 }
+/**
+ * Obtiene un registro de favorito específico para un usuario y carta.
+ *
+ * @param {number} userId - ID del usuario.
+ * @param {number} cardId - ID de la carta.
+ * @returns {Promise<Object|null>} El registro de favorito o null si no existe.
+ */
+export async function getFavorite(userId, cardId) {
+  return prisma.favorite.findUnique({
+    where: {
+      userId_cardId: { userId, cardId }
+    }
+  });
+}
 
 /**
  * Agrega una carta a favoritos de forma idempotente.
- * 
+ *
  * @param {number} userId - ID del usuario.
  * @param {number} cardId - ID de la carta.
  * @returns {Promise<Object>} Registro del favorito creado o actualizado.
@@ -56,7 +70,7 @@ export async function addFavorite(userId, cardId) {
 /**
  * Elimina una carta de favoritos de manera segura.
  * Retorna null si la carta no estaba en favoritos.
- * 
+ *
  * @param {number} userId - ID del usuario.
  * @param {number} cardId - ID de la carta.
  * @returns {Promise<Object|null>} El registro eliminado o null si no existía.
@@ -73,6 +87,7 @@ export async function removeFavorite(userId, cardId) {
     if (error.code === 'P2025') {
       return null;
     }
+
     throw error;
   }
 }

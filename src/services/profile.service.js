@@ -22,9 +22,14 @@ export async function getProfileByUserId(userId) {
  * @returns {Promise<Object>} El perfil actualizado.
  */
 export async function updateProfile(userId, data) {
-  const updatedProfile = await prisma.profile.update({
+  const updatedProfile = await prisma.profile.upsert({
     where: { userId },
-    data
+    update: data,
+    create: {
+      userId,
+      darkMode: data.darkMode ?? false,
+      language: data.language ?? 'es'
+    }
   });
 
   return updatedProfile;

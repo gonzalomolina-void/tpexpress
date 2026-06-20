@@ -6,6 +6,6 @@ const router = Router();
 
 router.use(requireAuth);
 
-router.get('/types', getAllTypes);
+router.get('/', getAllTypes);
 
 export default router;

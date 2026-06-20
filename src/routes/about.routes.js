@@ -3,6 +3,6 @@ import { getAboutInfo } from '../controllers/about.controller.js';
 
 const router = Router();
 
-router.get('/about', getAboutInfo);
+router.get('/', getAboutInfo);
 
 export default router;

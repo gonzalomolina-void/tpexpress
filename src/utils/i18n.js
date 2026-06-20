@@ -4,7 +4,11 @@
  * @returns {"es" | "en"} El idioma resuelto ("es" por defecto).
  */
 export function getLanguage(req) {
-  return req.language || 'es';
+  if (!req.language) return 'es';
+
+  const primaryLang = req.language.split('-')[0].toLowerCase();
+
+  return primaryLang === 'en' ? 'en' : 'es';
 }
 
 /**

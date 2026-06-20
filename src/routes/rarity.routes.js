@@ -6,6 +6,6 @@ const router = Router();
 
 router.use(requireAuth);
 
-router.get('/rarities', getAllRarities);
+router.get('/', getAllRarities);
 
 export default router;

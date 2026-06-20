@@ -75,5 +75,11 @@
   "TRANSLATION_DESCRIPTION_INVALID": "Must be a non-empty string",
   "BODY_REQUIRED": "The body cannot be empty",
   "INVALID_LANGUAGE": "Language must be either \"es\" or \"en\"",
-  "INVALID_DARK_MODE": "Dark mode must be a boolean value"
+  "INVALID_DARK_MODE": "Dark mode must be a boolean value",
+  "CURRENT_PASSWORD_REQUIRED": "Current password is required",
+  "NEW_PASSWORD_REQUIRED": "New password is required",
+  "INVALID_CURRENT_PASSWORD": {
+    "error": "Unauthorized",
+    "message": "The current password is incorrect"
+  }
 }

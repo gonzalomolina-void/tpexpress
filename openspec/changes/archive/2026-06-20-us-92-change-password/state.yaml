@@ -1,0 +1,10 @@
+change: us-92-change-password
+current_phase: archive
+completed_phases:
+  - explore
+  - proposal
+  - spec
+  - design
+  - tasks
+  - apply
+  - verify

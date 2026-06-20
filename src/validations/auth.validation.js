@@ -70,3 +70,33 @@ export function validateLogin(body) {
 
   return null;
 }
+
+/**
+ * Valida los datos para el cambio de contraseña de un usuario.
+ * Retorna un array con objetos conteniendo el campo y su clave de error (ERROR_KEYS).
+ *
+ * @param {Object} body - El cuerpo de la petición.
+ * @returns {Array<{field: string, errorKey: string}>} Array de errores de validación.
+ */
+export function validateChangePassword(body) {
+  const { currentPassword, newPassword } = body || {};
+  const errors = [];
+
+  if (currentPassword === undefined || currentPassword === null || currentPassword === '') {
+    errors.push({ field: 'currentPassword', errorKey: ERROR_KEYS.CURRENT_PASSWORD_REQUIRED });
+  }
+
+  if (newPassword === undefined || newPassword === null || newPassword === '') {
+    errors.push({ field: 'newPassword', errorKey: ERROR_KEYS.NEW_PASSWORD_REQUIRED });
+  }
+
+  if (errors.length > 0) {
+    return errors;
+  }
+
+  if (newPassword && newPassword.length < 6) {
+    errors.push({ field: 'newPassword', errorKey: ERROR_KEYS.PASSWORD_TOO_SHORT });
+  }
+
+  return errors;
+}

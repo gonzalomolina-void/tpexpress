@@ -60,3 +60,20 @@ export async function getUserById(id) {
     include: { role: true, profile: true }
   });
 }
+
+/**
+ * Actualiza la contraseña de un usuario hasheándola antes de guardar.
+ *
+ * @param {number} id - El ID del usuario.
+ * @param {string} newPassword - La nueva contraseña en texto plano.
+ * @returns {Promise<Object>} El usuario actualizado.
+ */
+export async function updateUserPassword(id, newPassword) {
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+  return prisma.user.update({
+    where: { id },
+    data: { password: hashedPassword }
+  });
+}

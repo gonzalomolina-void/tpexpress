@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { register, login, refresh, logout, getMe } from '../src/controllers/auth.controller.js';
+import { register, login, refresh, logout, getMe, changePassword } from '../src/controllers/auth.controller.js';
 import { AUTH_CONFIG } from '../src/constants/auth.constants.js';
 import * as userService from '../src/services/user.service.js';
 import bcrypt from 'bcryptjs';
@@ -409,6 +409,108 @@ describe('Auth Controller - Unit Tests', () => {
       await getMe(req, res, next);
 
       expect(next).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe('PUT /api/auth/change-password', () => {
+    beforeEach(() => {
+      req.user = { id: 10 };
+    });
+
+    it('debería retornar 400 si falta currentPassword o newPassword', async () => {
+      req.body = { currentPassword: '', newPassword: '' };
+
+      await changePassword(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Datos inválidos'
+        })
+      );
+    });
+
+    it('debería retornar 400 si la nueva contraseña es muy corta (menor a 6 caracteres)', async () => {
+      req.body = { currentPassword: 'password123', newPassword: '123' };
+
+      await changePassword(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Datos inválidos',
+          details: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'newPassword',
+              message: 'La contraseña debe tener al menos 6 caracteres'
+            })
+          ])
+        })
+      );
+    });
+
+    it('debería retornar 401 si el usuario no existe', async () => {
+      req.body = { currentPassword: 'password123', newPassword: 'newSecurePassword123' };
+      userService.getUserById.mockResolvedValue(null);
+
+      await changePassword(req, res, next);
+
+      expect(userService.getUserById).toHaveBeenCalledWith(10);
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: 'Usuario no encontrado'
+        })
+      );
+    });
+
+    it('debería retornar 401 si la contraseña actual es incorrecta', async () => {
+      req.body = { currentPassword: 'wrongPassword', newPassword: 'newSecurePassword123' };
+      userService.getUserById.mockResolvedValue({
+        id: 10,
+        email: 'test@example.com',
+        password: 'hashedOldPassword'
+      });
+      bcrypt.compare.mockResolvedValue(false);
+
+      await changePassword(req, res, next);
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('wrongPassword', 'hashedOldPassword');
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'No autorizado',
+        message: 'La contraseña actual es incorrecta'
+      });
+    });
+
+    it('debería cambiar la contraseña con éxito y retornar 200 si los datos son correctos', async () => {
+      req.body = { currentPassword: 'correctPassword', newPassword: 'newSecurePassword123' };
+      userService.getUserById.mockResolvedValue({
+        id: 10,
+        email: 'test@example.com',
+        password: 'hashedOldPassword'
+      });
+      bcrypt.compare.mockResolvedValue(true);
+      userService.updateUserPassword.mockResolvedValue({ id: 10 });
+
+      await changePassword(req, res, next);
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('correctPassword', 'hashedOldPassword');
+      expect(userService.updateUserPassword).toHaveBeenCalledWith(10, 'newSecurePassword123');
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Contraseña actualizada exitosamente'
+      });
+    });
+
+    it('debería delegar el error a next si ocurre una excepción', async () => {
+      req.body = { currentPassword: 'correctPassword', newPassword: 'newSecurePassword123' };
+      const testError = new Error('Database connection failed');
+      userService.getUserById.mockRejectedValue(testError);
+
+      await changePassword(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(testError);
     });
   });
 

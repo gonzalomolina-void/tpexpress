@@ -6,7 +6,7 @@ import { getLanguage } from '../utils/i18n.js';
 import { AUTH_CONFIG } from '../constants/auth.constants.js';
 import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 import prisma from '../prisma/prismaClient.js';
-import { validateRegister, validateLogin } from '../validations/auth.validation.js';
+import { validateRegister, validateLogin, validateChangePassword } from '../validations/auth.validation.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_fallback_key';
 
@@ -260,6 +260,67 @@ export async function logout(req, res, next) {
 export async function getMe(req, res, next) {
   try {
     return res.status(200).json(req.user);
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Controlador para cambiar la contraseña del usuario autenticado actual.
+ * PUT /api/auth/change-password
+ *
+ * @type {import('express').RequestHandler}
+ */
+export async function changePassword(req, res, next) {
+  try {
+    const userId = req.user.id;
+    const lang = getLanguage(req);
+    const validationErrors = validateChangePassword(req.body);
+
+    if (validationErrors.length > 0) {
+      const details = validationErrors.map(err => ({
+        field: err.field,
+        message: translate(err.errorKey, lang)
+      }));
+
+      return res.status(400).json({
+        error: translate(ERROR_KEYS.INVALID_DATA, lang),
+        details
+      });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    // 1. Obtener usuario de la DB incluyendo la contraseña hasheada
+    const user = await userService.getUserById(userId);
+
+    if (!user) {
+      const err = translate(ERROR_KEYS.USER_NOT_FOUND, lang);
+
+      return res.status(401).json({
+        error: err.error,
+        message: err.message
+      });
+    }
+
+    // 2. Comparar contraseña actual
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isPasswordValid) {
+      const err = translate(ERROR_KEYS.INVALID_CURRENT_PASSWORD, lang);
+
+      return res.status(401).json({
+        error: err.error,
+        message: err.message
+      });
+    }
+
+    // 3. Actualizar contraseña
+    await userService.updateUserPassword(userId, newPassword);
+
+    return res.status(200).json({
+      message: lang === 'en' ? 'Password updated successfully' : 'Contraseña actualizada exitosamente'
+    });
   } catch (error) {
     next(error);
   }

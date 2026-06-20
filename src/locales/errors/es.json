@@ -75,5 +75,11 @@
   "TRANSLATION_DESCRIPTION_INVALID": "Debe ser un string no vacío",
   "BODY_REQUIRED": "El body no puede estar vacío",
   "INVALID_LANGUAGE": "El idioma debe ser \"es\" o \"en\"",
-  "INVALID_DARK_MODE": "El modo oscuro debe ser un valor booleano"
+  "INVALID_DARK_MODE": "El modo oscuro debe ser un valor booleano",
+  "CURRENT_PASSWORD_REQUIRED": "La contraseña actual es obligatoria",
+  "NEW_PASSWORD_REQUIRED": "La nueva contraseña es obligatoria",
+  "INVALID_CURRENT_PASSWORD": {
+    "error": "No autorizado",
+    "message": "La contraseña actual es incorrecta"
+  }
 }

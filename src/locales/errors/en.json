@@ -81,5 +81,6 @@
   "INVALID_CURRENT_PASSWORD": {
     "error": "Unauthorized",
     "message": "The current password is incorrect"
-  }
+  },
+  "HEALTH_DESCRIPTION": "Official REST API for Hexa TCG, providing support for card management, user authentication, favorites, and more, with persistence in PostgreSQL database using Prisma ORM."
 }

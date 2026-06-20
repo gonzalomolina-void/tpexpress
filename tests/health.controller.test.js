@@ -26,8 +26,9 @@ describe('Health Controller - Unit Tests', () => {
   });
 
   describe('getHealth', () => {
-    it('debería retornar estado 200 y la metadata de la API cuando la base de datos está activa', async () => {
+    it('debería retornar estado 200 y la descripción en español por defecto cuando la base de datos está activa', async () => {
       prisma.$queryRaw.mockResolvedValueOnce([1]);
+      req.language = 'es';
 
       await getHealth(req, res, next);
 
@@ -37,12 +38,29 @@ describe('Health Controller - Unit Tests', () => {
         database: 'ok',
         name: packageJson.name,
         version: packageJson.version,
-        description: packageJson.description
+        description: 'API REST oficial para Hexa TCG, proporcionando soporte para gestión de cartas, autenticación de usuarios, favoritos y más, con persistencia en base de datos PostgreSQL mediante Prisma ORM.'
+      });
+    });
+
+    it('debería retornar la descripción en inglés cuando req.language es en', async () => {
+      prisma.$queryRaw.mockResolvedValueOnce([1]);
+      req.language = 'en';
+
+      await getHealth(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        status: 'ok',
+        database: 'ok',
+        name: packageJson.name,
+        version: packageJson.version,
+        description: 'Official REST API for Hexa TCG, providing support for card management, user authentication, favorites, and more, with persistence in PostgreSQL database using Prisma ORM.'
       });
     });
 
     it('debería retornar estado 500 y status de error cuando la base de datos no está activa', async () => {
       prisma.$queryRaw.mockRejectedValueOnce(new Error('Connection failed'));
+      req.language = 'es';
 
       await getHealth(req, res, next);
 
@@ -52,7 +70,7 @@ describe('Health Controller - Unit Tests', () => {
         database: 'error',
         name: packageJson.name,
         version: packageJson.version,
-        description: packageJson.description
+        description: 'API REST oficial para Hexa TCG, proporcionando soporte para gestión de cartas, autenticación de usuarios, favoritos y más, con persistencia en base de datos PostgreSQL mediante Prisma ORM.'
       });
     });
   });

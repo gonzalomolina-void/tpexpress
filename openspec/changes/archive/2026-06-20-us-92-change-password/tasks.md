@@ -20,3 +20,4 @@
 - [x] 4.4 Verify integration tests pass using `Test-Api.ps1` in PowerShell 7.
 - [x] 4.5 Verify code style compliance with `pnpm run lint`.
 - [x] 4.6 Create Bruno request files for Change Password and update Get Me request sequence in bruno collection.
+- [x] 4.7 Document PUT `/api/auth/change-password` endpoint in `docs/swagger.json`.

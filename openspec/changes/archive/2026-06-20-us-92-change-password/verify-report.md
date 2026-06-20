@@ -54,5 +54,8 @@ All backend tasks and specifications have been implemented, tested, and verified
 ### Bruno Collection Verification
 - **Details**: Added `Change Password.bru` to the `bruno/Auth` collection to allow direct HTTP testing. Updated request sequence in `Get Me.bru` to sequence 4, placing the Change Password endpoint at sequence 5.
 
+### Swagger API Documentation
+- **Details**: Added OpenAPI Swagger documentation for `PUT /api/auth/change-password` endpoint in `docs/swagger.json`, documenting input payload schemas and response error codes (200, 400, 401).
+
 ## Final State
 All specifications are met and fully verified. The change is ready to be archived.

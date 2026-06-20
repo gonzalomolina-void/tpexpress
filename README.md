@@ -159,6 +159,19 @@ Puebla la base de datos con los registros de prueba requeridos (20 a 30 elemento
 pnpm prisma db seed
 ```
 
+### 🔄 Resetear la Base de Datos (Reiniciar IDs desde 1)
+Si por algún motivo necesitás limpiar la base de datos por completo y que todos los identificadores autoincrementales (IDs) comiencen de nuevo desde `1`, ejecutá:
+```bash
+pnpm prisma migrate reset
+```
+*(O `npx prisma migrate reset` si no usás pnpm)*
+
+> [!WARNING]
+> Este comando es destructivo en desarrollo. Realiza los siguientes pasos de forma automática:
+> 1. **Descarta (Drop)** la base de datos o limpia todas las tablas y esquemas existentes.
+> 2. **Aplica** todas las migraciones desde cero (lo que reinicia las secuencias de IDs autoincrementales a 1).
+> 3. **Ejecuta** el script de semillado (`prisma/seed.js`) de forma automática al finalizar el reset para dejar la base con datos iniciales limpios.
+
 ### 7. Ejecutar el Servidor en Desarrollo
 Inicia el servidor Express localmente con recarga automática (`nodemon`):
 ```bash

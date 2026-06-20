@@ -117,7 +117,20 @@ model User {
   // Refresh Tokens
   refreshTokens RefreshToken[]
 
+  // Perfil del usuario
+  profile Profile?
+
   @@map("users")
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  darkMode  Boolean  @default(false)
+  language  String   @default("es")
+
+  @@map("profiles")
 }
 
 model RefreshToken {

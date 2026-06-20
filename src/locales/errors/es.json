@@ -73,5 +73,7 @@
   "TRANSLATION_LANGUAGE_INVALID": "Debe ser \"es\" o \"en\"",
   "TRANSLATION_NAME_INVALID": "Debe ser un string no vacío",
   "TRANSLATION_DESCRIPTION_INVALID": "Debe ser un string no vacío",
-  "BODY_REQUIRED": "El body no puede estar vacío"
+  "BODY_REQUIRED": "El body no puede estar vacío",
+  "INVALID_LANGUAGE": "El idioma debe ser \"es\" o \"en\"",
+  "INVALID_DARK_MODE": "El modo oscuro debe ser un valor booleano"
 }

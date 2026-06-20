@@ -1,0 +1,8 @@
+change: us-80-user-profile
+current_phase: tasks
+completed_phases:
+  - explore
+  - proposal
+  - spec
+  - design
+  - tasks

@@ -10,6 +10,7 @@ import aboutRoutes from './routes/about.routes.js';
 import healthRoutes from './routes/health.routes.js';
 import typeRoutes from './routes/type.routes.js';
 import rarityRoutes from './routes/rarity.routes.js';
+import profileRoutes from './routes/profile.routes.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { i18nMiddleware } from './utils/errors.i18n.js';
 
@@ -42,6 +43,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/types', typeRoutes);
 app.use('/api/rarities', rarityRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Middleware global de errores
 app.use(errorHandler);

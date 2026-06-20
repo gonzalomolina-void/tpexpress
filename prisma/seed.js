@@ -191,19 +191,22 @@ async function main() {
       email: 'testuser@example.com',
       name: 'Juan Perez',
       password: hashedPassword,
-      role: { connect: { name: 'usuario' } }
+      role: { connect: { name: 'usuario' } },
+      profile: { create: {} }
     },
     {
       email: 'admin@example.com',
       name: 'Gonzalo Molina',
       password: hashedPassword,
-      role: { connect: { name: 'admin' } }
+      role: { connect: { name: 'admin' } },
+      profile: { create: {} }
     },
     {
       email: 'integration@test.com',
       name: 'Integration User',
       password: hashedPassword,
-      role: { connect: { name: 'usuario' } }
+      role: { connect: { name: 'usuario' } },
+      profile: { create: {} }
     }
   ];
 

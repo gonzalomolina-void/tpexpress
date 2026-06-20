@@ -7,7 +7,7 @@ const router = Router();
 // Proteger todas las rutas de perfil bajo este enrutador
 router.use(requireAuth);
 
-router.get('/profile', getProfile);
-router.put('/profile', updateProfile);
+router.get('/', getProfile);
+router.put('/', updateProfile);
 
 export default router;

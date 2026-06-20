@@ -43,6 +43,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/types', typeRoutes);
 app.use('/api/rarities', rarityRoutes);
+app.use('/api/profile', profileRoutes);
 
 // Middleware global de errores
 app.use(errorHandler);

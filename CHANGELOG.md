@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/gonzalomolina-void/tpexpress/compare/v1.5.0...v1.6.0) (2026-06-21)
+
+
+### Features
+
+* **cards:** implement hybrid cursor-based pagination for catalog scroll ([e5561da](https://github.com/gonzalomolina-void/tpexpress/commit/e5561da847c52e0d08fe83d2d403317dbbaac5f7))
+
 ## [1.5.0](https://github.com/gonzalomolina-void/tpexpress/compare/v1.1.3...v1.5.0) (2026-06-20)
 
 

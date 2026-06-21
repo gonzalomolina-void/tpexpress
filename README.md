@@ -280,6 +280,30 @@ Cuando ejecutas cualquiera de los comandos anteriores, el script `scripts/Releas
 3. **Git Push**: Sube los commits y tags generados a la rama remota (`git push origin <rama> --follow-tags`).
 4. **GitHub Release**: Invoca a la CLI de GitHub para publicar el Release oficial en la web de GitHub (`gh release create`) bajo el tag correspondiente y generando automáticamente las notas de lanzamiento en base a los commits.
 
+### Flujo de Integración y Lanzamiento Local (Recomendado)
+Para evitar despliegues automáticos duplicados en producción antes de actualizar la versión en `package.json` y el changelog, se recomienda realizar el merge de la rama `develop` a `main` de manera local en tu máquina antes de ejecutar el script de release:
+
+1. **Actualizar ramas locales:**
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout main
+   git pull origin main
+   ```
+
+2. **Merge local (sin empujar a remoto):**
+   Mergea la rama `develop` en `main` localmente usando `--no-ff` para mantener el registro del merge commit:
+   ```bash
+   git merge develop --no-ff -m "merge: integrate develop branch into main"
+   ```
+
+3. **Lanzar la versión:**
+   Ejecuta el script de release correspondiente en la rama `main` local:
+   ```bash
+   pnpm release:minor
+   ```
+   *Esto generará el commit de release con la versión actualizada (ej: `1.4.0`) y el tag correspondiente en tu local, y empujará todo junto (`git push origin main --follow-tags`) en un único comando. Así, producción se construirá una sola vez con el versionado correcto.*
+
 ### Integración con Vercel
 Para asegurar que las ramas de desarrollo permanezcan aisladas y no se desplieguen directamente a producción en Vercel, se recomienda configurar la **Integración de Vercel Git**:
 1. En el panel de Vercel, ir a la configuración del proyecto y definir que el entorno de producción (`Production Branch`) se despliegue únicamente cuando ocurran tags de versión coincidiendo con el patrón `v*` (o mediante un script de build step en Vercel que ignore compilaciones si el trigger no es un Git Tag `v*`).

@@ -1,0 +1,22 @@
+meta {
+  name: Get Cards by Cursor
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/api/cards
+  body: none
+  auth: bearer
+}
+
+params:query {
+  limit: 5
+  cursor: 0
+  ~order: asc
+  ~lang: es
+}
+
+auth:bearer {
+  token: {{token}}
+}

@@ -16,11 +16,30 @@ export async function getAllCards(req, res, next) {
     const { search, type, rarity } = req.query;
     let isPaging = false;
 
-    // Si se pasa 'page' o 'limit', activamos la paginación.
-    if (page !== null || limit !== null) {
+    // Extraer y validar el cursor
+    let cursor = null;
+    const hasCursor = req.query.cursor !== undefined;
+
+    if (hasCursor) {
+      cursor = parseInt(req.query.cursor, 10);
+
+      if (isNaN(cursor) || cursor < 0) {
+        const lang = getLanguage(req);
+
+        return res.status(400).json({
+          error: translate(ERROR_KEYS.INVALID_DATA, lang),
+          details: [{ field: 'cursor', message: 'Cursor must be a non-negative integer' }]
+        });
+      }
+    }
+
+    const order = req.query.order === 'desc' ? 'desc' : 'asc';
+
+    // Si no hay cursor pero se pasa 'page' o 'limit', activamos la paginación tradicional.
+    if (!hasCursor && (page !== null || limit !== null)) {
       isPaging = true;
       page = page && page > 0 ? page : 1;
-      limit = limit && limit > 0 ? limit : 10; // 10 elementos por página por defecto si se omite limit
+      limit = limit && limit > 0 ? limit : 10;
     }
 
     // Resolver el idioma del request
@@ -29,7 +48,9 @@ export async function getAllCards(req, res, next) {
     // Obtener los datos del servicio
     const { cards, totalCount } = await cardService.getCards({
       page: isPaging ? page : null,
-      limit: isPaging ? limit : null,
+      limit: isPaging ? limit : limit, // En paginación por cursor también enviamos limit
+      cursor,
+      order,
       search,
       type,
       rarity,

@@ -44,6 +44,8 @@ describe('Card Controller - Unit Tests', () => {
       expect(cardService.getCards).toHaveBeenCalledWith({
         page: null,
         limit: null,
+        cursor: null,
+        order: 'asc',
         search: undefined,
         type: undefined,
         rarity: undefined,
@@ -64,6 +66,8 @@ describe('Card Controller - Unit Tests', () => {
       expect(cardService.getCards).toHaveBeenCalledWith({
         page: 2,
         limit: 5,
+        cursor: null,
+        order: 'asc',
         search: undefined,
         type: undefined,
         rarity: undefined,
@@ -86,6 +90,8 @@ describe('Card Controller - Unit Tests', () => {
       expect(cardService.getCards).toHaveBeenCalledWith({
         page: null,
         limit: null,
+        cursor: null,
+        order: 'asc',
         search: 'mago',
         type: 'creature',
         rarity: 'rare',
@@ -102,6 +108,52 @@ describe('Card Controller - Unit Tests', () => {
       await getAllCards(req, res, next);
 
       expect(next).toHaveBeenCalledWith(errorMock);
+    });
+
+    it('debería soportar query params de cursor y orden', async () => {
+      req.query = { cursor: '15', order: 'desc', limit: '5' };
+      const mockCards = [{ id: 14 }];
+      cardService.getCards.mockResolvedValue({ cards: mockCards, totalCount: 1 });
+      getLanguage.mockReturnValue('es');
+
+      await getAllCards(req, res, next);
+
+      expect(cardService.getCards).toHaveBeenCalledWith({
+        page: null,
+        limit: 5,
+        cursor: 15,
+        order: 'desc',
+        search: undefined,
+        type: undefined,
+        rarity: undefined,
+        lang: 'es'
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(mockCards);
+    });
+
+    it('debería retornar 400 si el parámetro cursor es inválido (negativo o no-numérico)', async () => {
+      req.query = { cursor: '-5' };
+      getLanguage.mockReturnValue('es');
+
+      await getAllCards(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: expect.any(String)
+        })
+      );
+      expect(cardService.getCards).not.toHaveBeenCalled();
+
+      // Reset mock and try with text cursor
+      vi.clearAllMocks();
+      req.query = { cursor: 'abc' };
+
+      await getAllCards(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(cardService.getCards).not.toHaveBeenCalled();
     });
   });
 

@@ -29,8 +29,9 @@ const INCLUDE_RELATIONS = {
  * @param {string} [options.lang] - Idioma de la consulta ("es" o "en", por defecto "es").
  * @returns {Promise<{ cards: Array<Object>, totalCount: number }>} Las cartas y el total general.
  */
-export async function getCards({ page, limit, search, type, rarity, lang = 'es' }) {
-  const isPaging = page !== null && limit !== null;
+export async function getCards({ page, limit, cursor, order = 'asc', search, type, rarity, lang = 'es' }) {
+  const isCursorPaging = cursor !== undefined && cursor !== null;
+  const isOffsetPaging = !isCursorPaging && page !== null && limit !== null;
   const where = {};
 
   if (search) {
@@ -67,8 +68,28 @@ export async function getCards({ page, limit, search, type, rarity, lang = 'es' 
     };
   }
 
-  // Si hay paginación, hacemos las dos consultas de forma paralela para mayor performance
-  if (isPaging) {
+  const orderDir = order === 'desc' ? 'desc' : 'asc';
+  const cursorOp = orderDir === 'desc' ? 'lt' : 'gt';
+
+  // Si hay paginación por cursor
+  if (isCursorPaging) {
+    if (cursor > 0) {
+      where.id = { [cursorOp]: cursor };
+    }
+
+    const take = limit || 10;
+    const cards = await prisma.card.findMany({
+      where,
+      take,
+      include: INCLUDE_RELATIONS,
+      orderBy: { id: orderDir }
+    });
+
+    return { cards, totalCount: cards.length };
+  }
+
+  // Si hay paginación tradicional offset, hacemos las dos consultas de forma paralela para mayor performance
+  if (isOffsetPaging) {
     const skip = (page - 1) * limit;
     const take = limit;
     const [cards, totalCount] = await Promise.all([
@@ -77,7 +98,7 @@ export async function getCards({ page, limit, search, type, rarity, lang = 'es' 
         skip,
         take,
         include: INCLUDE_RELATIONS,
-        orderBy: { id: 'asc' } // Mantener orden estable
+        orderBy: { id: orderDir } // Mantener orden dinámico
       }),
       prisma.card.count({ where })
     ]);
@@ -91,7 +112,7 @@ export async function getCards({ page, limit, search, type, rarity, lang = 'es' 
     where,
     take: MAX_UNPAGED_LIMIT,
     include: INCLUDE_RELATIONS,
-    orderBy: { id: 'asc' }
+    orderBy: { id: orderDir }
   });
 
   return { cards, totalCount: cards.length };

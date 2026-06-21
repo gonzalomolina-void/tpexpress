@@ -207,6 +207,45 @@ try {
         }
     }
 
+    # TC-02a: GET /api/cards?cursor=0&limit=5
+    Write-Host "TC-02a: GET /api/cards?cursor=0&limit=5 (Cursor first page)"
+    $res = Invoke-Api -Method Get -Uri "$baseUrl/api/cards?cursor=0&limit=5" -headers $adminHeaders
+    Assert-Status $res 200 "TC-02a: GET /api/cards with cursor 0"
+    if ($res.StatusCode -eq 200) {
+        $cards = $res.Content | ConvertFrom-Json
+        if ($cards.Count -gt 0) {
+            $firstId = $cards[0].id
+            Write-Host "  First page loaded. First card ID: $firstId" -ForegroundColor Green
+            
+            # Request next page using the last card's ID as cursor
+            $lastId = $cards[-1].id
+            Write-Host "TC-02a-next: GET /api/cards?cursor=$lastId&limit=5"
+            $resNext = Invoke-Api -Method Get -Uri "$baseUrl/api/cards?cursor=$lastId&limit=5" -headers $adminHeaders
+            Assert-Status $resNext 200 "TC-02a-next: GET /api/cards sequential fetch"
+            if ($resNext.StatusCode -eq 200) {
+                $nextCards = $resNext.Content | ConvertFrom-Json
+                if ($nextCards.Count -gt 0) {
+                    $nextFirstId = $nextCards[0].id
+                    if ($nextFirstId -gt $lastId) {
+                        Write-Host "  [PASS] Sequential cursor fetched card ID $nextFirstId (> $lastId)" -ForegroundColor Green
+                    } else {
+                        Write-Host "  [FAIL] Sequential cursor fetched card ID $nextFirstId (expected > $lastId)" -ForegroundColor Red
+                    }
+                }
+            }
+        }
+    }
+
+    # TC-02b: GET /api/cards?cursor=-1 (Invalid negative cursor)
+    Write-Host "TC-02b: GET /api/cards?cursor=-1"
+    $resNeg = Invoke-Api -Method Get -Uri "$baseUrl/api/cards?cursor=-1" -headers $adminHeaders
+    Assert-Status $resNeg 400 "TC-02b: GET /api/cards?cursor=-1 should fail"
+
+    # TC-02c: GET /api/cards?cursor=abc (Invalid non-numeric cursor)
+    Write-Host "TC-02c: GET /api/cards?cursor=abc"
+    $resAbc = Invoke-Api -Method Get -Uri "$baseUrl/api/cards?cursor=abc" -headers $adminHeaders
+    Assert-Status $resAbc 400 "TC-02c: GET /api/cards?cursor=abc should fail"
+
     # TC-03: POST /api/cards
     Write-Host "TC-03: POST /api/cards (Valid payload)"
     $body = @{

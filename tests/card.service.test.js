@@ -103,4 +103,77 @@ describe('Card Service - Unit Tests', () => {
       })
     ).rejects.toThrow('Prisma error');
   });
+
+  it('debería consultar cartas usando cursor-based pagination (ascendente)', async () => {
+    prisma.card.findMany.mockResolvedValue(mockDbCards);
+
+    const result = await getCards({
+      page: null,
+      limit: 5,
+      cursor: 12,
+      order: 'asc',
+      search: undefined,
+      type: undefined,
+      rarity: undefined,
+      lang: 'es'
+    });
+
+    expect(prisma.card.findMany).toHaveBeenCalledWith({
+      where: {
+        id: { gt: 12 }
+      },
+      take: 5,
+      include: expect.any(Object),
+      orderBy: { id: 'asc' }
+    });
+    expect(result).toEqual({ cards: mockDbCards, totalCount: 1 });
+  });
+
+  it('debería consultar cartas usando cursor-based pagination (descendente)', async () => {
+    prisma.card.findMany.mockResolvedValue(mockDbCards);
+
+    const result = await getCards({
+      page: null,
+      limit: 5,
+      cursor: 12,
+      order: 'desc',
+      search: undefined,
+      type: undefined,
+      rarity: undefined,
+      lang: 'es'
+    });
+
+    expect(prisma.card.findMany).toHaveBeenCalledWith({
+      where: {
+        id: { lt: 12 }
+      },
+      take: 5,
+      include: expect.any(Object),
+      orderBy: { id: 'desc' }
+    });
+    expect(result).toEqual({ cards: mockDbCards, totalCount: 1 });
+  });
+
+  it('debería consultar cartas desde el principio (cursor=0) respetando el orden desc', async () => {
+    prisma.card.findMany.mockResolvedValue(mockDbCards);
+
+    const result = await getCards({
+      page: null,
+      limit: 5,
+      cursor: 0,
+      order: 'desc',
+      search: undefined,
+      type: undefined,
+      rarity: undefined,
+      lang: 'es'
+    });
+
+    expect(prisma.card.findMany).toHaveBeenCalledWith({
+      where: {}, // cursor === 0 -> id: undefined -> omit
+      take: 5,
+      include: expect.any(Object),
+      orderBy: { id: 'desc' }
+    });
+  });
 });
+

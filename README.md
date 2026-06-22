@@ -308,3 +308,5 @@ Para evitar despliegues automáticos duplicados en producción antes de actualiz
 Para asegurar que las ramas de desarrollo permanezcan aisladas y no se desplieguen directamente a producción en Vercel, se recomienda configurar la **Integración de Vercel Git**:
 1. En el panel de Vercel, ir a la configuración del proyecto y definir que el entorno de producción (`Production Branch`) se despliegue únicamente cuando ocurran tags de versión coincidiendo con el patrón `v*` (o mediante un script de build step en Vercel que ignore compilaciones si el trigger no es un Git Tag `v*`).
 2. Esto asegura que solo las versiones probadas y etiquetadas oficialmente por el script de lanzamiento lleguen al servidor de producción.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/gonzalomolina-void/tpexpress)

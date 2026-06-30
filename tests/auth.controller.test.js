@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { register, login, refresh, logout, getMe, changePassword } from '../src/controllers/auth.controller.js';
+import {
+  register,
+  login,
+  refresh,
+  logout,
+  getMe,
+  changePassword
+} from '../src/controllers/auth.controller.js';
 import { AUTH_CONFIG } from '../src/constants/auth.constants.js';
 import * as userService from '../src/services/user.service.js';
 import bcrypt from 'bcryptjs';

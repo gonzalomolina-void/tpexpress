@@ -15,7 +15,7 @@ const packageJson = require('../../package.json');
 export async function getHealth(req, res, next) {
   try {
     let databaseStatus = 'ok';
-    
+
     try {
       await prisma.$queryRaw`SELECT 1`;
     } catch (dbError) {

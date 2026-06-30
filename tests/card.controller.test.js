@@ -1,10 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getAllCards, getCardById, getCardForEdit } from '../src/controllers/card.controller.js';
+import {
+  getAllCards,
+  getCardById,
+  getCardForEdit,
+  createCard
+} from '../src/controllers/card.controller.js';
 import * as cardService from '../src/services/card.service.js';
+import * as cloudinaryService from '../src/services/cloudinary.service.js';
 import { getLanguage, mapCardToLang, mapCardForEdit } from '../src/utils/i18n.js';
 
 // Mockear dependencias externas
 vi.mock('../src/services/card.service.js');
+vi.mock('../src/services/cloudinary.service.js');
 vi.mock('../src/utils/i18n.js', () => ({
   getLanguage: vi.fn(),
   mapCardToLang: vi.fn(card => card), // Mock simple que devuelve el mismo objeto
@@ -239,6 +246,95 @@ describe('Card Controller - Unit Tests', () => {
       await getCardForEdit(req, res, next);
 
       expect(next).toHaveBeenCalledWith(errorMock);
+    });
+  });
+
+  describe('POST /api/cards', () => {
+    let mockCardBody;
+
+    beforeEach(() => {
+      mockCardBody = {
+        cost: 3,
+        atk: 4,
+        def: 5,
+        image: 'SirKaelen.webp',
+        typeId: 1,
+        rarityId: 1,
+        translations: [
+          { language: 'es', name: 'Sir Kaelen', description: 'Un noble caballero' },
+          { language: 'en', name: 'Sir Kaelen', description: 'A noble knight' }
+        ]
+      };
+      req.body = mockCardBody;
+    });
+
+    it('debería crear una carta con imagen local sin llamar a Cloudinary', async () => {
+      cardService.checkTypeExists.mockResolvedValue(true);
+      cardService.checkRarityExists.mockResolvedValue(true);
+      cardService.createCard.mockResolvedValue({ id: 1, ...mockCardBody });
+      getLanguage.mockReturnValue('es');
+
+      await createCard(req, res, next);
+
+      expect(cloudinaryService.uploadFromUrl).not.toHaveBeenCalled();
+      expect(cardService.createCard).toHaveBeenCalledWith(mockCardBody);
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith({ id: 1, ...mockCardBody });
+    });
+
+    it('debería subir la imagen a Cloudinary y guardar el public_id.webp si recibe una URL absoluta', async () => {
+      req.body.image = 'https://example.com/cards/kaelen-large.png';
+      cardService.checkTypeExists.mockResolvedValue(true);
+      cardService.checkRarityExists.mockResolvedValue(true);
+      cloudinaryService.uploadFromUrl.mockResolvedValue('v123456/cards/kaelen-large');
+
+      const expectedSavedCard = {
+        id: 1,
+        ...mockCardBody,
+        image: 'v123456/cards/kaelen-large.webp'
+      };
+      cardService.createCard.mockResolvedValue(expectedSavedCard);
+      getLanguage.mockReturnValue('es');
+
+      await createCard(req, res, next);
+
+      expect(cloudinaryService.uploadFromUrl).toHaveBeenCalledWith(
+        'https://example.com/cards/kaelen-large.png'
+      );
+      expect(cardService.createCard).toHaveBeenCalledWith(
+        expect.objectContaining({ image: 'v123456/cards/kaelen-large.webp' })
+      );
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith(expectedSavedCard);
+    });
+
+    it('debería abortar la creación y retornar 500 si la subida a Cloudinary falla', async () => {
+      req.body.image = 'https://example.com/cards/kaelen-large.png';
+      cardService.checkTypeExists.mockResolvedValue(true);
+      cardService.checkRarityExists.mockResolvedValue(true);
+      cloudinaryService.uploadFromUrl.mockRejectedValue(
+        new Error('Cloudinary error: Connection timeout')
+      );
+      getLanguage.mockReturnValue('es');
+
+      await createCard(req, res, next);
+
+      expect(cloudinaryService.uploadFromUrl).toHaveBeenCalledWith(
+        'https://example.com/cards/kaelen-large.png'
+      );
+      expect(cardService.createCard).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: expect.any(Object), // El error retornado por translate es un objeto
+          details: expect.arrayContaining([
+            expect.objectContaining({
+              field: 'image',
+              message: 'Cloudinary error: Connection timeout'
+            })
+          ])
+        })
+      );
     });
   });
 });

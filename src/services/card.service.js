@@ -29,7 +29,16 @@ const INCLUDE_RELATIONS = {
  * @param {string} [options.lang] - Idioma de la consulta ("es" o "en", por defecto "es").
  * @returns {Promise<{ cards: Array<Object>, totalCount: number }>} Las cartas y el total general.
  */
-export async function getCards({ page, limit, cursor, order = 'asc', search, type, rarity, lang = 'es' }) {
+export async function getCards({
+  page,
+  limit,
+  cursor,
+  order = 'asc',
+  search,
+  type,
+  rarity,
+  lang = 'es'
+}) {
   const isCursorPaging = cursor !== undefined && cursor !== null;
   const isOffsetPaging = !isCursorPaging && page !== null && limit !== null;
   const where = {};

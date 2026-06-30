@@ -6,7 +6,11 @@ import { getLanguage } from '../utils/i18n.js';
 import { AUTH_CONFIG } from '../constants/auth.constants.js';
 import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
 import prisma from '../prisma/prismaClient.js';
-import { validateRegister, validateLogin, validateChangePassword } from '../validations/auth.validation.js';
+import {
+  validateRegister,
+  validateLogin,
+  validateChangePassword
+} from '../validations/auth.validation.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_fallback_key';
 
@@ -319,7 +323,8 @@ export async function changePassword(req, res, next) {
     await userService.updateUserPassword(userId, newPassword);
 
     return res.status(200).json({
-      message: lang === 'en' ? 'Password updated successfully' : 'Contraseña actualizada exitosamente'
+      message:
+        lang === 'en' ? 'Password updated successfully' : 'Contraseña actualizada exitosamente'
     });
   } catch (error) {
     next(error);

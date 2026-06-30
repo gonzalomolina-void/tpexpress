@@ -82,5 +82,9 @@
     "error": "Unauthorized",
     "message": "The current password is incorrect"
   },
-  "HEALTH_DESCRIPTION": "Official REST API for Hexa TCG, providing support for card management, user authentication, favorites, and more, with persistence in PostgreSQL database using Prisma ORM."
+  "HEALTH_DESCRIPTION": "Official REST API for Hexa TCG, providing support for card management, user authentication, favorites, and more, with persistence in PostgreSQL database using Prisma ORM.",
+  "CLOUDINARY_UPLOAD_FAILED": {
+    "error": "Image upload failed",
+    "message": "Could not upload external image to Cloudinary"
+  }
 }

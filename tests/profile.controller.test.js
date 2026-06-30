@@ -96,9 +96,7 @@ describe('Profile Controller - Unit Tests', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: translate(ERROR_KEYS.INVALID_DATA, 'es'),
-          details: [
-            { field: 'language', message: translate(ERROR_KEYS.INVALID_LANGUAGE, 'es') }
-          ]
+          details: [{ field: 'language', message: translate(ERROR_KEYS.INVALID_LANGUAGE, 'es') }]
         })
       );
       expect(profileService.updateProfile).not.toHaveBeenCalled();
@@ -113,9 +111,7 @@ describe('Profile Controller - Unit Tests', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: translate(ERROR_KEYS.INVALID_DATA, 'es'),
-          details: [
-            { field: 'darkMode', message: translate(ERROR_KEYS.INVALID_DARK_MODE, 'es') }
-          ]
+          details: [{ field: 'darkMode', message: translate(ERROR_KEYS.INVALID_DARK_MODE, 'es') }]
         })
       );
       expect(profileService.updateProfile).not.toHaveBeenCalled();

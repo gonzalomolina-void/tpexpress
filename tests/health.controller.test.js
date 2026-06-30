@@ -38,7 +38,8 @@ describe('Health Controller - Unit Tests', () => {
         database: 'ok',
         name: packageJson.name,
         version: packageJson.version,
-        description: 'API REST oficial para Hexa TCG, proporcionando soporte para gestión de cartas, autenticación de usuarios, favoritos y más, con persistencia en base de datos PostgreSQL mediante Prisma ORM.'
+        description:
+          'API REST oficial para Hexa TCG, proporcionando soporte para gestión de cartas, autenticación de usuarios, favoritos y más, con persistencia en base de datos PostgreSQL mediante Prisma ORM.'
       });
     });
 
@@ -54,7 +55,8 @@ describe('Health Controller - Unit Tests', () => {
         database: 'ok',
         name: packageJson.name,
         version: packageJson.version,
-        description: 'Official REST API for Hexa TCG, providing support for card management, user authentication, favorites, and more, with persistence in PostgreSQL database using Prisma ORM.'
+        description:
+          'Official REST API for Hexa TCG, providing support for card management, user authentication, favorites, and more, with persistence in PostgreSQL database using Prisma ORM.'
       });
     });
 
@@ -70,7 +72,8 @@ describe('Health Controller - Unit Tests', () => {
         database: 'error',
         name: packageJson.name,
         version: packageJson.version,
-        description: 'API REST oficial para Hexa TCG, proporcionando soporte para gestión de cartas, autenticación de usuarios, favoritos y más, con persistencia en base de datos PostgreSQL mediante Prisma ORM.'
+        description:
+          'API REST oficial para Hexa TCG, proporcionando soporte para gestión de cartas, autenticación de usuarios, favoritos y más, con persistencia en base de datos PostgreSQL mediante Prisma ORM.'
       });
     });
   });

@@ -1,4 +1,5 @@
 import * as cardService from '../services/card.service.js';
+import * as cloudinaryService from '../services/cloudinary.service.js';
 import { getLanguage, mapCardToLang, mapCardForEdit } from '../utils/i18n.js';
 import { validateCard } from '../validations/card.validation.js';
 import { ERROR_KEYS, translate } from '../utils/errors.i18n.js';
@@ -160,10 +161,28 @@ export async function createCard(req, res, next) {
       });
     }
 
-    // 3. Crear la carta
-    const newCard = await cardService.createCard(req.body);
+    // 3. Procesar imagen externa si corresponde (Cloudinary)
+    let imageValue = req.body.image;
 
-    // 4. Retornar en el idioma adecuado, aplanada
+    if (/^https?:\/\//i.test(imageValue)) {
+      try {
+        const publicId = await cloudinaryService.uploadFromUrl(imageValue);
+        imageValue = `${publicId}.webp`;
+      } catch (err) {
+        return res.status(500).json({
+          error: translate(ERROR_KEYS.CLOUDINARY_UPLOAD_FAILED, lang),
+          details: [{ field: 'image', message: err.message }]
+        });
+      }
+    }
+
+    // 4. Crear la carta
+    const newCard = await cardService.createCard({
+      ...req.body,
+      image: imageValue
+    });
+
+    // 5. Retornar en el idioma adecuado, aplanada
     const formattedCard = mapCardToLang(newCard, lang);
 
     return res.status(201).json(formattedCard);

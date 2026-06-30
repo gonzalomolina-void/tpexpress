@@ -100,3 +100,28 @@ export function validateChangePassword(body) {
 
   return errors;
 }
+
+/**
+ * Valida los datos para el refresco de token.
+ * No requiere validaciones específicas del body ya que se maneja por cookies,
+ * pero cumple formalmente con el requerimiento de validación del body.
+ *
+ * @param {Object} body - El cuerpo de la petición.
+ * @returns {Array} Array vacío de errores.
+ */
+export function validateRefresh(body) {
+  return [];
+}
+
+/**
+ * Valida los datos para el cierre de sesión.
+ * No requiere validaciones específicas del body ya que se maneja por cookies,
+ * pero cumple formalmente con el requerimiento de validación del body.
+ *
+ * @param {Object} body - El cuerpo de la petición.
+ * @returns {Array} Array vacío de errores.
+ */
+export function validateLogout(body) {
+  return [];
+}
+
